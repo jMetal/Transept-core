@@ -12,6 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.tmm2structalign.algorithm.AlgorithmType;
 import org.tmm2structalign.run.BaselineScorer.BaselineScore;
 import org.tmm2structalign.testing.SyntheticDataset;
 
@@ -128,6 +131,58 @@ class CliTest {
 
       // Assert
       assertEquals("\"d\",\"m\",,,\"f.fasta\",failed,\"bad \"\"file\"\"\"", csv.split("\n")[1]);
+    }
+  }
+
+  @Nested
+  @DisplayName("When choosing the algorithm")
+  class Algorithm {
+
+    @Test
+    @DisplayName("given PAES, when running, then the metadata records it and pm defaults to 1")
+    void givenPaes_whenRunning_thenMetadataRecordsItAndMutationIsOne() throws IOException {
+      // Act
+      int status =
+          TmStructAlignCli.execute(
+              "run",
+              "--data-root", dataRoot.toString(),
+              "--dataset", SyntheticDataset.NAME,
+              "--seeds", "left,right",
+              "--output-root", outputRoot.toString(),
+              "--run-id", "paes",
+              "--seed", "3",
+              "--max-evaluations", "50",
+              "--population-size", "8",
+              "--algorithm", "PAES");
+
+      // Assert
+      Path runDirectory = outputRoot.resolve("ejecuciones/synthetic/paes");
+      assertEquals(0, status);
+      assertTrue(Files.readString(runDirectory.resolve("metadata.json"))
+          .contains("\"algorithmType\":\"PAES\""));
+      assertTrue(Files.readString(runDirectory.resolve("config.json"))
+          .contains("\"mutationProbability\":1.0"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"PAES, , 1.0", "NSGA_II, , 0.2", "SMS_EMOA, , 0.2", "PAES, 0.5, 0.5"})
+    @DisplayName("given an algorithm, when resolving pm, then the explicit or default is used")
+    void givenAlgorithm_whenResolvingMutationProbability_thenExplicitOrDefaultValueIsUsed(
+        AlgorithmType algorithm, Double explicit, double expected) {
+      // Arrange
+      RunCommand command = new RunCommand();
+      command.algorithm = algorithm;
+      command.mutationProbability = explicit;
+
+      // Act & Assert
+      assertEquals(expected, command.effectiveMutationProbability());
+    }
+
+    @Test
+    @DisplayName("given an unknown algorithm, when running, then picocli reports a usage error")
+    void givenUnknownAlgorithm_whenRunning_thenUsageErrorIsReported() {
+      // Act & Assert
+      assertEquals(2, TmStructAlignCli.execute("run", "--algorithm", "SPEA2"));
     }
   }
 }
