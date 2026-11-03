@@ -66,7 +66,8 @@ For reproducible analyses, cite the Zenodo version-specific DOI and use the arch
 ## Requirements and build
 
 - Java 21 and Maven 3.9+.
-- Dependencies (jMetal 7.10, picocli, BioJava) are downloaded from Maven Central.
+- Dependencies (jMetal 7.11, picocli, BioJava) are downloaded from Maven Central. Until jMetal
+  7.11 is released, install `7.11-SNAPSHOT` locally from the jMetal sources (`mvn install`).
 
 ```bash
 mvn clean verify     # compile, unit and integration tests, Checkstyle, coverage
@@ -101,13 +102,33 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--max-evaluations` | 10000 | Stopping criterion |
 | `--population-size` | 100 | Population and offspring size |
 | `--threads` | 1 | Parallel evaluation threads (results do not depend on it) |
-| `--crossover-probability` / `--mutation-probability` | 0.8 / 0.2 | Operator probabilities |
+| `--algorithm` | `NSGA_II` | Search algorithm (see below) |
+| `--crossover-probability` / `--mutation-probability` | 0.8 / 0.2 (1.0 for PAES) | Operator probabilities |
 | `--mapping-policy` | `VERIFIED` | `VERIFIED`, `NUMBERED_ONLY` or `LEGACY` (original, unchecked mapping) |
 | `--lddt-aggregation` | `HARMONIC_OVER_LENGTH` | Original aggregation, or `PAIR_MEAN` |
 | `--progress-interval` | 100 | Evaluations between progress records |
 
 Options can be stored in a file, one per line, and passed as `@run-classF.args`. A batch of ten
 seeds on Windows is available in `scripts/run_10_seeds_windows.ps1`.
+
+### Algorithms
+
+All algorithms use the same objectives, operators and seeded initial population; they stop after
+`--max-evaluations`.
+
+| `--algorithm` | Algorithm | Notes |
+| --- | --- | --- |
+| `NSGA_II` | NSGA-II | Published configuration (default) |
+| `NSGA_III` | NSGA-III | Population size must be a multiple of 4 |
+| `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
+| `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
+| `MOEA_D` | MOEA/D | Normalised PBI aggregation; steady state |
+| `PAES` | PAES, (1+1) with a crowding-distance archive | Mutation only; starts from the first seed; archive size = population size |
+| `RANDOM_SEARCH` | Random search, gaps at random | Sanity check (weak baseline) |
+| `RANDOM_SEEDED` | Random search, seeds + 10 random mutations | Sanity check (strong baseline) |
+
+SMS-EMOA, MOEA/D and PAES need jMetal 7.11, which lets them start from a given population or
+solution.
 
 ### Score precomputed alignments
 
