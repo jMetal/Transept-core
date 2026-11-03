@@ -1,5 +1,11 @@
 # Java BAliBASE SP/TC evaluator
 
+> **Note (November 2026):** the classes described here were removed from the source tree in
+> commit `23bb95e` ("Deleting Adaptation of Baliscore") and are only available in the git
+> history. Reference-based metrics are now computed by `org.tmm2structalign.evaluation`
+> (see [evaluation-metrics.md](evaluation-metrics.md)).
+
+
 This module reimplements the core `bali_score_elm` behavior in Java so the project can compute BAliBASE-style SP and TC scores without compiling the original C program or installing Expat.
 
 ## Classes

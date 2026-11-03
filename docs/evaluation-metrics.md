@@ -1,6 +1,6 @@
 # MSA evaluation metrics
 
-The package `org.tm_msaligner.evaluation` compares every generated MSA with a
+The package `org.tmm2structalign.evaluation` compares every generated MSA with a
 GPCRdb reference alignment and reuses the existing `AAArray`, `AA`, and
 `BaseType` topology model to identify transmembrane residues.
 
@@ -58,7 +58,7 @@ Evaluate all `MSA*.fasta` files recursively under a directory such as
 `ejecuciones/semilla/MSA1.fasta`:
 
 ```bash
-java -cp target/classes org.tm_msaligner.evaluation.EvaluationMain \
+java -cp target/classes org.tmm2structalign.evaluation.EvaluationMain \
   --reference /data/GPCRdb/reference_alignments/classA_001.fasta \
   --topology /data/sequences/tmregions/classA_001_predicted_topologies.3line \
   --msa-root /results/ejecuciones/classA_001 \
