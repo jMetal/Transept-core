@@ -57,10 +57,10 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --datasets classF --output baselines.csv
 ```
 
-Run outputs (`<output-root>/ejecuciones/<dataset>/<run-id>/`): `FUN.tsv`, `MSASol<i>.fasta`,
-`config.json`, `metadata.json`, `progress.jsonl`, `seed.txt`, `runtime.txt`, and `error.json` on
-failure. Existing run directories are never overwritten. `FUN.tsv`/`MSASol`/`runtime.txt` keep
-the formats read by `scripts/pareto_analysis.py`.
+Run outputs (`<output-root>/ejecuciones/<dataset>/<run-id>/`): `FUN.csv` (no header),
+`MSASol<i>.fasta`, `runtime.csv`, `config.json`, `metadata.json`, `progress.jsonl`, `seed.txt`,
+and `error.json` on failure. Existing run directories are never overwritten. Tabular outputs are
+CSV; `scripts/pareto_analysis.py` also reads `FUN.tsv`/`runtime.txt` of the original runner.
 
 For quick experiments use `classF` (11 sequences) with ~500 evaluations and a population of 20:
 it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDataset`).
@@ -159,7 +159,7 @@ without touching the algorithm:
   `System.exit`, no console-only output, and no interactive prompts in library code.
 - Every run must be fully described by a configuration file (`.properties` or JSON) and must
   write **machine-readable** outputs with a stable layout: `config.json`, `metadata.json`,
-  `FUN.tsv`, `MSASol*.fasta`, and a progress log that can be followed while the run is active
+  `FUN.csv`, `MSASol*.fasta`, and a progress log that can be followed while the run is active
   (one JSON object per line, e.g. `progress.jsonl` with evaluations and best objective values).
 - Report errors with specific exceptions and clear messages that the CLI turns into a non-zero
   exit code plus a JSON error file, so a GUI can display them.
