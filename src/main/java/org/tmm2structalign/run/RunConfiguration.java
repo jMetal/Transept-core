@@ -139,6 +139,7 @@ public record RunConfiguration(
     map.put("crossoverProbability", algorithm.crossoverProbability());
     map.put("mutationProbability", algorithm.mutationProbability());
     map.put("mutationType", algorithm.mutationType());
+    map.put("initializationType", algorithm.initializationType());
     map.put("threads", algorithm.threads());
     map.put("mappingPolicy", mappingPolicy);
     map.put("lddtAggregation", lddtAggregation);

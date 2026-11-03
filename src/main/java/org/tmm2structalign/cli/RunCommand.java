@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.StructuralLddt;
@@ -99,6 +100,15 @@ public final class RunCommand implements Callable<Integer> {
   MutationType mutation;
 
   @Option(
+      names = "--initialization",
+      defaultValue = "CROSSOVER",
+      description =
+          "Initial population besides the seeds: ${COMPLETION-CANDIDATES}. Default:"
+              + " ${DEFAULT-VALUE} (original). CROSSOVER_DISTINCT avoids duplicates; PERTURBED"
+              + " mutates every crossover child.")
+  InitializationType initialization;
+
+  @Option(
       names = "--algorithm",
       defaultValue = "NSGA_II",
       description =
@@ -145,7 +155,8 @@ public final class RunCommand implements Callable<Integer> {
                   crossoverProbability,
                   effectiveMutationProbability(),
                   threads,
-                  mutation),
+                  mutation,
+                  initialization),
               algorithm,
               mappingPolicy,
               lddtAggregation,

@@ -20,6 +20,7 @@ import org.uma.jmetal.component.algorithm.multiobjective.SMSEMOABuilder;
 import org.uma.jmetal.component.catalogue.common.evaluation.Evaluation;
 import org.uma.jmetal.component.catalogue.common.evaluation.impl.MultiThreadedEvaluation;
 import org.uma.jmetal.component.catalogue.common.evaluation.impl.SequentialEvaluation;
+import org.uma.jmetal.component.catalogue.common.solutionscreation.SolutionsCreation;
 import org.uma.jmetal.component.catalogue.common.termination.Termination;
 import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEA2EnvironmentalSelection;
@@ -169,7 +170,7 @@ public final class AlgorithmFactory {
             new CyclicIntegerSequence(size),
             true)
         .setNeighborhoodSize(Math.min(MOEAD_NEIGHBORHOOD_SIZE, size))
-        .setCreateInitialPopulation(population())
+        .setCreateInitialPopulation(moeadPopulation())
         .setTermination(termination())
         .setEvaluation(evaluation())
         .build();
@@ -190,7 +191,22 @@ public final class AlgorithmFactory {
   }
 
   private SeededPopulationCreation population() {
-    return new SeededPopulationCreation(problem, seeds, configuration.populationSize(), random);
+    return configuration.initializationType() == InitializationType.CROSSOVER
+        ? new SeededPopulationCreation(problem, seeds, configuration.populationSize(), random)
+        : new SeededPopulationCreation(
+            problem,
+            seeds,
+            configuration.populationSize(),
+            random,
+            configuration.initializationType(),
+            mutation(1.0));
+  }
+
+  /** MOEA/D population: seeds spread over equally spaced subproblems. */
+  private SolutionsCreation<MsaSolution> moeadPopulation() {
+    SeededPopulationCreation creation = population();
+    int seedCount = creation.distinctSeeds().size();
+    return () -> SeededPopulationCreation.spreadSeeds(creation.create(), seedCount);
   }
 
   private TmSafeSinglePointCrossover crossover() {
