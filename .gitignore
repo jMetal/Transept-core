@@ -6,3 +6,5 @@ jMetal.log.*
 *.fasta
 *.fasta.* 
 resources/*
+# Small FASTA fixtures used by tests are versioned
+!src/test/resources/**/*.fasta
