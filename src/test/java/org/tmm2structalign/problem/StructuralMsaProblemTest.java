@@ -1,5 +1,6 @@
 package org.tmm2structalign.problem;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,16 +8,29 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.Objective;
+import org.tmm2structalign.run.Experiment;
+import org.tmm2structalign.run.RunConfiguration;
+import org.tmm2structalign.structure.MappingPolicy;
 import org.tmm2structalign.testing.Alignments;
+import org.tmm2structalign.testing.SyntheticDataset;
 
 @DisplayName("Unit tests for class StructuralMsaProblem")
 class StructuralMsaProblemTest {
@@ -133,6 +147,62 @@ class StructuralMsaProblemTest {
       assertThrows(
           IllegalArgumentException.class,
           () -> new StructuralMsaProblem("dataset", proteins, List.of()));
+    }
+  }
+
+  @Nested
+  @DisplayName("When evaluating concurrently")
+  class Concurrency {
+
+    @TempDir Path directory;
+
+    @Test
+    @DisplayName("given many threads, when evaluating copies, then results match sequential ones")
+    void givenManyThreads_whenEvaluatingCopies_thenResultsEqualSequentialOnes() throws Exception {
+      // Arrange: a real problem (SOPwTP + lDDT with structures) shared by every thread
+      Path root = SyntheticDataset.write(directory.resolve("GPCRdb"));
+      StructuralMsaProblem shared =
+          Experiment.load(
+                  new RunConfiguration(
+                      root,
+                      SyntheticDataset.NAME,
+                      SyntheticDataset.SEED_METHODS,
+                      directory.resolve("unused"),
+                      1L,
+                      AlgorithmConfiguration.withDefaults(10, 4, 1),
+                      MappingPolicy.VERIFIED,
+                      LddtAggregation.HARMONIC_OVER_LENGTH,
+                      15f,
+                      10))
+              .problem();
+      Random random = new Random(17);
+      List<MsaSolution> originals = new ArrayList<>();
+      for (int index = 0; index < 64; index++) {
+        originals.add(Alignments.randomSolution(shared.proteins(), 40, random));
+      }
+      List<double[]> expected = new ArrayList<>();
+      for (MsaSolution original : originals) {
+        expected.add(shared.evaluate(original.copy()).objectives().clone());
+      }
+      ExecutorService pool = Executors.newFixedThreadPool(8);
+
+      try {
+        for (int round = 0; round < 5; round++) {
+          // Act
+          List<MsaSolution> copies = originals.stream().map(MsaSolution::copy).toList();
+          List<Future<MsaSolution>> futures = new ArrayList<>();
+          for (MsaSolution copy : copies) {
+            futures.add(pool.submit(() -> shared.evaluate(copy)));
+          }
+
+          // Assert
+          for (int index = 0; index < futures.size(); index++) {
+            assertArrayEquals(expected.get(index), futures.get(index).get().objectives());
+          }
+        }
+      } finally {
+        pool.shutdownNow();
+      }
     }
   }
 }
