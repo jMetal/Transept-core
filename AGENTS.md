@@ -5,16 +5,17 @@ first, then `JAVA_CODING_GUIDELINES.md` and `GIT_GUIDELINES.md`.
 
 ## 1. What this project is
 
-TM-M2StructAlign is a multiobjective evolutionary algorithm (NSGA-II-style, built on jMetal) for
-multiple sequence alignment (MSA) of transmembrane proteins, specifically human GPCRs. It
-optimizes two objectives:
+TM-M2StructAlign is a multiobjective evolutionary algorithm (NSGA-II built from jMetal
+components) for multiple sequence alignment (MSA) of transmembrane proteins, specifically human
+GPCRs. It optimizes two objectives:
 
-1. **SOPwTP** (`score/impl/StructSumOfPairsWithTopologyPredict`): sum of pairs using PHAT inside
-   TM regions and BLOSUM62 elsewhere, with affine gap penalties that differ for TM and non-TM.
-2. **Structural lDDT** (`score/impl/LDDTStructuralScore`): reference-free, superposition-free
-   lDDT computed from AlphaFold2 Cα distance matrices (R0 = 15 Å).
+1. **SOPwTP** (`objective.TopologyAwareSumOfPairs`): sum of pairs using PHAT when both residues
+   are transmembrane (TM) and BLOSUM62 otherwise, with affine gap penalties that differ for TM
+   (8/3) and non-TM (3/1).
+2. **lDDT** (`objective.StructuralLddt`): reference-free, superposition-free lDDT computed from
+   AlphaFold2 Cα distance matrices (R0 = 15 Å).
 
-Both are maximized; internally they are negated for jMetal minimization.
+Both are maximized; `problem.StructuralMsaProblem` negates them for jMetal minimization.
 
 ## 2. Workspace layout
 
@@ -39,97 +40,96 @@ the reduced `_19` variants (19 proteins each, required by mTM-align).
 ## 3. Build, test, run
 
 ```bash
-mvn clean test                     # must pass before every commit
-mvn clean package                  # builds target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar
+mvn clean verify     # unit + integration tests, Checkstyle, JaCoCo; must pass before committing
+mvn clean package    # target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar
+GPCR_DATASET=../Dataset_Structural_GPCRs/GPCRdb mvn verify   # also runs real-data ITs
 ```
 
-Main runner (`org.tm_msaligner.TM_MSAStructAlignerGPCRdb`, 9 positional arguments):
+The JAR runs the picocli command line (`cli.TmStructAlignCli`):
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
-  <dataDirectory=.../GPCRdb> <dataset> <maxEvaluations> <populationSize> \
-  <numberOfCores> <observerFrequency> <runId> <outputRoot> <seed>
+java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+  --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
+  --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
+  --output-root results --run-id seed_000 --seed 0 \
+  --max-evaluations 10000 --population-size 100 --threads 4
+java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
+  --data-root ../Dataset_Structural_GPCRs/GPCRdb --datasets classF --output baselines.csv
 ```
 
-Output goes to `<outputRoot>/ejecuciones/<dataset>/<runId>/` (`FUN.tsv`, `MSASol*.fasta`,
-`BestScores.tsv`, `seed.txt`, `runtime.txt`). The runner refuses to overwrite an existing folder.
+Run outputs (`<output-root>/ejecuciones/<dataset>/<run-id>/`): `FUN.tsv`, `MSASol<i>.fasta`,
+`config.json`, `metadata.json`, `progress.jsonl`, `seed.txt`, `runtime.txt`, and `error.json` on
+failure. Existing run directories are never overwritten. `FUN.tsv`/`MSASol`/`runtime.txt` keep
+the formats read by `scripts/pareto_analysis.py`.
 
-Other entry points: `BaselineMain` (scores every precomputed FASTA; currently uses a hard-coded
-Windows path), `evaluation/EvaluationMain` (Pair F1, TM-Pair F1, TM-gap rate against GPCRdb
-references; see `docs/evaluation-metrics.md`), `scripts/pareto_analysis.py`.
+For quick experiments use `classF` (11 sequences) with ~500 evaluations and a population of 20:
+it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDataset`).
 
-For quick experiments use a small dataset (`classF`, 11 sequences) with ~400 evaluations and a
-population of 20: it runs in seconds.
-
-## 4. Code map
+## 4. Code map (`src/main/java/org/tmm2structalign/`)
 
 | Package | Role |
 | --- | --- |
-| `problem`, `problem.impl` | Problem loading (3-line topology, distance/idx matrices, seed alignments) and evaluation. Structural variant: `StructuralTMMSAProblem`, `MultiObjStructuralTMMSAProblem` |
-| `solution` | Gap-group encoding of MSAs (`StructuralTM_MSASolution`): per sequence, a sorted list of `[start, end]` gap intervals |
-| `crossover` | `BioSPXMSACrossover`: single-point crossover that never cuts inside a TM helix |
-| `mutation` | `BioShiftClosedGapsMSAMutation`: moves a gap block, biased away from TM residues |
-| `score.impl` | Objective functions |
-| `algorithm.structural_multiobjective` | `StructuralTM_M2Align` and its builder (jMetal component-based EA) |
-| `solutionscreation` | Initial population from precomputed alignments + crossover |
-| `evaluation` | Reference-based metrics |
-| `auto`, `parallel`, `algorithm.{single,multi}objective` | Earlier, non-structural TM-M2Align variants and irace tuning |
-| `test` (under `src/main`!) | Legacy experiment drivers with hard-coded paths; do not extend |
+| `model` | `ProteinSequence` (residues + topology), `ProteinSet`, `Topology` |
+| `alignment` | `GapIntervals` (immutable gap runs of one row), `Msa` (decoded integer view, TM flag of gaps), `GapColumnCompactor`, `MsaSolution` (jMetal solution, one `GapIntervals` per protein) |
+| `io` | Readers for 3-line topology, aligned FASTA (tool-specific ids), `_D.csv`/`_idx.csv`, PDB chains; FASTA writer |
+| `structure` | `SequenceStructureMapper` (numbering checked by residue identity, alignment fallback), `StructureLoader`, `ProteinStructures`, `StructuralNeighborhood` |
+| `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
+| `operator` | `TmSafeSinglePointCrossover`, `TmAwareGapShiftMutation`, `RandomSource` |
+| `problem` | `StructuralMsaProblem` |
+| `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly) |
+| `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
+| `cli` | `run` and `baseline` commands |
+| `evaluation` | Comparison with GPCRdb reference alignments (`EvaluationMain`) |
+
+`org.tm_msaligner` contains only the irace tuning code (`auto`) and the 27 legacy classes it
+needs; see §8.
 
 ## 5. Conventions
 
-- Follow `JAVA_CODING_GUIDELINES.md` for **new and modified code**. Platform: Java 21, jMetal
-  7.10, JUnit 6 (Jupiter) + Mockito (`mock`/`when`/`verify` only), unit tests `*Test` (surefire)
-  and integration tests `*IT` (failsafe, `mvn verify`).
-- The rewritten core lives in **`org.tmm2structalign`**. Checkstyle (Google style) and JaCoCo
-  (>= 80 % line coverage) are enforced on that package only; `mvn verify` fails otherwise.
-  The legacy package `org.tm_msaligner` is exempt and is being replaced (see §7).
-- jMetal 7.10 is not yet on Maven Central (2026-11-03); builds resolve it from `~/.m2`. Check that
-  it resolves from Central before pushing.
+- Follow `JAVA_CODING_GUIDELINES.md`. Platform: Java 21, jMetal 7.10, JUnit 6 (Jupiter) +
+  Mockito (`mock`/`when`/`verify` only), unit tests `*Test` (surefire) and integration tests
+  `*IT` (failsafe, `mvn verify`).
+- Checkstyle (Google style) and JaCoCo (>= 80 % line coverage) are enforced on
+  `org.tmm2structalign` only; `config/checkstyle/suppressions.xml` allows the `IT` suffix.
+- jMetal 7.10 may not be on Maven Central yet; builds then resolve it from `~/.m2`. Check that it
+  resolves from Central before pushing.
 - Follow `GIT_GUIDELINES.md`: Conventional Commits, one logical change per commit, never mix
-  `test:` with `fix:`/`feat:`, never mix code with docs.
+  `test:` with `fix:`/`feat:`, never mix code with docs; every commit must build.
 - Write code, comments, and messages in English. Discussion and review documents may be in
   Spanish.
-- Use `JMetalRandom` for every stochastic decision so that runs are reproducible from the seed.
+- Draw all randomness from `operator.RandomSource` (default: the global `JMetalRandom`) so that
+  runs are reproducible from `--seed`; tests inject `testing.SeededRandom` or Mockito mocks.
 
 ## 6. Pitfalls (read before touching these areas)
 
-1. **Sequence→structure mapping.** `<prot>_idx.csv` holds AlphaFold PDB residue numbers, which
-   the loader treats as 1-based positions in the GPCRdb sequence **without checking residue
-   identity**. That is wrong for OXER1 and MCHR1, whose AlphaFold sequence differs. See A1.
-2. **`removeGapColumns` is buggy**: it leaves gap-only columns (reproduced for 2 sequences and for
-   ≥3 sequences with several gap blocks). Because the lDDT divides by alignment length, this
-   changes objective 2. See A2.
-3. **Seed alignments**: every `*.fasta` in `precomputed/<ds>/` is loaded, and one invalid file
-   aborts the run. Currently classA_002/003/004 abort because of the structural-tool outputs.
-   Caretta outputs are residue-level misaligned for most classes. See A4 and
-   `docs/review/01-caretta-mtmalign.md`.
-4. **The lDDT objective rewards compact alignments** and is nearly blind to helix register shifts.
-   Do not draw conclusions from objective 2 alone; check against reference-based metrics.
+1. **The lDDT objective rewards compact alignments** (`HARMONIC_OVER_LENGTH` divides by the
+   alignment length) and is nearly blind to helix register shifts. Do not draw conclusions from
+   objective 2 alone; check against reference-based metrics. See finding A3.
+2. **Structure mapping.** `VERIFIED` (default) changes the lDDT of classA_002, classA_004 and
+   classA_004_19 with respect to the published values (OXER1/MCHR1 were mis-mapped). Use
+   `--mapping-policy LEGACY` only to reproduce published numbers.
+3. **Seeds.** Caretta outputs are residue-level misaligned for most classes, and the structural
+   tools' outputs in the full classA_002/003/004 datasets do not match the GPCRdb sequences.
+   Choose `--seeds` deliberately (see `docs/review/01-caretta-mtmalign.md`).
+4. **Differential oracle.** `BaselineOracleIT` compares the objectives with the dataset's
+   `baselines.csv` (frozen in `src/test/resources/oracle`). If you change an objective on
+   purpose, update the oracle expectations in the same change and explain why.
 5. `.gitignore` excludes `*.fasta` except under `src/test/resources/`. Prefer generating fixtures
-   in `@TempDir`; version only small, hand-checked files.
-6. Missing structural files only produce a `[WARN]` on stdout; the sequence is silently excluded
-   from the lDDT.
+   in `@TempDir`.
+6. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
+   numbers are consumed); same seed + same version is bit-identical.
 
 ## 7. Current work (November 2026)
 
-The goal on branch `antonio` is to (1) review TM-M2StructAlign for errors and inconsistencies,
-(2) review the dataset directory, and (3) carry out an improvement plan. Documents:
+Branch `antonio`. Review documents in `docs/review/` (`01` Caretta/mTM-align, `02` code review
+with ids A*/M*/B*, `03` dataset review with ids D*, `04` work plan; `scripts/` diagnostics).
+Part 1 of the plan (platform migration, rewrite of the structural core with tests, removal of
+the old structural flow) is done; tag `legacy-v1.0` marks the pre-rewrite state. Part 2
+(new operators, objectives, algorithm improvements) is pending; Phase 0 decisions of the plan
+belong to the authors, so ask before implementing work that depends on them.
 
-- `docs/review/01-caretta-mtmalign.md`: investigation of anomalous baselines
-- `docs/review/02-code-review.md`: code findings (ids A*, M*, B*), plus the JDK 21 / jMetal 7.9
-  check
-- `docs/review/03-dataset-review.md`: dataset findings (ids D*)
-- `docs/review/04-work-plan.md`: phased plan; **Phase 0 decisions belong to the authors**. Do
-  not implement work that depends on an open decision without asking.
-- `docs/review/scripts/`: read-only diagnostic scripts used to produce the numbers
-
-An approved rewrite is under way (November 2026): the structural core is re-implemented with
-tests in `org.tmm2structalign` (tag `legacy-v1.0` marks the pre-rewrite state), then the old
-structural flow in `org.tm_msaligner` is removed. The irace code and its dependencies stay (§8).
-
-When fixing a finding, reference its id in the commit body (e.g. `Refs: A2`) and update the
-corresponding document.
+When fixing a finding, reference its id in the commit body (e.g. `Refs: A2`) and update
+`docs/review/02-code-review.md`.
 
 ## 8. Do not
 
