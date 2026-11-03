@@ -20,7 +20,7 @@ Both are maximized; internally they are negated for jMetal minimization.
 
 Two sibling repositories are expected under the same parent directory:
 
-```
+```text
 MSA/
 ├── TM-M2StructAlign/            # this repository (Java, Maven)
 └── Dataset_Structural_GPCRs/    # benchmark data (separate git repo, Zenodo v1.0.0)
@@ -78,13 +78,14 @@ population of 20: it runs in seconds.
 
 ## 5. Conventions
 
-- Follow `JAVA_CODING_GUIDELINES.md` for **new and modified code**. Known gaps in the current
-  codebase (do not fix them on the side; they are planned, see §7):
-  - `pom.xml` targets Java 17 and jMetal 6.2; the guidelines assume Java 21+. A verified migration
-    patch exists (`docs/review/jdk21-jmetal79-migration.patch`).
-  - Tests use JUnit 5.10 (Jupiter), not JUnit 6. Write new tests in Jupiter style
-    (GWT naming, `@Nested`, `@DisplayName`, AAA).
-  - No Checkstyle yet; package `org.tm_msaligner` and many class names contain underscores.
+- Follow `JAVA_CODING_GUIDELINES.md` for **new and modified code**. Platform: Java 21, jMetal
+  7.10, JUnit 6 (Jupiter) + Mockito (`mock`/`when`/`verify` only), unit tests `*Test` (surefire)
+  and integration tests `*IT` (failsafe, `mvn verify`).
+- The rewritten core lives in **`org.tmm2structalign`**. Checkstyle (Google style) and JaCoCo
+  (>= 80 % line coverage) are enforced on that package only; `mvn verify` fails otherwise.
+  The legacy package `org.tm_msaligner` is exempt and is being replaced (see §7).
+- jMetal 7.10 is not yet on Maven Central (2026-11-03); builds resolve it from `~/.m2`. Check that
+  it resolves from Central before pushing.
 - Follow `GIT_GUIDELINES.md`: Conventional Commits, one logical change per commit, never mix
   `test:` with `fix:`/`feat:`, never mix code with docs.
 - Write code, comments, and messages in English. Discussion and review documents may be in
@@ -105,8 +106,8 @@ population of 20: it runs in seconds.
    `docs/review/01-caretta-mtmalign.md`.
 4. **The lDDT objective rewards compact alignments** and is nearly blind to helix register shifts.
    Do not draw conclusions from objective 2 alone; check against reference-based metrics.
-5. `.gitignore` excludes `*.fasta`. Test fixtures should be generated in code (temp dirs) or the
-   ignore rule must be adjusted explicitly.
+5. `.gitignore` excludes `*.fasta` except under `src/test/resources/`. Prefer generating fixtures
+   in `@TempDir`; version only small, hand-checked files.
 6. Missing structural files only produce a `[WARN]` on stdout; the sequence is silently excluded
    from the lDDT.
 
@@ -123,6 +124,10 @@ The goal on branch `antonio` is to (1) review TM-M2StructAlign for errors and in
   not implement work that depends on an open decision without asking.
 - `docs/review/scripts/`: read-only diagnostic scripts used to produce the numbers
 
+An approved rewrite is under way (November 2026): the structural core is re-implemented with
+tests in `org.tmm2structalign` (tag `legacy-v1.0` marks the pre-rewrite state), then the old
+structural flow in `org.tm_msaligner` is removed. The irace code and its dependencies stay (§8).
+
 When fixing a finding, reference its id in the commit body (e.g. `Refs: A2`) and update the
 corresponding document.
 
@@ -138,3 +143,22 @@ corresponding document.
   depends on (`TM_MSASolution`, `SPXMSACrossover`, the old mutations, `MultiObjTMMSAProblem`,
   etc.). The authors will decide later whether to continue that line. Only API renames that a
   dependency upgrade makes unavoidable are allowed.
+
+## 9. Future work: graphical user interface
+
+Once the rewrite is complete, the authors plan a GUI for the tool, probably a Python
+**Streamlit** application that drives the Java core. Design the core so that a GUI can be added
+without touching the algorithm:
+
+- Keep all logic in the library (`org.tmm2structalign`); `cli` is a thin layer. No
+  `System.exit`, no console-only output, and no interactive prompts in library code.
+- Every run must be fully described by a configuration file (`.properties` or JSON) and must
+  write **machine-readable** outputs with a stable layout: `config.json`, `metadata.json`,
+  `FUN.tsv`, `MSASol*.fasta`, and a progress log that can be followed while the run is active
+  (one JSON object per line, e.g. `progress.jsonl` with evaluations and best objective values).
+- Report errors with specific exceptions and clear messages that the CLI turns into a non-zero
+  exit code plus a JSON error file, so a GUI can display them.
+- Keep the CLI arguments and output formats stable and documented; treat them as the public API
+  between the Java core and the GUI.
+- Do not start the GUI before the rewrite (Part 1 of the plan) is finished.
+
