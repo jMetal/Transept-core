@@ -15,6 +15,7 @@
         <!-- Libraries -->
         <jmetal.version>7.10</jmetal.version>
         <biojava.version>7.0.0</biojava.version>
+        <picocli.version>4.7.7</picocli.version>
 
         <!-- Testing -->
         <junit.version>6.1.3</junit.version>
@@ -27,6 +28,7 @@
         <jacoco.plugin.version>0.8.16</jacoco.plugin.version>
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <checkstyle.version>14.4.0</checkstyle.version>
+        <git.commit.plugin.version>10.0.1</git.commit.plugin.version>
 
         <!-- Quality gates apply only to the rewritten core -->
         <quality.package>org/tmm2structalign/**</quality.package>
@@ -81,6 +83,13 @@
             <version>${biojava.version}</version>
         </dependency>
 
+        <!-- Command line -->
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>${picocli.version}</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -104,6 +113,29 @@
                 <configuration>
                     <release>${java.version}</release>
                     <proc>none</proc>
+                </configuration>
+            </plugin>
+
+            <!-- Records the git commit in git.properties for run metadata -->
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>${git.commit.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.commit.id$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.branch$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.dirty$</includeOnlyProperty>
+                    </includeOnlyProperties>
                 </configuration>
             </plugin>
 
