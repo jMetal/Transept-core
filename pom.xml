@@ -56,23 +56,12 @@
         </dependency>
         <dependency>
             <groupId>org.uma.jmetal</groupId>
-            <artifactId>jmetal-algorithm</artifactId>
-            <version>${jmetal.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-component</artifactId>
             <version>${jmetal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-auto</artifactId>
-            <version>${jmetal.version}</version>
-        </dependency>
-        <!-- Used by legacy experiment drivers under src/main (org.tm_msaligner.test) -->
-        <dependency>
-            <groupId>org.uma.jmetal</groupId>
-            <artifactId>jmetal-lab</artifactId>
             <version>${jmetal.version}</version>
         </dependency>
 
