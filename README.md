@@ -153,12 +153,13 @@ existing directory.
 
 | File | Content |
 | --- | --- |
-| `FUN.tsv` | One line per solution: SOPwTP and lDDT, tab-separated, no header |
-| `MSASol<i>.fasta` | Alignment of line `i` of `FUN.tsv` |
+| `FUN.csv` | One line per solution: SOPwTP and lDDT, comma-separated, no header (jMetal convention) |
+| `MSASol<i>.fasta` | Alignment of line `i` of `FUN.csv` |
 | `config.json` | Full run configuration |
 | `metadata.json` | Git commit, timing, seed files with SHA-256 (and duplicates), structure mapping of every protein, proteins without structure |
 | `progress.jsonl` | One JSON line per progress record (evaluations, elapsed time, best values) |
-| `seed.txt`, `runtime.txt` | Random seed and runtime, as in the original runner |
+| `runtime.csv` | `runtime_ms,runtime_seconds,evaluations` with one row |
+| `seed.txt` | Random seed |
 | `error.json` | Only if the run failed: exception type and message |
 
 ## Project layout
