@@ -91,8 +91,6 @@ needs; see §8.
   `*IT` (failsafe, `mvn verify`).
 - Checkstyle (Google style) and JaCoCo (>= 80 % line coverage) are enforced on
   `org.tmm2structalign` only; `config/checkstyle/suppressions.xml` allows the `IT` suffix.
-- jMetal 7.10 may not be on Maven Central yet; builds then resolve it from `~/.m2`. Check that it
-  resolves from Central before pushing.
 - Follow `GIT_GUIDELINES.md`: Conventional Commits, one logical change per commit, never mix
   `test:` with `fix:`/`feat:`, never mix code with docs; every commit must build.
 - Write code, comments, and messages in English. Discussion and review documents may be in
