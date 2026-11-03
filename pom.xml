@@ -241,6 +241,7 @@
                 </dependencies>
                 <configuration>
                     <configLocation>google_checks.xml</configLocation>
+                    <suppressionsLocation>config/checkstyle/suppressions.xml</suppressionsLocation>
                     <includes>${quality.package}</includes>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <consoleOutput>true</consoleOutput>

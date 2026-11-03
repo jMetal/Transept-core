@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<!--
+  Integration tests must end in "IT" (JAVA_CODING_GUIDELINES.md, section 13), which Google's
+  AbbreviationAsWordInName check rejects. The project convention wins for those class names.
+-->
+<suppressions>
+    <suppress checks="AbbreviationAsWordInName" files="[\\/]src[\\/]test[\\/]java[\\/].*IT\.java$"/>
+</suppressions>
