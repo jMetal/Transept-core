@@ -9,6 +9,7 @@ package org.tmm2structalign.algorithm;
  * @param crossoverProbability probability of the TM-safe crossover
  * @param mutationProbability probability of the gap-shift mutation
  * @param threads number of evaluation threads; 1 evaluates sequentially
+ * @param mutationType mutation operator
  */
 public record AlgorithmConfiguration(
     int maxEvaluations,
@@ -16,7 +17,8 @@ public record AlgorithmConfiguration(
     int offspringPopulationSize,
     double crossoverProbability,
     double mutationProbability,
-    int threads) {
+    int threads,
+    MutationType mutationType) {
 
   /** Crossover probability used in the published experiments. */
   public static final double DEFAULT_CROSSOVER_PROBABILITY = 0.8;
@@ -32,6 +34,36 @@ public record AlgorithmConfiguration(
     requirePositive(threads, "threads");
     requireProbability(crossoverProbability, "crossoverProbability");
     requireProbability(mutationProbability, "mutationProbability");
+    if (mutationType == null) {
+      throw new IllegalArgumentException("mutationType is required");
+    }
+  }
+
+  /**
+   * Creates a configuration with the original gap-shift mutation.
+   *
+   * @param maxEvaluations stopping criterion, number of evaluations
+   * @param populationSize population size
+   * @param offspringPopulationSize offspring created per generation
+   * @param crossoverProbability probability of the TM-safe crossover
+   * @param mutationProbability probability of the gap-shift mutation
+   * @param threads number of evaluation threads; 1 evaluates sequentially
+   */
+  public AlgorithmConfiguration(
+      int maxEvaluations,
+      int populationSize,
+      int offspringPopulationSize,
+      double crossoverProbability,
+      double mutationProbability,
+      int threads) {
+    this(
+        maxEvaluations,
+        populationSize,
+        offspringPopulationSize,
+        crossoverProbability,
+        mutationProbability,
+        threads,
+        MutationType.GAP_SHIFT);
   }
 
   /**

@@ -6,6 +6,7 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.operator.RandomSource;
 import org.tmm2structalign.operator.TmAwareGapShiftMutation;
+import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
@@ -23,6 +24,7 @@ import org.uma.jmetal.component.catalogue.common.termination.Termination;
 import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEA2EnvironmentalSelection;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEAEnvironmentalSelection;
+import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
 
@@ -113,8 +115,7 @@ public final class AlgorithmFactory {
                       population().distinctSeeds(),
                       configuration.populationSize(),
                       PerturbedSeedCreation.DEFAULT_MUTATIONS,
-                      new TmAwareGapShiftMutation(
-                          1.0, structures, TmAwareGapShiftMutation.DEFAULT_MAX_TRIES, random),
+                      mutation(1.0),
                       random),
                   evaluation(),
                   termination()));
@@ -196,12 +197,19 @@ public final class AlgorithmFactory {
     return new TmSafeSinglePointCrossover(configuration.crossoverProbability(), random);
   }
 
-  private TmAwareGapShiftMutation mutation() {
-    return new TmAwareGapShiftMutation(
-        configuration.mutationProbability(),
-        structures,
-        TmAwareGapShiftMutation.DEFAULT_MAX_TRIES,
-        random);
+  private MutationOperator<MsaSolution> mutation() {
+    return mutation(configuration.mutationProbability());
+  }
+
+  private MutationOperator<MsaSolution> mutation(double probability) {
+    return switch (configuration.mutationType()) {
+      case GAP_SHIFT ->
+          new TmAwareGapShiftMutation(
+              probability, structures, TmAwareGapShiftMutation.DEFAULT_MAX_TRIES, random);
+      case TM_SAFE_GAP_SHIFT ->
+          new TmSafeGapShiftMutation(
+              probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random);
+    };
   }
 
   private Termination termination() {

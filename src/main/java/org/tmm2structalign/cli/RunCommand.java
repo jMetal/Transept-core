@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.run.ExperimentRunner;
@@ -90,6 +91,14 @@ public final class RunCommand implements Callable<Integer> {
   Double mutationProbability;
 
   @Option(
+      names = "--mutation",
+      defaultValue = "GAP_SHIFT",
+      description =
+          "Mutation operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE} (original);"
+              + " TM_SAFE_GAP_SHIFT never breaks a transmembrane helix.")
+  MutationType mutation;
+
+  @Option(
       names = "--algorithm",
       defaultValue = "NSGA_II",
       description =
@@ -135,7 +144,8 @@ public final class RunCommand implements Callable<Integer> {
                   populationSize,
                   crossoverProbability,
                   effectiveMutationProbability(),
-                  threads),
+                  threads,
+                  mutation),
               algorithm,
               mappingPolicy,
               lddtAggregation,
