@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
+import org.tmm2structalign.algorithm.AlgorithmType;
 import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.structure.MappingPolicy;
 
@@ -20,6 +21,7 @@ import org.tmm2structalign.structure.MappingPolicy;
  * @param runDirectory output directory of the run; must not exist
  * @param randomSeed seed of the global jMetal generator
  * @param algorithm algorithm parameters
+ * @param algorithmType search algorithm
  * @param mappingPolicy policy for mapping sequences onto structures
  * @param lddtAggregation aggregation of the structural objective
  * @param lddtCutoff inclusion radius of the structural objective, in Å
@@ -32,6 +34,7 @@ public record RunConfiguration(
     Path runDirectory,
     long randomSeed,
     AlgorithmConfiguration algorithm,
+    AlgorithmType algorithmType,
     MappingPolicy mappingPolicy,
     LddtAggregation lddtAggregation,
     float lddtCutoff,
@@ -48,8 +51,9 @@ public record RunConfiguration(
     if (seedMethods == null || seedMethods.isEmpty()) {
       throw new IllegalArgumentException("At least one seed method is required");
     }
-    if (mappingPolicy == null || lddtAggregation == null) {
-      throw new IllegalArgumentException("mappingPolicy and lddtAggregation are required");
+    if (algorithmType == null || mappingPolicy == null || lddtAggregation == null) {
+      throw new IllegalArgumentException(
+          "algorithmType, mappingPolicy and lddtAggregation are required");
     }
     if (!Float.isFinite(lddtCutoff) || lddtCutoff <= 0f) {
       throw new IllegalArgumentException("lddtCutoff must be positive: " + lddtCutoff);
@@ -58,6 +62,45 @@ public record RunConfiguration(
       throw new IllegalArgumentException("progressInterval must be positive: " + progressInterval);
     }
     seedMethods = List.copyOf(seedMethods);
+  }
+
+  /**
+   * Creates a configuration that uses NSGA-II, the published algorithm.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtAggregation aggregation of the structural objective
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      MappingPolicy mappingPolicy,
+      LddtAggregation lddtAggregation,
+      float lddtCutoff,
+      int progressInterval) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        AlgorithmType.NSGA_II,
+        mappingPolicy,
+        lddtAggregation,
+        lddtCutoff,
+        progressInterval);
   }
 
   /** Returns the 3-line topology file of the dataset. */
@@ -89,6 +132,7 @@ public record RunConfiguration(
     map.put("seedMethods", seedMethods);
     map.put("runDirectory", runDirectory.toAbsolutePath().toString());
     map.put("randomSeed", randomSeed);
+    map.put("algorithmType", algorithmType);
     map.put("maxEvaluations", algorithm.maxEvaluations());
     map.put("populationSize", algorithm.populationSize());
     map.put("offspringPopulationSize", algorithm.offspringPopulationSize());

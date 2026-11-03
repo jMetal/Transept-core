@@ -157,8 +157,8 @@ class RunSupportTest {
   class Progress {
 
     @Test
-    @DisplayName("given observer updates, when the interval is reached, then a line is appended")
-    void givenObserverUpdates_whenIntervalIsReached_thenLineIsAppended() throws IOException {
+    @DisplayName("given progress reports, when the interval is reached, then a line is appended")
+    void givenProgressReports_whenIntervalIsReached_thenLineIsAppended() throws IOException {
       // Arrange
       ProteinSet proteins = Alignments.proteins("ACD:OOO", "AD:OO");
       StructuralMsaProblem problem =
@@ -167,14 +167,14 @@ class RunSupportTest {
       MsaSolution solution = Alignments.solution(proteins, "ACD", "A-D");
       problem.evaluate(solution);
       ProgressObserver observer = new ProgressObserver(problem, directory, 10);
-      List<MsaSolution> population = new ArrayList<>(List.of(solution));
+      List<MsaSolution> front = new ArrayList<>(List.of(solution));
 
-      // Act
-      observer.update(null, Map.of("EVALUATIONS", 5, "POPULATION", population));
-      observer.update(null, Map.of("EVALUATIONS", 12, "POPULATION", population));
-      observer.update(null, Map.of("EVALUATIONS", 15, "POPULATION", population));
-      observer.update(null, Map.of("EVALUATIONS", 20, "POPULATION", population));
-      observer.update(null, Map.of("OTHER", 1));
+      // Act: 5 is below the interval, 15 follows the record at 12, the empty front is skipped
+      observer.progress(5, () -> front);
+      observer.progress(12, () -> front);
+      observer.progress(15, () -> front);
+      observer.progress(20, List::of);
+      observer.progress(30, () -> front);
 
       // Assert
       List<String> lines = Files.readAllLines(directory.resolve(ProgressObserver.FILE_NAME));

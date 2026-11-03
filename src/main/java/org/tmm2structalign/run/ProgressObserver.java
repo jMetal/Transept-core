@@ -9,18 +9,18 @@ import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.problem.StructuralMsaProblem;
-import org.uma.jmetal.util.observable.Observable;
-import org.uma.jmetal.util.observer.Observer;
 
 /**
  * Records the progress of a run in {@code progress.jsonl}: one JSON object per line with the
  * number of evaluations, the elapsed time and the best value of every objective in the current
- * population. Designed to be followed by a GUI while the run is active.
+ * result of the search (population, archive or non-dominated solutions, depending on the
+ * algorithm). Designed to be followed by a GUI while the run is active.
  */
-public final class ProgressObserver implements Observer<Map<String, Object>> {
+public final class ProgressObserver {
 
   /** File name of the progress log inside the run directory. */
   public static final String FILE_NAME = "progress.jsonl";
@@ -48,16 +48,19 @@ public final class ProgressObserver implements Observer<Map<String, Object>> {
     this.nextRecord = interval;
   }
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public void update(Observable<Map<String, Object>> observable, Map<String, Object> data) {
-    Object evaluations = data.get("EVALUATIONS");
-    Object population = data.get("POPULATION");
-    if (evaluations instanceof Integer count
-        && population instanceof List<?> solutions
-        && count >= nextRecord) {
-      record(count, (List<MsaSolution>) solutions);
-      nextRecord = (count / interval + 1) * interval;
+  /**
+   * Records progress if at least {@code interval} evaluations have passed since the last record.
+   *
+   * @param evaluations evaluations performed so far
+   * @param front supplier of the current result of the search
+   */
+  public void progress(int evaluations, Supplier<List<MsaSolution>> front) {
+    if (evaluations >= nextRecord) {
+      List<MsaSolution> solutions = front.get();
+      if (!solutions.isEmpty()) {
+        record(evaluations, solutions);
+      }
+      nextRecord = (evaluations / interval + 1) * interval;
     }
   }
 
@@ -65,7 +68,7 @@ public final class ProgressObserver implements Observer<Map<String, Object>> {
    * Appends one progress record.
    *
    * @param evaluations evaluations performed so far
-   * @param population current population, evaluated
+   * @param population current result of the search, evaluated
    */
   public void record(int evaluations, List<MsaSolution> population) {
     Map<String, Object> best = new LinkedHashMap<>();

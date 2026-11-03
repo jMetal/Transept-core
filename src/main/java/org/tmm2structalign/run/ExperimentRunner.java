@@ -11,17 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.tmm2structalign.algorithm.SeededPopulationCreation;
+import org.tmm2structalign.algorithm.AlgorithmFactory;
+import org.tmm2structalign.algorithm.SearchRun;
 import org.tmm2structalign.algorithm.TmStructAlign;
 import org.tmm2structalign.alignment.GapIntervals;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.io.FastaAlignmentWriter;
 import org.tmm2structalign.objective.Objective;
 import org.tmm2structalign.operator.RandomSource;
-import org.tmm2structalign.operator.TmAwareGapShiftMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.StructureMapping;
-import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 /**
@@ -72,33 +71,27 @@ public final class ExperimentRunner {
     JMetalRandom.getInstance().setSeed(configuration.randomSeed());
     Experiment experiment = Experiment.load(configuration);
     StructuralMsaProblem problem = experiment.problem();
-    var algorithmConfiguration = configuration.algorithm();
-    var population =
-        new SeededPopulationCreation(
-            problem,
-            experiment.seedAlignments(),
-            algorithmConfiguration.populationSize(),
-            RandomSource.jmetal());
-    var mutation =
-        new TmAwareGapShiftMutation(
-            algorithmConfiguration.mutationProbability(), experiment.structures());
-    EvolutionaryAlgorithm<MsaSolution> algorithm =
-        TmStructAlign.createDefault(
-            problem, population, algorithmConfiguration, mutation, RandomSource.jmetal());
-    algorithm
-        .observable()
-        .register(new ProgressObserver(problem, directory, configuration.progressInterval()));
-    algorithm.run();
+    SearchRun search =
+        new AlgorithmFactory(
+                problem,
+                experiment.seedAlignments(),
+                configuration.algorithm(),
+                experiment.structures(),
+                RandomSource.jmetal())
+            .create(configuration.algorithmType());
+    ProgressObserver progress =
+        new ProgressObserver(problem, directory, configuration.progressInterval());
+    search.onProgress(evaluations -> progress.progress(evaluations, search::front));
+    search.run();
 
-    List<MsaSolution> front = algorithm.result();
+    List<MsaSolution> front = search.front();
     writeFront(problem, front, directory);
-    long runtime = algorithm.totalComputingTime();
-    writeRuntime(directory, runtime, algorithm.numberOfEvaluations());
-    RunSummary summary =
-        new RunSummary(directory, algorithm.numberOfEvaluations(), runtime, front.size());
+    long runtime = search.runtimeMillis();
+    writeRuntime(directory, runtime, search.evaluations());
+    RunSummary summary = new RunSummary(directory, search.evaluations(), runtime, front.size());
     write(
         directory.resolve("metadata.json"),
-        Json.write(metadata(experiment, summary, start)) + "\n");
+        Json.write(metadata(experiment, configuration, search, summary, start)) + "\n");
     return summary;
   }
 
@@ -130,9 +123,15 @@ public final class ExperimentRunner {
   }
 
   private static Map<String, Object> metadata(
-      Experiment experiment, RunSummary summary, Instant start) {
+      Experiment experiment,
+      RunConfiguration configuration,
+      SearchRun search,
+      RunSummary summary,
+      Instant start) {
     Map<String, Object> metadata = new LinkedHashMap<>();
     metadata.put("tool", TmStructAlign.NAME);
+    metadata.put("algorithmType", configuration.algorithmType());
+    metadata.put("algorithmName", search.name());
     metadata.put("build", BuildInfo.describe());
     metadata.put("startedAt", start.toString());
     metadata.put("finishedAt", Instant.now().toString());
