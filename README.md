@@ -66,7 +66,7 @@ For reproducible analyses, cite the Zenodo version-specific DOI and use the arch
 ## Requirements and build
 
 - Java 21 and Maven 3.9+.
-- jMetal 7.10 (if it is not yet available from Maven Central, install it locally first).
+- Dependencies (jMetal 7.10, picocli, BioJava) are downloaded from Maven Central.
 
 ```bash
 mvn clean verify     # compile, unit and integration tests, Checkstyle, coverage
