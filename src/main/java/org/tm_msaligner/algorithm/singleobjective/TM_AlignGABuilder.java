@@ -42,7 +42,7 @@ public class TM_AlignGABuilder {
         variation = new CrossoverAndMutationVariation<>(
                 offspringPopulationSize, crossover, mutation);
 
-        selection = new NaryTournamentSelection<>(2, variation.getMatingPoolSize(),
+        selection = new NaryTournamentSelection<>(2, variation.matingPoolSize(),
                 new ObjectiveComparator<>(0));
         replacement = new MuPlusLambdaReplacement<>(new ObjectiveComparator<>(0));
 

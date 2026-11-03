@@ -61,11 +61,11 @@ public class StructuralTM_M2AlignBuilder {
     densityEstimator = new CrowdingDistanceDensityEstimator<>();
     ranking = new FastNonDominatedSortRanking<>();
     replacement = new RankingAndDensityEstimatorReplacement<>(
-        ranking, densityEstimator, Replacement.RemovalPolicy.ONE_SHOT);
+        ranking, densityEstimator, RankingAndDensityEstimatorReplacement.RemovalPolicy.ONE_SHOT);
 
     int tournamentSize = 2;
     selection = new NaryTournamentSelection<>(
-        tournamentSize, variation.getMatingPoolSize(),
+        tournamentSize, variation.matingPoolSize(),
         new MultiComparator<>(
             Arrays.asList(
                 Comparator.comparing(ranking::getRank),

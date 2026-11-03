@@ -226,7 +226,7 @@ public class ConfigurableTM_MSAligner implements AutoConfigurableAlgorithm {
 
     Selection<TM_MSASolution> selection =
         selectionParameter.getParameter(
-            variation.getMatingPoolSize(), rankingAndCrowdingComparator);
+            variation.matingPoolSize(), rankingAndCrowdingComparator);
 
     Evaluation<TM_MSASolution> evaluation;
     if (algorithmResultParameter.value().equals("externalArchive")) {
@@ -239,7 +239,7 @@ public class ConfigurableTM_MSAligner implements AutoConfigurableAlgorithm {
         ranking, densityEstimator);
     Replacement<TM_MSASolution> replacement =
         new RankingAndDensityEstimatorReplacement<>(preferenceForReplacement,
-            Replacement.RemovalPolicy.ONE_SHOT);
+            RankingAndDensityEstimatorReplacement.RemovalPolicy.ONE_SHOT);
 
     Termination termination =
         new TerminationByEvaluations(maximumNumberOfEvaluationsParameter.value());

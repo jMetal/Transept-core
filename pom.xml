@@ -71,22 +71,22 @@
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-core</artifactId>
-            <version>6.2</version>
+            <version>7.10</version>
         </dependency>
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-algorithm</artifactId>
-            <version>6.2</version>
+            <version>7.10</version>
         </dependency>
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-component</artifactId>
-            <version>6.2</version>
+            <version>7.10</version>
         </dependency>
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-auto</artifactId>
-            <version>6.2</version>
+            <version>7.10</version>
         </dependency>
         <dependency>
             <groupId>org.biojava</groupId>
@@ -96,7 +96,17 @@
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-lab</artifactId>
-            <version>6.2</version>
+            <version>7.10</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-core</artifactId>
+            <version>0.38.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-jsplot</artifactId>
+            <version>0.38.1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

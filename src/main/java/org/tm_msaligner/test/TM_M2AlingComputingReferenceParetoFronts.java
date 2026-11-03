@@ -9,7 +9,7 @@ import org.uma.jmetal.lab.experiment.Experiment;
 import org.uma.jmetal.lab.experiment.ExperimentBuilder;
 import org.uma.jmetal.lab.experiment.component.impl.ComputeQualityIndicators;
 import org.uma.jmetal.lab.experiment.component.impl.GenerateBoxplotsWithR;
-import org.uma.jmetal.lab.experiment.component.impl.GenerateFriedmanHolmTestTables;
+import org.uma.jmetal.lab.experiment.component.impl.GenerateFriedmanTestTables;
 import org.uma.jmetal.lab.experiment.component.impl.GenerateLatexTablesWithStatistics;
 import org.uma.jmetal.lab.experiment.component.impl.GenerateReferenceParetoSetAndFrontFromDoubleSolutions;
 import org.uma.jmetal.lab.experiment.component.impl.GenerateWilcoxonTestTablesWithR;
@@ -108,7 +108,7 @@ public class TM_M2AlingComputingReferenceParetoFronts {
         new GenerateReferenceParetoSetAndFrontFromDoubleSolutions(experiment).run();
         new ComputeQualityIndicators<>(experiment).run();
         new GenerateLatexTablesWithStatistics(experiment).run();
-        new GenerateFriedmanHolmTestTables<>(experiment).run();
+        new GenerateFriedmanTestTables<>(experiment).run();
         new GenerateWilcoxonTestTablesWithR<>(experiment).run();
         new GenerateBoxplotsWithR<>(experiment).setRows(3).setColumns(2).run();
         //new GenerateHtmlPages<>(experiment).run() ;
