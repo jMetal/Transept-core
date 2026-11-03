@@ -67,7 +67,7 @@ class ReproducibilityIT {
     assertEquals(sequential, parallel);
   }
 
-  /** Runs and returns FUN.tsv followed by every MSASol file, as one string. */
+  /** Runs and returns FUN.csv followed by every MSASol file, as one string. */
   private String run(String runId, long seed, int threads) throws IOException {
     Path runDirectory = directory.resolve("out").resolve(runId);
     new ExperimentRunner()
@@ -83,7 +83,7 @@ class ReproducibilityIT {
                 LddtAggregation.HARMONIC_OVER_LENGTH,
                 15f,
                 100));
-    StringBuilder results = new StringBuilder(Files.readString(runDirectory.resolve("FUN.tsv")));
+    StringBuilder results = new StringBuilder(Files.readString(runDirectory.resolve("FUN.csv")));
     for (int index = 0; index < 8; index++) {
       results.append(Files.readString(runDirectory.resolve("MSASol" + index + ".fasta")));
     }

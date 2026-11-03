@@ -53,20 +53,23 @@ class SyntheticEndToEndIT {
 
     // Assert
     Path run = summary.runDirectory();
-    List<String> fun = Files.readAllLines(run.resolve("FUN.tsv"));
+    List<String> fun = Files.readAllLines(run.resolve("FUN.csv"));
     assertEquals(POPULATION, summary.frontSize());
     assertEquals(POPULATION, fun.size());
     assertTrue(summary.evaluations() >= 500);
     ProteinSet proteins = new ThreeLineTopologyReader().read(configuration.topologyFile());
     for (int index = 0; index < fun.size(); index++) {
-      assertEquals(2, fun.get(index).split("\t").length);
+      assertEquals(2, fun.get(index).split(",").length);
       Msa msa = new FastaAlignmentReader().read(run.resolve("MSASol" + index + ".fasta"), proteins);
       assertEquals(0, GapColumnCompactor.countGapOnlyColumns(msa.rows()), "MSASol" + index);
     }
     for (String file : List.of("config.json", "metadata.json", "progress.jsonl", "seed.txt",
-        "runtime.txt")) {
+        "runtime.csv")) {
       assertTrue(Files.isRegularFile(run.resolve(file)), file);
     }
+    List<String> runtime = Files.readAllLines(run.resolve("runtime.csv"));
+    assertEquals("runtime_ms,runtime_seconds,evaluations", runtime.get(0));
+    assertEquals(String.valueOf(summary.evaluations()), runtime.get(1).split(",")[2]);
     String metadata = Files.readString(run.resolve("metadata.json"));
     assertTrue(metadata.contains("\"proteinsWithoutStructure\":[]"));
     assertTrue(metadata.contains("\"status\":\"NUMBERED\""));
@@ -79,11 +82,11 @@ class SyntheticEndToEndIT {
     // Arrange
     RunConfiguration configuration = configuration("again", 40);
     runner.run(configuration);
-    String fun = Files.readString(configuration.runDirectory().resolve("FUN.tsv"));
+    String fun = Files.readString(configuration.runDirectory().resolve("FUN.csv"));
 
     // Act & Assert
     assertThrows(RunDirectoryExistsException.class, () -> runner.run(configuration));
-    assertEquals(fun, Files.readString(configuration.runDirectory().resolve("FUN.tsv")));
+    assertEquals(fun, Files.readString(configuration.runDirectory().resolve("FUN.csv")));
   }
 
   private RunConfiguration configuration(String runId, int evaluations) {

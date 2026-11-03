@@ -61,8 +61,8 @@ class SanityCheckIT {
                 LddtAggregation.HARMONIC_OVER_LENGTH,
                 15f,
                 100));
-    return Files.readAllLines(runDirectory.resolve("FUN.tsv")).stream()
-        .mapToDouble(line -> Double.parseDouble(line.split("\t")[0]))
+    return Files.readAllLines(runDirectory.resolve("FUN.csv")).stream()
+        .mapToDouble(line -> Double.parseDouble(line.split(",")[0]))
         .max()
         .orElseThrow();
   }

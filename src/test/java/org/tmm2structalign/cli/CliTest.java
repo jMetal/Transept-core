@@ -45,7 +45,7 @@ class CliTest {
       // Assert
       Path runDirectory = outputRoot.resolve("ejecuciones/synthetic/run1");
       assertEquals(0, status);
-      assertTrue(Files.isRegularFile(runDirectory.resolve("FUN.tsv")));
+      assertTrue(Files.isRegularFile(runDirectory.resolve("FUN.csv")));
       assertTrue(Files.isRegularFile(runDirectory.resolve("metadata.json")));
     }
 

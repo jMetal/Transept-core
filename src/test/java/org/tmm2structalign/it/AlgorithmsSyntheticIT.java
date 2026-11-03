@@ -52,7 +52,7 @@ class AlgorithmsSyntheticIT {
 
     // Assert
     Path run = summary.runDirectory();
-    List<String> fun = Files.readAllLines(run.resolve("FUN.tsv"));
+    List<String> fun = Files.readAllLines(run.resolve("FUN.csv"));
     assertFalse(fun.isEmpty());
     assertEquals(summary.frontSize(), fun.size());
     assertTrue(summary.evaluations() >= EVALUATIONS);
@@ -82,7 +82,7 @@ class AlgorithmsSyntheticIT {
 
     // Assert
     assertEquals(
-        Files.readString(first.resolve("FUN.tsv")), Files.readString(second.resolve("FUN.tsv")));
+        Files.readString(first.resolve("FUN.csv")), Files.readString(second.resolve("FUN.csv")));
     assertEquals(
         Files.readString(first.resolve("MSASol0.fasta")),
         Files.readString(second.resolve("MSASol0.fasta")));

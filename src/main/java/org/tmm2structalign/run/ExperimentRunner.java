@@ -29,16 +29,24 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
  * <p>Output files in the run directory:
  *
  * <ul>
- *   <li>{@code FUN.tsv}: one line per front solution, objective values in their natural
- *       direction, tab-separated, no header (as consumed by {@code scripts/pareto_analysis.py})
- *   <li>{@code MSASol<i>.fasta}: alignment of the solution in line {@code i} of {@code FUN.tsv}
- *   <li>{@code seed.txt}, {@code runtime.txt}: same formats as the original runner
+ *   <li>{@code FUN.csv}: one line per front solution, objective values in their natural
+ *       direction, comma-separated, no header (jMetal convention; objective names are in
+ *       {@code metadata.json})
+ *   <li>{@code MSASol<i>.fasta}: alignment of the solution in line {@code i} of {@code FUN.csv}
+ *   <li>{@code runtime.csv}: header {@code runtime_ms,runtime_seconds,evaluations} and one row
+ *   <li>{@code seed.txt}: the random seed
  *   <li>{@code config.json}: the run configuration
  *   <li>{@code metadata.json}: build, timing, objectives, seed provenance and structure mapping
  *   <li>{@code progress.jsonl}: progress records written during the run
  * </ul>
  */
 public final class ExperimentRunner {
+
+  /** Objective values of the final solutions. */
+  public static final String FUN_FILE = "FUN.csv";
+
+  /** Runtime and number of evaluations. */
+  public static final String RUNTIME_FILE = "runtime.csv";
 
   /**
    * Summary of a finished run.
@@ -105,21 +113,20 @@ public final class ExperimentRunner {
       for (int objective = 0; objective < problem.numberOfObjectives(); objective++) {
         values.add(Double.toString(problem.naturalValue(solution, objective)));
       }
-      fun.append(String.join("\t", values)).append('\n');
+      fun.append(String.join(",", values)).append('\n');
       writer.write(solution.toMsa(), dir.resolve("MSASol" + index + ".fasta"));
     }
-    write(dir.resolve("FUN.tsv"), fun.toString());
+    write(dir.resolve(FUN_FILE), fun.toString());
   }
 
   private static void writeRuntime(Path directory, long runtimeMillis, int evaluations)
       throws IOException {
-    String separator = System.lineSeparator();
     write(
-        directory.resolve("runtime.txt"),
-        "runtime_ms\t" + runtimeMillis + separator
-            + "runtime_seconds\t" + String.format(Locale.ROOT, "%.3f", runtimeMillis / 1000.0)
-            + separator
-            + "evaluations\t" + evaluations + separator);
+        directory.resolve(RUNTIME_FILE),
+        "runtime_ms,runtime_seconds,evaluations\n"
+            + runtimeMillis + ","
+            + String.format(Locale.ROOT, "%.3f", runtimeMillis / 1000.0) + ","
+            + evaluations + "\n");
   }
 
   private static Map<String, Object> metadata(
