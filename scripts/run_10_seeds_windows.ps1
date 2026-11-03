@@ -11,6 +11,11 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$OutputRoot,
 
+    # Comma-separated tools whose precomputed alignments seed the population,
+    # e.g. "clustalw,kalign,mafft,muscle5,tcoffee,tmaligner"
+    [Parameter(Mandatory = $true)]
+    [string]$SeedMethods,
+
     [int]$MaxEvaluations = 2500,
     [int]$PopulationSize = 100,
     [int]$NumberOfCores = 4,
@@ -52,6 +57,7 @@ Write-Host "Output root   : $OutputRoot"
 Write-Host "Evaluations   : $MaxEvaluations"
 Write-Host "Population    : $PopulationSize"
 Write-Host "Cores         : $NumberOfCores"
+Write-Host "Seed methods  : $SeedMethods"
 Write-Host "Seeds         : $($Seeds -join ', ')"
 Write-Host ""
 
@@ -63,16 +69,17 @@ for ($Index = 0; $Index -lt $Seeds.Count; $Index++) {
     Write-Host "Starting $ProblemName / $RunId / seed=$Seed"
     Write-Host "============================================================"
 
-    & java -jar $JarPath `
-        $DataDirectory `
-        $ProblemName `
-        $MaxEvaluations `
-        $PopulationSize `
-        $NumberOfCores `
-        $ObserverFrequency `
-        $RunId `
-        $OutputRoot `
-        $Seed
+    & java -jar $JarPath run `
+        --data-root $DataDirectory `
+        --dataset $ProblemName `
+        --seeds $SeedMethods `
+        --output-root $OutputRoot `
+        --run-id $RunId `
+        --seed $Seed `
+        --max-evaluations $MaxEvaluations `
+        --population-size $PopulationSize `
+        --threads $NumberOfCores `
+        --progress-interval $ObserverFrequency
 
     if ($LASTEXITCODE -ne 0) {
         throw "Execution failed for $RunId with seed $Seed. Exit code: $LASTEXITCODE"
@@ -81,7 +88,8 @@ for ($Index = 0; $Index -lt $Seeds.Count; $Index++) {
     $RunDirectory = Join-Path $OutputRoot "ejecuciones\$ProblemName\$RunId"
     $RequiredFiles = @(
         "FUN.tsv",
-        "BestScores.tsv",
+        "progress.jsonl",
+        "metadata.json",
         "runtime.txt",
         "seed.txt"
     )
