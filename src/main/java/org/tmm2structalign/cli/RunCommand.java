@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
+import org.tmm2structalign.algorithm.AlgorithmType;
 import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.run.ExperimentRunner;
@@ -33,6 +34,9 @@ public final class RunCommand implements Callable<Integer> {
 
   /** Name of the error report written to the run directory when a run fails. */
   public static final String ERROR_FILE = "error.json";
+
+  /** Default mutation probability of PAES: every iteration produces a new mutant. */
+  public static final double PAES_MUTATION_PROBABILITY = 1.0;
 
   @Option(names = "--data-root", required = true, description = "Dataset root (.../GPCRdb).")
   Path dataRoot;
@@ -82,9 +86,17 @@ public final class RunCommand implements Callable<Integer> {
 
   @Option(
       names = "--mutation-probability",
-      defaultValue = "0.2",
-      description = "Default: ${DEFAULT-VALUE}.")
-  double mutationProbability;
+      description = "Default: 1.0 for PAES (mutation-only), 0.2 for the other algorithms.")
+  Double mutationProbability;
+
+  @Option(
+      names = "--algorithm",
+      defaultValue = "NSGA_II",
+      description =
+          "Search algorithm: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}. NSGA_III needs a"
+              + " population size multiple of 4; PAES uses the first seed and ignores the"
+              + " crossover; RANDOM_SEARCH ignores the seeds and both operators.")
+  AlgorithmType algorithm;
 
   @Option(
       names = "--mapping-policy",
@@ -122,8 +134,9 @@ public final class RunCommand implements Callable<Integer> {
                   populationSize,
                   populationSize,
                   crossoverProbability,
-                  mutationProbability,
+                  effectiveMutationProbability(),
                   threads),
+              algorithm,
               mappingPolicy,
               lddtAggregation,
               StructuralLddt.DEFAULT_CUTOFF,
@@ -140,6 +153,15 @@ public final class RunCommand implements Callable<Integer> {
       status = 1;
     }
     return status;
+  }
+
+  /** Mutation probability given by the user, or the default of the chosen algorithm. */
+  double effectiveMutationProbability() {
+    double defaultValue =
+        algorithm == AlgorithmType.PAES
+            ? PAES_MUTATION_PROBABILITY
+            : AlgorithmConfiguration.DEFAULT_MUTATION_PROBABILITY;
+    return mutationProbability != null ? mutationProbability : defaultValue;
   }
 
   private static void reportError(Path runDirectory, Exception exception) throws IOException {
