@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Libraries -->
-        <jmetal.version>7.10</jmetal.version>
+        <jmetal.version>7.11-SNAPSHOT</jmetal.version>
         <biojava.version>7.0.0</biojava.version>
         <picocli.version>4.7.7</picocli.version>
 
