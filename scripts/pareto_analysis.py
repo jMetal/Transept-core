@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Reproducible two-objective analysis of TM-M2StructAlign runs.
 
-Expected layout (created by TM_MSAStructAlignerGPCRdb):
+Expected layout (created by the ``run`` command of TM-M2StructAlign):
 
-    ROOT/ejecuciones/DATASET/RUN_ID/FUN.tsv
+    ROOT/ejecuciones/DATASET/RUN_ID/FUN.csv
     ROOT/ejecuciones/DATASET/RUN_ID/MSASol0.fasta
-    ROOT/ejecuciones/DATASET/RUN_ID/runtime.txt
+    ROOT/ejecuciones/DATASET/RUN_ID/runtime.csv
 
-FUN.tsv row i maps to MSASol{i}.fasta. Both values written by the current
+Results of the original runner (FUN.tsv and runtime.txt) are still read when
+the CSV files are absent. FUN row i maps to MSASol{i}.fasta. Both values written by the current
 runner are benefit scores (larger is better): objective 1 is the structural
 sum-of-pairs/topology score and objective 2 is LDDT.
 
@@ -51,7 +52,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("root", type=Path, help="Root containing ejecuciones/, or ejecuciones itself")
     parser.add_argument("dataset", help="Dataset name, e.g. classA_002")
     parser.add_argument("--output", type=Path, help="Output directory")
-    parser.add_argument("--fun-name", default="FUN.tsv", help="FUN filename (default: FUN.tsv)")
+    parser.add_argument(
+        "--fun-name",
+        default=None,
+        help="FUN filename (default: FUN.csv, or FUN.tsv for results of the original runner)",
+    )
     parser.add_argument("--f1-name", default="Topology-aware structural SoP")
     parser.add_argument("--f2-name", default="LDDT")
     parser.add_argument(
@@ -124,9 +129,15 @@ def find_fasta(run_dir: Path, row: int) -> Path:
     raise RuntimeError(f"Ambiguous FASTA mapping for row {row}: {existing}")
 
 
-def load_solutions(dataset_dir: Path, fun_name: str) -> tuple[list[Solution], list[str]]:
+def default_fun_name(dataset_dir: Path) -> str:
+    """FUN.csv for current results, FUN.tsv for results of the original runner."""
+    return "FUN.csv" if any(dataset_dir.glob("*/FUN.csv")) else "FUN.tsv"
+
+
+def load_solutions(dataset_dir: Path, fun_name: str | None) -> tuple[list[Solution], list[str]]:
     solutions: list[Solution] = []
     warnings: list[str] = []
+    fun_name = fun_name or default_fun_name(dataset_dir)
     run_dirs = sorted(path.parent for path in dataset_dir.glob(f"*/{fun_name}"))
     if not run_dirs:
         raise FileNotFoundError(f"No */{fun_name} files found below {dataset_dir}")
@@ -224,6 +235,16 @@ def igd_plus(approximation: np.ndarray, reference_front: np.ndarray) -> float:
 
 
 def read_runtime(run_dir: Path) -> float:
+    """Runtime in seconds from runtime.csv, or from runtime.txt of the original runner."""
+    csv_path = run_dir / "runtime.csv"
+    if csv_path.is_file():
+        with csv_path.open(encoding="utf-8", newline="") as handle:
+            for record in csv.DictReader(handle):
+                try:
+                    return float(record["runtime_seconds"])
+                except (KeyError, TypeError, ValueError):
+                    return math.nan
+        return math.nan
     path = run_dir / "runtime.txt"
     if not path.is_file():
         return math.nan
