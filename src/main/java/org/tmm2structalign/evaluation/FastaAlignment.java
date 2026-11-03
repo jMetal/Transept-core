@@ -1,4 +1,4 @@
-package org.tm_msaligner.evaluation;
+package org.tmm2structalign.evaluation;
 
 import java.io.BufferedReader;
 import java.io.IOException;

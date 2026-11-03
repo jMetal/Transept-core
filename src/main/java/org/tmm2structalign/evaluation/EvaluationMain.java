@@ -1,4 +1,4 @@
-package org.tm_msaligner.evaluation;
+package org.tmm2structalign.evaluation;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,9 +16,10 @@ import java.util.Map;
 
 /** Command-line batch evaluator for execution/seed/MSA*.fasta result trees. */
 public final class EvaluationMain {
-  private static final String USAGE = """
+  private static final String USAGE =
+      """
       Usage:
-        java -cp target/classes org.tm_msaligner.evaluation.EvaluationMain \\
+        java -cp target/classes org.tmm2structalign.evaluation.EvaluationMain \\
           --reference <gpcrdb-reference.fasta> \\
           --topology <dataset_predicted_topologies.3line> \\
           --msa-root <execution-directory> \\
@@ -31,6 +32,12 @@ public final class EvaluationMain {
   private EvaluationMain() {
   }
 
+  /**
+   * Evaluates every alignment of a result tree against a reference alignment.
+   *
+   * @param args command-line options, see the usage text
+   * @throws IOException if an input cannot be read or the report cannot be written
+   */
   public static void main(String[] args) throws IOException {
     Configuration configuration = parseArguments(args);
     List<Path> msaFiles = discoverAlignments(configuration.msaRoot(), configuration.glob());
@@ -105,9 +112,9 @@ public final class EvaluationMain {
     Path reference = requiredPath(values, "--reference");
     Path topology = requiredPath(values, "--topology");
     Path msaRoot = requiredPath(values, "--msa-root");
-    Path output = Path.of(values.getOrDefault(
+    final Path output = Path.of(values.getOrDefault(
         "--output", msaRoot.resolve("evaluation_metrics.csv").toString()));
-    String glob = values.getOrDefault("--glob", "MSA*.fasta");
+    final String glob = values.getOrDefault("--glob", "MSA*.fasta");
 
     for (String option : values.keySet()) {
       if (!List.of("--reference", "--topology", "--msa-root", "--output", "--glob")

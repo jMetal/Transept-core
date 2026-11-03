@@ -1,4 +1,4 @@
-package org.tm_msaligner.evaluation;
+package org.tmm2structalign.evaluation;
 
 /**
  * Immutable result of comparing one multiple sequence alignment against a

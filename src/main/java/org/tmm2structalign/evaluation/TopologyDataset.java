@@ -1,4 +1,4 @@
-package org.tm_msaligner.evaluation;
+package org.tmm2structalign.evaluation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,18 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Locale;
-import org.tm_msaligner.util.AAArray;
+import org.tmm2structalign.model.ProteinSequence;
 
 /** Reads the project's name/sequence/topology three-line format. */
 final class TopologyDataset {
-  private final LinkedHashMap<String, AAArray> residuesByProtein;
+  private final LinkedHashMap<String, ProteinSequence> residuesByProtein;
 
-  private TopologyDataset(LinkedHashMap<String, AAArray> residuesByProtein) {
+  private TopologyDataset(LinkedHashMap<String, ProteinSequence> residuesByProtein) {
     this.residuesByProtein = residuesByProtein;
   }
 
   static TopologyDataset read(Path path) throws IOException {
-    LinkedHashMap<String, AAArray> proteins = new LinkedHashMap<>();
+    LinkedHashMap<String, ProteinSequence> proteins = new LinkedHashMap<>();
 
     try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
       while (true) {
@@ -50,10 +50,7 @@ final class TopologyDataset {
         }
 
         String id = FastaAlignment.normalizeProteinId(header);
-        AAArray residues = new AAArray(sequence, topology);
-        for (int index = 0; index < sequence.length(); index++) {
-          residues.AAAt(index).setSeqIndex(index);
-        }
+        ProteinSequence residues = new ProteinSequence(id, sequence, topology);
         if (proteins.putIfAbsent(id, residues) != null) {
           throw new IOException(
               "Duplicated normalized protein ID '" + id + "' in topology file " + path);
@@ -82,7 +79,7 @@ final class TopologyDataset {
     return value.replaceAll("\\s+", "");
   }
 
-  AAArray residues(String proteinId) {
+  ProteinSequence residues(String proteinId) {
     return residuesByProtein.get(proteinId);
   }
 }

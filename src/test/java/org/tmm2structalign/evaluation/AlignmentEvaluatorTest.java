@@ -1,4 +1,4 @@
-package org.tm_msaligner.evaluation;
+package org.tmm2structalign.evaluation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,7 +17,8 @@ class AlignmentEvaluatorTest {
 
   @Test
   void identicalAlignmentHasPerfectPairScoresDespiteOrderAndPdbExtension() throws Exception {
-    Path topology = write("topology.3line", """
+    Path topology = write("topology.3line",
+        """
         >seq1
         ABCD
         OMMO
@@ -25,13 +26,15 @@ class AlignmentEvaluatorTest {
         ABCD
         OMMO
         """);
-    Path reference = write("reference.fasta", """
+    Path reference = write("reference.fasta",
+        """
         >seq1
         ABCD
         >seq2
         ABCD
         """);
-    Path test = write("test.fasta", """
+    Path test = write("test.fasta",
+        """
         >seq2.pdb
         ABCD
         >seq1.pdb:A
@@ -50,7 +53,8 @@ class AlignmentEvaluatorTest {
 
   @Test
   void computesPartialPairF1AndTmGapRateFromUngappedResiduePositions() throws Exception {
-    Path topology = write("topology.3line", """
+    Path topology = write("topology.3line",
+        """
         >seq1
         ABC
         OMM
@@ -58,13 +62,15 @@ class AlignmentEvaluatorTest {
         ABC
         OMM
         """);
-    Path reference = write("reference.fasta", """
+    Path reference = write("reference.fasta",
+        """
         >seq1
         AB-C
         >seq2
         A-BC
         """);
-    Path test = write("test.fasta", """
+    Path test = write("test.fasta",
+        """
         >seq1
         ABC-
         >seq2
@@ -92,8 +98,9 @@ class AlignmentEvaluatorTest {
   }
 
   @Test
-  void rejectsASequenceMismatchInsteadOfReturningMisleadingScores() throws Exception {
-    Path topology = write("topology.3line", """
+  void rejectsSequenceMismatchInsteadOfReturningMisleadingScores() throws Exception {
+    Path topology = write("topology.3line",
+        """
         >seq1
         ABC
         MMM
@@ -101,13 +108,15 @@ class AlignmentEvaluatorTest {
         ABC
         MMM
         """);
-    Path reference = write("reference.fasta", """
+    Path reference = write("reference.fasta",
+        """
         >seq1
         ABC
         >seq2
         ABC
         """);
-    Path test = write("test.fasta", """
+    Path test = write("test.fasta",
+        """
         >seq1
         ABC
         >seq2

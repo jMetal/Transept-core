@@ -1,13 +1,14 @@
-package org.tm_msaligner.evaluation;
+package org.tmm2structalign.evaluation;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
-import org.tm_msaligner.util.AA;
-import org.tm_msaligner.util.AAArray;
+import org.tmm2structalign.model.Alphabet;
+import org.tmm2structalign.model.ProteinSequence;
 
 /**
  * Computes reference-based residue-pair metrics and a topology-aware gap rate.
@@ -44,6 +45,15 @@ public final class AlignmentEvaluator {
         preparedReference, preparedTopology, preparedProteinIds);
   }
 
+  /**
+   * Compares a test alignment with a reference alignment.
+   *
+   * @param referenceFile reference alignment (FASTA)
+   * @param testFile alignment to evaluate (FASTA)
+   * @param topologyFile 3-line topology file of the proteins
+   * @return pair-based and transmembrane-aware scores
+   * @throws IOException if a file cannot be read or the files are inconsistent
+   */
   public AlignmentEvaluationResult evaluate(
       Path referenceFile,
       Path testFile,
@@ -121,7 +131,7 @@ public final class AlignmentEvaluator {
       Path referenceFile,
       Path topologyFile) throws IOException {
     for (String id : reference.sequences().keySet()) {
-      AAArray annotatedResidues = topology.residues(id);
+      ProteinSequence annotatedResidues = topology.residues(id);
       if (annotatedResidues == null) {
         throw new IOException(
             "Protein '" + id + "' is missing from topology file " + topologyFile);
@@ -186,8 +196,8 @@ public final class AlignmentEvaluator {
         char letter = alignment.sequences().get(id).charAt(column);
         if (!isGap(letter)) {
           int residueIndex = residuePositions[sequenceIndex]++;
-          AA residue = topology.residues(id).AAAt(residueIndex);
-          residues.add(new AlignedResidue(id, residueIndex, residue.getType().isTMRegion()));
+          boolean transmembrane = topology.residues(id).isTransmembrane(residueIndex);
+          residues.add(new AlignedResidue(id, residueIndex, transmembrane));
         }
       }
 
@@ -217,10 +227,9 @@ public final class AlignmentEvaluator {
     long tmResidueCount = 0;
 
     for (String id : proteinIds) {
-      AAArray residues = topology.residues(id);
-      for (int residueIndex = 0; residueIndex < residues.getSize(); residueIndex++) {
-        AA residue = residues.AAAt(residueIndex);
-        if (residue.getType().isTMRegion()) {
+      ProteinSequence residues = topology.residues(id);
+      for (int residueIndex = 0; residueIndex < residues.length(); residueIndex++) {
+        if (residues.isTransmembrane(residueIndex)) {
           tmResidueCount++;
         }
       }
@@ -235,8 +244,8 @@ public final class AlignmentEvaluator {
         char letter = alignment.sequences().get(id).charAt(column);
         gaps[sequenceIndex] = isGap(letter);
         if (!gaps[sequenceIndex]) {
-          AA residue = topology.residues(id).AAAt(residuePositions[sequenceIndex]++);
-          transmembrane[sequenceIndex] = residue.getType().isTMRegion();
+          transmembrane[sequenceIndex] =
+              topology.residues(id).isTransmembrane(residuePositions[sequenceIndex]++);
         }
       }
 
@@ -284,16 +293,12 @@ public final class AlignmentEvaluator {
     return sequence.replace("-", "").replace(".", "").toUpperCase();
   }
 
-  private static String residueSequence(AAArray residues) {
-    StringBuilder sequence = new StringBuilder(residues.getSize());
-    for (int index = 0; index < residues.getSize(); index++) {
-      sequence.append(Character.toUpperCase(residues.AAAt(index).getLetter()));
-    }
-    return sequence.toString();
+  private static String residueSequence(ProteinSequence residues) {
+    return residues.residues().toUpperCase(Locale.ROOT);
   }
 
   private static boolean isGap(char letter) {
-    return letter == AA.GAP_IDENTIFIER || letter == '.';
+    return letter == Alphabet.GAP || letter == '.';
   }
 
   private record AlignedResidue(String proteinId, int position, boolean transmembrane) {
