@@ -76,7 +76,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
 | `operator` | `TmSafeSinglePointCrossover`, `TmAwareGapShiftMutation`, `RandomSource` |
 | `problem` | `StructuralMsaProblem` |
-| `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly) |
+| `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, random search), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
 | `cli` | `run` and `baseline` commands |
 | `evaluation` | Comparison with GPCRdb reference alignments (`EvaluationMain`) |
@@ -91,6 +91,9 @@ needs; see §8.
   `*IT` (failsafe, `mvn verify`).
 - Checkstyle (Google style) and JaCoCo (>= 80 % line coverage) are enforced on
   `org.tmm2structalign` only; `config/checkstyle/suppressions.xml` allows the `IT` suffix.
+- Branch `feat/algorithms` builds against **jMetal 7.11-SNAPSHOT** (the SMS-EMOA, MOEA/D and PAES
+  builders accept a given initial population or solution only from 7.11). Install the snapshot
+  from the local jMetal sources until 7.11 is on Maven Central, then switch to `7.11` and merge.
 - Follow `GIT_GUIDELINES.md`: Conventional Commits, one logical change per commit, never mix
   `test:` with `fix:`/`feat:`, never mix code with docs; every commit must build.
 - Write code, comments, and messages in English. Discussion and review documents may be in
