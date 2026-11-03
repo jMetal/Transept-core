@@ -74,7 +74,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `io` | Readers for 3-line topology, aligned FASTA (tool-specific ids), `_D.csv`/`_idx.csv`, PDB chains; FASTA writer |
 | `structure` | `SequenceStructureMapper` (numbering checked by residue identity, alignment fallback), `StructureLoader`, `ProteinStructures`, `StructuralNeighborhood` |
 | `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
-| `operator` | `TmSafeSinglePointCrossover`, `TmAwareGapShiftMutation`, `RandomSource` |
+| `operator` | `TmSafeSinglePointCrossover`, `TmAwareGapShiftMutation` (original, default), `TmSafeGapShiftMutation` (never breaks a helix; `--mutation TM_SAFE_GAP_SHIFT`), `RandomSource` |
 | `problem` | `StructuralMsaProblem` |
 | `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, random search), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
@@ -117,7 +117,11 @@ needs; see §8.
    purpose, update the oracle expectations in the same change and explain why.
 5. `.gitignore` excludes `*.fasta` except under `src/test/resources/`. Prefer generating fixtures
    in `@TempDir`.
-6. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
+6. **TM integrity is not a formal constraint** (`numberOfConstraints() = 0`). The crossover never
+   cuts a helix; the original mutation only discourages it; `TmSafeGapShiftMutation` forbids it.
+   Gaps inside helices inherited from the seeds are kept. Which mutation becomes the default is
+   pending a decision of the authors: do not change the default without asking.
+7. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
    numbers are consumed); same seed + same version is bit-identical.
 
 ## 7. Current work (November 2026)
