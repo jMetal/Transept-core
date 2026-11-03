@@ -87,10 +87,10 @@ for ($Index = 0; $Index -lt $Seeds.Count; $Index++) {
 
     $RunDirectory = Join-Path $OutputRoot "ejecuciones\$ProblemName\$RunId"
     $RequiredFiles = @(
-        "FUN.tsv",
+        "FUN.csv",
         "progress.jsonl",
         "metadata.json",
-        "runtime.txt",
+        "runtime.csv",
         "seed.txt"
     )
 
