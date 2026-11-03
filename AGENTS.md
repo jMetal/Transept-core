@@ -120,7 +120,9 @@ needs; see §8.
 6. **TM integrity is not a formal constraint** (`numberOfConstraints() = 0`). The crossover never
    cuts a helix; the original mutation only discourages it; `TmSafeGapShiftMutation` forbids it.
    Gaps inside helices inherited from the seeds are kept. Which mutation becomes the default is
-   pending a decision of the authors: do not change the default without asking.
+   pending a decision of the authors: do not change the default without asking. The same applies
+   to `--initialization` (`CROSSOVER` is the original; `CROSSOVER_DISTINCT` removes the 15-28 %
+   effective duplicates measured in the original initial population).
 7. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
    numbers are consumed); same seed + same version is bit-identical.
 
