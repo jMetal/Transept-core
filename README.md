@@ -1,18 +1,24 @@
-# Multiobjective Optimization for Structural-Aware Sequence Alignment of Transmembrane Proteins
+# TM-M2StructAlign: Multiobjective Structure-Guided Alignment of Transmembrane Proteins
 
 [![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23243974.svg)](https://doi.org/10.5281/zenodo.23243974)
 
-_An optimization framework integrating AlphaFold2-guided structural constraints._
+_A multiobjective evolutionary algorithm for multiple sequence alignment (MSA) of G
+protein-coupled receptors guided by predicted topology and AlphaFold2 structures._
 
-## 📌 Overview
+## Overview
 
-This project implements a transmembrane protein sequence alignment framework combining:
+TM-M2StructAlign refines alignments produced by existing tools (MAFFT, Kalign, ClustalW...)
+with an NSGA-II built on [jMetal](https://github.com/jMetal/jMetal). Every solution is an
+alignment, and two objectives are optimised at the same time:
 
-- **Sequence information** (similarities, clustering).
-- **Structural data** derived from AlphaFold2 predictions and topology comparisons.
-- **Multiobjective optimization** to balance accuracy, stability, and complexity.
+| Objective | What it rewards |
+| --- | --- |
+| **SOPwTP** (topology-aware sum of pairs) | Residue pairs scored with PHAT when both residues are transmembrane (TM) and BLOSUM62 otherwise; affine gap penalties that are higher in TM regions (8/3) than elsewhere (3/1) |
+| **lDDT** (structural consistency) | Superposition-free lDDT computed from AlphaFold2 Cα distance matrices (inclusion radius 15 Å): aligned residues should have the same local distances in every structure |
 
-The major innovation is the **Structural Aware Alignment** module, which incorporates structural data into alignments and evaluates solutions with metrics such as TM-score, RMSD, or predicted topologies.
+The search never cuts a TM helix when recombining alignments, and moves gap blocks preferably
+into loops. The result is a set of Pareto-optimal alignments that trade sequence and structural
+consistency.
 
 ## Project ecosystem
 
@@ -40,111 +46,130 @@ For reproducible analyses, cite the Zenodo version-specific DOI and use the arch
 
 ---
 
-## Key Features
+## How it works
 
-1. **Alignment strategies**
-   - Reference alignments (`.msf`, `.fasta`) and support for external tools (MAFFT, Kalign, ClustalW, etc.).
-   - Custom `TM-M2StructAlign` module with mutation and crossover operators tailored to transmembrane sequences.
+- **Representation.** One gap layout per protein: the sorted runs of gap columns of its aligned
+  row (`alignment.GapIntervals`). Residues are never stored; the alignment is decoded from the
+  ungapped sequences.
+- **Initial population.** An explicit list of seed alignments (precomputed with other tools),
+  without duplicates, completed with crossover children up to the population size.
+- **Crossover** (`TmSafeSinglePointCrossover`). Single cut at a column of the first parent; the
+  cut is rejected if it separates two consecutive TM residues of any protein. Remaining residues
+  of every protein are taken from the second parent.
+- **Mutation** (`TmAwareGapShiftMutation`). Moves a gap block of one protein to a new position
+  chosen by rejection sampling: TM residues are avoided (acceptance 0.05), loops and residues
+  without structure are preferred (0.90 / 0.95).
+- **Structure mapping.** AlphaFold residues are mapped to the input sequence by PDB numbering
+  when the residues agree, or by sequence alignment otherwise (e.g. OXER1 and MCHR1, whose
+  AlphaFold model is a different isoform). Every mapping is reported in the run metadata.
 
-2. **Structural Aware Alignment (SAA)**
-   - Loading predicted topology files (`*_predicted_topologies.3line`).
-   - Penalties/bonuses based on agreement between topology and generated structure.
-   - Utilization of AlphaFold2 data: model superposition and TM domain extraction.
-   - Specialized objectives: topology concordance, helix overlap, Cα distance.
+## Requirements and build
 
-3. **Multiobjective optimization**
-   - Evolutionary algorithms run over populations of MSAs.
-   - Pareto front evaluation and non-dominated individuals.
-   - Metrics included: Baliscore, gap weight, structural similarity.
-
-4. **Benchmarking and testing**
-   - Datasets in `resources/benchmarks/ref7` and `custom_tests`.
-   - Precomputed results in `precomputed_solutions`.
-   - Test scripts under `tests/` for integrity and method comparison.
-
-5. **Lightweight web interface**
-   - MSA browser with `libs/msabrowser.js` and `style.css`.
-   - Interactive visualization and exploration of results.
-
-6. **Result generation and analysis**
-   - Outputs in TSV, FASTA, and MSF formats.
-   - Computation of reference fronts (`referenceFronts/*.csv`).
-   - Batch evaluation against GPCRdb references with Pair F1, TM-Pair F1,
-     and TM-gap rate (see [`docs/evaluation-metrics.md`](docs/evaluation-metrics.md)).
-
-## Installation
+- Java 21 and Maven 3.9+.
+- jMetal 7.10 (if it is not yet available from Maven Central, install it locally first).
 
 ```bash
-# Requires Java 17+ and Maven
-git clone https://github.com/TM-M2StructAlign/TM-M2StructAlign.git
-cd TM-M2StructAlign
-mvn clean package
+mvn clean verify     # compile, unit and integration tests, Checkstyle, coverage
+mvn clean package    # target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar
 ```
 
-The runnable JAR will be in `target/` and can be executed with:
-
-```bash
-java -jar target/tm-msaligner.jar [options]
-```
+The benchmark data lives in the companion repository
+[Dataset_Structural_GPCRs](https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs); the
+commands below take its `GPCRdb` directory as `--data-root`.
 
 ## Usage
 
-Example executions:
+### Run the algorithm
 
 ```bash
-# standard multiobjective alignment
-java -jar tm-msaligner.jar \
-  -input resources/benchmarks/ref7/7tm/7tm.tfa \
-  -topology resources/benchmarks/ref7/7tm/7tm_predicted_topologies.3line \
-  -mode structural-aware \
-  -generations 1000
-
-# generate TSV report
-java -jar tm-msaligner.jar -report results/FUN.tsv
+java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+  --data-root ../Dataset_Structural_GPCRs/GPCRdb \
+  --dataset classF \
+  --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
+  --output-root results \
+  --run-id seed_000 \
+  --seed 0 \
+  --max-evaluations 10000 \
+  --population-size 100 \
+  --threads 4
 ```
 
-Parameters include:
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--seeds` | (required) | Tools whose `precomputed/<dataset>/<tool>_<dataset>.fasta` seed the population |
+| `--seed` | (required) | Random seed; the same seed and options reproduce the run exactly |
+| `--max-evaluations` | 10000 | Stopping criterion |
+| `--population-size` | 100 | Population and offspring size |
+| `--threads` | 1 | Parallel evaluation threads (results do not depend on it) |
+| `--crossover-probability` / `--mutation-probability` | 0.8 / 0.2 | Operator probabilities |
+| `--mapping-policy` | `VERIFIED` | `VERIFIED`, `NUMBERED_ONLY` or `LEGACY` (original, unchecked mapping) |
+| `--lddt-aggregation` | `HARMONIC_OVER_LENGTH` | Original aggregation, or `PAIR_MEAN` |
+| `--progress-interval` | 100 | Evaluations between progress records |
 
-- `-mode structural-aware` to enable structural constraints.
-- `-topology` path to predicted topology file from AlphaFold2.
-- `-obj` multiple objectives configurable (`baliscore`, `topology`, …).
+Options can be stored in a file, one per line, and passed as `@run-classF.args`. A batch of ten
+seeds on Windows is available in `scripts/run_10_seeds_windows.ps1`.
 
-Refer to the documentation in `src/main/java/org/...` for additional details.
+### Score precomputed alignments
 
-## Repository Structure
+```bash
+java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
+  --data-root ../Dataset_Structural_GPCRs/GPCRdb \
+  --datasets classF,classT2_19 \
+  --output baselines.csv
+```
 
-- `src/main/java/org/…` – main source code.
-- `resources/…` – example data, benchmarks, and tests.
-- `precomputed_solutions/` – reference solutions for comparison.
-- `tests/` – unit and integration tests.
+### Compare with the GPCRdb reference alignments
 
-## ✨ Structural Aware Alignment Changes
+`org.tmm2structalign.evaluation.EvaluationMain` computes Pair F1, TM-Pair F1 and TM-gap rate
+for every alignment of a result tree; see [docs/evaluation-metrics.md](docs/evaluation-metrics.md).
+`scripts/pareto_analysis.py` analyses the fronts of several runs.
 
-- Initial implementation of the **structural evaluation function**.
-- Reading and normalization of 3-line topology format.
-- Adaptation of genetic operators to consider TM information.
-- Dedicated module `AlignmentStructuralEvaluator` with superposition algorithms.
-- Configuration interface for selecting “hard” vs “soft” constraints.
-- Added metrics: helix agreement, intra-RMSD, and TM-score.
-- Performance improvements via distance caches and parallelism.
+## Output files
 
-## ✅ Example Results
+Each run writes to `<output-root>/ejecuciones/<dataset>/<run-id>/` and never overwrites an
+existing directory.
 
-- `resources/benchmarks/*` contain reference alignments.
-- `custom_tests/` allows reproducible experiments with custom data.
-- Pareto fronts can be visualized with the web tool.
+| File | Content |
+| --- | --- |
+| `FUN.tsv` | One line per solution: SOPwTP and lDDT, tab-separated, no header |
+| `MSASol<i>.fasta` | Alignment of line `i` of `FUN.tsv` |
+| `config.json` | Full run configuration |
+| `metadata.json` | Git commit, timing, seed files with SHA-256 (and duplicates), structure mapping of every protein, proteins without structure |
+| `progress.jsonl` | One JSON line per progress record (evaluations, elapsed time, best values) |
+| `seed.txt`, `runtime.txt` | Random seed and runtime, as in the original runner |
+| `error.json` | Only if the run failed: exception type and message |
 
-## 🧪 Adding New Data
+## Project layout
 
-1. Copy `*.tfa` sequences and `*_predicted_topologies.3line` into a new folder under `resources/`.
-2. Add the path to the configuration file or provide it via command line.
-3. Run the JAR with `structural-aware` mode.
+```text
+src/main/java/org/tmm2structalign/
+  model/       proteins, topology
+  alignment/   gap layouts, decoded alignments, jMetal solution
+  io/          3-line topology, FASTA, distance matrices, PDB readers
+  structure/   sequence-structure mapping and structural neighbourhoods
+  objective/   SOPwTP, lDDT, substitution matrices
+  operator/    crossover and mutation
+  problem/     jMetal problem
+  algorithm/   seeded population and NSGA-II assembly
+  run/         run configuration, execution, outputs, baseline scoring
+  cli/         command line (picocli)
+  evaluation/  comparison with reference alignments
+src/main/java/org/tm_msaligner/   legacy irace tuning code (kept as is)
+docs/review/                       code and dataset review, work plan
+```
 
-## 📄 License & Credits
+## Development
 
-Project licensed under the [LICENSE](LICENSE).  
-Developed as part of the transmembrane structural alignment initiative.
+- Read [AGENTS.md](AGENTS.md), [JAVA_CODING_GUIDELINES.md](JAVA_CODING_GUIDELINES.md) and
+  [GIT_GUIDELINES.md](GIT_GUIDELINES.md).
+- `mvn verify` enforces Google Java Style (Checkstyle) and 80 % line coverage on
+  `org.tmm2structalign`.
+- Integration tests that need the real dataset run only when `GPCR_DATASET` points to the
+  `GPCRdb` directory. `BaselineOracleIT` checks that the objectives reproduce the values of the
+  original implementation stored in the dataset's `baselines.csv`.
+- The state before the November 2026 rewrite (Java 17, jMetal 6.2, original runner) is tagged
+  `legacy-v1.0`.
 
----
+## License
 
-> 📝 **Note:** The project’s focus is on the Structural Aware Alignment module; the README details its components, activation, and recent modifications.
+Licensed under the terms in [LICENSE](LICENSE).
