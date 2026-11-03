@@ -255,7 +255,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.tm_msaligner.TM_MSAStructAlignerGPCRdb</mainClass>
+                            <mainClass>org.tmm2structalign.cli.TmStructAlignCli</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
