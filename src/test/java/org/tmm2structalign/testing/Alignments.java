@@ -91,4 +91,28 @@ public final class Alignments {
     }
     return new ProteinStructures(mappings, distances);
   }
+
+  /**
+   * Counts the gap runs of a row placed between two consecutive transmembrane residues, i.e.
+   * the runs that break a helix.
+   */
+  public static int helixBreakingRuns(ProteinSequence protein, GapIntervals row) {
+    int[] residueAtColumn = row.columnToResidue();
+    int breaking = 0;
+    int residuesBefore = 0;
+    int run = 0;
+    for (int column = 0; column < residueAtColumn.length && run < row.runCount(); column++) {
+      if (column == row.start(run)) {
+        if (residuesBefore > 0
+            && residuesBefore < protein.length()
+            && protein.isTransmembrane(residuesBefore - 1)
+            && protein.isTransmembrane(residuesBefore)) {
+          breaking++;
+        }
+        run++;
+      }
+      residuesBefore += residueAtColumn[column] >= 0 ? 1 : 0;
+    }
+    return breaking;
+  }
 }
