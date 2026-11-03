@@ -103,6 +103,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--population-size` | 100 | Population and offspring size |
 | `--threads` | 1 | Parallel evaluation threads (results do not depend on it) |
 | `--algorithm` | `NSGA_II` | Search algorithm (see below) |
+| `--initialization` | `CROSSOVER` | Non-seed members: `CROSSOVER` (original), `CROSSOVER_DISTINCT` (no duplicates after removing gap-only columns) or `PERTURBED` (crossover child + 10 mutations) |
 | `--mutation` | `GAP_SHIFT` | `GAP_SHIFT` (original: discourages gaps inside TM helices) or `TM_SAFE_GAP_SHIFT` (never breaks a helix) |
 | `--crossover-probability` / `--mutation-probability` | 0.8 / 0.2 (1.0 for PAES) | Operator probabilities |
 | `--mapping-policy` | `VERIFIED` | `VERIFIED`, `NUMBERED_ONLY` or `LEGACY` (original, unchecked mapping) |
