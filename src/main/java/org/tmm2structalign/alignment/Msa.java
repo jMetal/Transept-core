@@ -89,12 +89,31 @@ public final class Msa {
       String ungapped = aligned.replace(String.valueOf(Alphabet.GAP), "");
       if (!ungapped.equalsIgnoreCase(protein.residues())) {
         throw new IllegalArgumentException(
-            "Aligned row of '" + protein.id() + "' does not match its sequence (expected "
-                + protein.length() + " residues, found " + ungapped.length() + ")");
+            "Aligned row of '" + protein.id() + "' does not match its sequence: "
+                + mismatch(ungapped, protein.residues()));
       }
       rows.add(GapIntervals.fromAlignedRow(aligned));
     }
     return of(proteins, rows);
+  }
+
+  /** Describes how an ungapped row differs from the expected residues. */
+  private static String mismatch(String found, String expected) {
+    String description;
+    if (found.length() != expected.length()) {
+      description =
+          "expected " + expected.length() + " residues, found " + found.length();
+    } else {
+      int position = 0;
+      while (Character.toUpperCase(found.charAt(position))
+          == Character.toUpperCase(expected.charAt(position))) {
+        position++;
+      }
+      description =
+          "residue " + (position + 1) + " is '" + found.charAt(position) + "' instead of '"
+              + expected.charAt(position) + "'";
+    }
+    return description;
   }
 
   /** Returns the proteins in canonical order. */
