@@ -7,7 +7,6 @@ import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
 import org.tmm2structalign.operator.RandomChoiceMutation;
 import org.tmm2structalign.operator.RandomSource;
-import org.tmm2structalign.operator.TmAwareGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeMultiPointCrossover;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
@@ -231,9 +230,6 @@ public final class AlgorithmFactory {
 
   private MutationOperator<MsaSolution> mutation(MutationType type, double probability) {
     return switch (type) {
-      case GAP_SHIFT ->
-          new TmAwareGapShiftMutation(
-              probability, structures, TmAwareGapShiftMutation.DEFAULT_MAX_TRIES, random);
       case TM_SAFE_GAP_SHIFT ->
           new TmSafeGapShiftMutation(
               probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random);

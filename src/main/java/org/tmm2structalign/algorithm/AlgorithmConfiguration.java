@@ -108,7 +108,7 @@ public record AlgorithmConfiguration(
   }
 
   /**
-   * Creates a configuration with the original gap-shift mutation.
+   * Creates a configuration with the default mutation, the TM-safe gap shift.
    *
    * @param maxEvaluations stopping criterion, number of evaluations
    * @param populationSize population size
@@ -131,7 +131,7 @@ public record AlgorithmConfiguration(
         crossoverProbability,
         mutationProbability,
         threads,
-        MutationType.GAP_SHIFT);
+        MutationType.TM_SAFE_GAP_SHIFT);
   }
 
   /**

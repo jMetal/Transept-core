@@ -17,7 +17,6 @@ import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
 import org.tmm2structalign.operator.RandomSource;
-import org.tmm2structalign.operator.TmAwareGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeMultiPointCrossover;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
@@ -179,8 +178,6 @@ public final class FormulationTour {
     describe(out, null, parent);
     RandomSource random = RandomSource.jmetal();
     Map<String, Supplier<MutationOperator<MsaSolution>>> mutations = new LinkedHashMap<>();
-    mutations.put("GAP_SHIFT (original)", () ->
-        new TmAwareGapShiftMutation(1.0, structures, 60, random));
     mutations.put("TM_SAFE_GAP_SHIFT", () ->
         new TmSafeGapShiftMutation(1.0, structures, 60, random));
     mutations.put("MERGE_GAP_RUNS", () -> new MergeAdjacentGapRunsMutation(1.0, random));

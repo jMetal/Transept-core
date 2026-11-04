@@ -102,11 +102,11 @@ public final class RunCommand implements Callable<Integer> {
 
   @Option(
       names = "--mutation",
-      defaultValue = "GAP_SHIFT",
+      defaultValue = "TM_SAFE_GAP_SHIFT",
       description =
-          "Mutation operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE} (original);"
-              + " all the others never break a transmembrane helix. RANDOM_CHOICE picks"
-              + " TM_SAFE_GAP_SHIFT or MERGE_GAP_RUNS each time.")
+          "Mutation operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}. None of them"
+              + " breaks a transmembrane helix. RANDOM_CHOICE picks TM_SAFE_GAP_SHIFT or"
+              + " MERGE_GAP_RUNS each time.")
   MutationType mutation;
 
   @Option(

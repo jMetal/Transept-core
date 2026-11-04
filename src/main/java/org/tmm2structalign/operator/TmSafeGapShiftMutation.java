@@ -28,11 +28,12 @@ import org.uma.jmetal.operator.mutation.MutationOperator;
  * <p>After {@code maxTries} rejections a valid position is chosen uniformly. If no valid
  * position differs from the original one, the solution is left unchanged.
  *
- * <p>Differences with {@link TmAwareGapShiftMutation}, which is kept unchanged: a helix is never
- * broken (the original only discouraged it, with acceptance 0.05, and not at all in proteins
- * without structure, nor when growing a gap run inside a helix); the boundary is judged by both
- * flanking residues, as in the crossover; any sequence with gaps can be mutated (the original
- * required a run of two or more gaps but then moved any run).
+ * <p>It replaces the mutation of the original implementation ({@code
+ * BioShiftClosedGapsMSAMutation}, tag {@code legacy-v1.0}). Differences: a helix is never broken
+ * (the original only discouraged it, with acceptance 0.05, and not at all in proteins without
+ * structure, nor when growing a gap run inside a helix); the boundary is judged by both flanking
+ * residues, as in the crossover; any sequence with gaps can be mutated (the original required a
+ * run of two or more gaps but then moved any run).
  */
 public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolution> {
 

@@ -201,8 +201,8 @@ instead:
 
 - a **broken helix** is a gap run between two consecutive transmembrane residues of a protein (the
   `broken helices` count of the example output);
-- the crossovers never create one, and all mutations except the original `GAP_SHIFT` never create
-  one either;
+- neither the crossover nor the mutations ever create one (the mutation of the original
+  implementation only discouraged them);
 - the seed alignments can contain broken helices, and the search keeps them unless a mutation
   happens to move those gaps.
 
@@ -279,7 +279,7 @@ A mutation changes one alignment. All mutations work on the gap layouts and keep
 valid encoding of its sequence. They are selected with `--mutation`; the probability of mutating
 each child is `--mutation-probability`.
 
-The output below applies three mutations to the same parent four times each (the random generator
+The output below applies the two mutations to the same parent four times each (the random generator
 is reset before every mutation):
 
 ```text
@@ -289,23 +289,6 @@ parent:
     P-TLLIAVLG-KE-
     PQSTLVAILGN--E
     SOPwTP 36.0   lDDT 0.7941   broken helices 0
-GAP_SHIFT (original), 4 children:
-    PQT-LLVAVLGNKE
-    P-TLLIAVLG-KE-
-    PQSTLVAILGNE--
-    SOPwTP 36.0   lDDT 0.7517   broken helices 0
-    PQT-LLVAVLGNKE
-    P-TLLIAVLG-KE-
-    PQSTLVAILGNE--
-    SOPwTP 36.0   lDDT 0.7517   broken helices 0
-    PQT-LLVAVLGNKE
-    P-TLLIAVLG-KE-
-    P--QSTLVAILGNE
-    SOPwTP -11.0   lDDT 0.7531   broken helices 0
-    PQT-LLVAVLGNKE
-    P-TLLIAVLG-KE-
-    PQSTLVAILGNE--
-    SOPwTP 36.0   lDDT 0.7517   broken helices 0
 TM_SAFE_GAP_SHIFT, 4 children:
     PQT-LLVAVLGNKE
     PTLLIAVLG-KE--
@@ -342,25 +325,20 @@ MERGE_GAP_RUNS, 4 children:
     SOPwTP 56.0   lDDT 0.7453   broken helices 0
 ```
 
-**`GAP_SHIFT`** (default, class `TmAwareGapShiftMutation`) is the mutation of the published
-experiments:
+**`TM_SAFE_GAP_SHIFT`** (default, class `TmSafeGapShiftMutation`) moves a run of gaps of one
+protein:
 
-1. Choose at random a protein that has a run of at least two gaps, and one of its runs.
-2. Remove the run and propose a new position at random. Accept it with a probability that depends
-   on what occupies that position in the row: 0.60 a gap, 0.95 a residue without structure, 0.05 a
-   transmembrane residue, 0.90 any other residue. After 60 rejections, a position chosen uniformly
-   at random is used.
+1. Choose at random a protein that has gaps, and one of its gap runs.
+2. Remove the run and propose a new position at random among the positions that **do not
+   separate two transmembrane residues** (judged by the residues on both sides, as in the
+   crossover). Accept it with a probability that depends on what occupies that position in the
+   row: 0.60 a gap, 0.95 a residue without structure, 0.90 any other residue. After 60
+   rejections, a valid position chosen uniformly at random is used.
 3. Insert the run at the accepted position; the length of the alignment does not change.
 
-Only `p3` has a run of two gaps in the parent, so it is the only protein that this mutation
-changes. Helices are only discouraged, not protected: a run can still land inside a helix, or a gap
-run already inside a helix can grow.
-
-**`TM_SAFE_GAP_SHIFT`** (class `TmSafeGapShiftMutation`) moves a gap run in the same way, with
-three differences: the new position is only chosen among the positions that **do not separate two
-transmembrane residues**, any protein with gaps can be chosen (`p2` and `p3` change in the
-example), and the boundary is judged by the residues on both sides, as in the crossover. The
-acceptance probabilities among valid positions are kept.
+In the example, `p2` and `p3` change. The original implementation used a variant that only
+*discouraged* positions inside helices (acceptance 0.05), so a run could still break a helix; it
+was replaced by this one, which gives alignments of the same quality without ever breaking one.
 
 **`MERGE_GAP_RUNS`** (class `MergeAdjacentGapRunsMutation`) joins two consecutive gap runs of one
 protein: one run moves next to the other, shifting the residues between them. It creates no new

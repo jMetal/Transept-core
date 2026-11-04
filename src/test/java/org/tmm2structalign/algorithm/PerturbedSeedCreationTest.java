@@ -18,7 +18,7 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
-import org.tmm2structalign.operator.TmAwareGapShiftMutation;
+import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.testing.Alignments;
 import org.tmm2structalign.testing.SeededRandom;
@@ -94,7 +94,7 @@ class PerturbedSeedCreationTest {
               seeds,
               20,
               PerturbedSeedCreation.DEFAULT_MUTATIONS,
-              new TmAwareGapShiftMutation(
+              new TmSafeGapShiftMutation(
                   1.0, Alignments.fullyStructured(proteins), 60, new SeededRandom(2)),
               new SeededRandom(3));
 

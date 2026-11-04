@@ -1,15 +1,10 @@
 package org.tmm2structalign.algorithm;
 
-/** Mutation operators available to the algorithms. */
+/** Mutation operators available to the algorithms. None of them breaks a transmembrane helix. */
 public enum MutationType {
   /**
-   * The original gap-shift mutation ({@code TmAwareGapShiftMutation}), which only discourages
-   * moving gaps into transmembrane helices. Default, to keep the published behaviour.
-   */
-  GAP_SHIFT,
-  /**
    * Gap-shift mutation that never breaks a transmembrane helix ({@code TmSafeGapShiftMutation}),
-   * with the same boundary rule as the crossover.
+   * with the same boundary rule as the crossover. Default.
    */
   TM_SAFE_GAP_SHIFT,
   /**
@@ -21,10 +16,5 @@ public enum MutationType {
    * Applies {@code TM_SAFE_GAP_SHIFT} or {@code MERGE_GAP_RUNS}, chosen uniformly at random each
    * time ({@code RandomChoiceMutation}).
    */
-  RANDOM_CHOICE;
-
-  /** Tells whether the operator can break a transmembrane helix. */
-  public boolean isTmSafe() {
-    return this != GAP_SHIFT;
-  }
+  RANDOM_CHOICE
 }

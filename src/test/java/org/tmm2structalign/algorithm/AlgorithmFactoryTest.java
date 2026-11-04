@@ -160,26 +160,18 @@ class AlgorithmFactoryTest {
     }
 
     @Test
-    @DisplayName("given the mutation types, when asked, then only the original may break helices")
-    void givenMutationTypes_whenAsked_thenOnlyTheOriginalMayBreakHelices() {
-      for (MutationType type : MutationType.values()) {
-        assertEquals(type != MutationType.GAP_SHIFT, type.isTmSafe());
-      }
-    }
-
-    @Test
     @DisplayName("given the shorter constructors, when built, then the published crossover is used")
     void givenShorterConstructors_whenBuilt_thenThePublishedOperatorsAreUsed() {
       // Act
       AlgorithmConfiguration configuration =
-          new AlgorithmConfiguration(10, 4, 4, 0.8, 0.2, 1, MutationType.GAP_SHIFT,
+          new AlgorithmConfiguration(10, 4, 4, 0.8, 0.2, 1, MutationType.TM_SAFE_GAP_SHIFT,
               InitializationType.CROSSOVER);
 
       // Assert
       assertEquals(CrossoverType.SINGLE_POINT, configuration.crossoverType());
       assertThrows(
           IllegalArgumentException.class,
-          () -> new AlgorithmConfiguration(10, 4, 4, 0.8, 0.2, 1, MutationType.GAP_SHIFT,
+          () -> new AlgorithmConfiguration(10, 4, 4, 0.8, 0.2, 1, MutationType.TM_SAFE_GAP_SHIFT,
               InitializationType.CROSSOVER, null));
     }
   }

@@ -78,10 +78,7 @@ class TmSafetyIT {
   }
 
   @ParameterizedTest
-  @EnumSource(
-      value = MutationType.class,
-      names = {"GAP_SHIFT"},
-      mode = EnumSource.Mode.EXCLUDE)
+  @EnumSource(MutationType.class)
   @DisplayName("given a TM-safe mutation and any crossover, when running, then no helix breaks")
   void givenTmSafeMutationAndAnyCrossover_whenRunning_thenNoHelixBreaks(MutationType mutation)
       throws IOException {

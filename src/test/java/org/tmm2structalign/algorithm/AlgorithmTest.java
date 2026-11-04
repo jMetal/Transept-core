@@ -16,7 +16,7 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
-import org.tmm2structalign.operator.TmAwareGapShiftMutation;
+import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.testing.Alignments;
 import org.tmm2structalign.testing.SeededRandom;
@@ -156,7 +156,7 @@ class AlgorithmTest {
               problem,
               population,
               configuration,
-              new TmAwareGapShiftMutation(
+              new TmSafeGapShiftMutation(
                   0.2, Alignments.unstructured(proteins), 60, new SeededRandom(4)),
               new SeededRandom(5));
 
