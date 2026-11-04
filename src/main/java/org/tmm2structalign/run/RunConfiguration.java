@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.structure.MappingPolicy;
 
 /**
@@ -24,6 +25,7 @@ import org.tmm2structalign.structure.MappingPolicy;
  * @param mappingPolicy policy for mapping sequences onto structures
  * @param lddtCutoff inclusion radius of the structural objective, in Å
  * @param progressInterval evaluations between progress records
+ * @param objectives objectives that are optimised
  */
 public record RunConfiguration(
     Path dataRoot,
@@ -35,7 +37,8 @@ public record RunConfiguration(
     AlgorithmType algorithmType,
     MappingPolicy mappingPolicy,
     float lddtCutoff,
-    int progressInterval) {
+    int progressInterval,
+    ObjectiveSet objectives) {
 
   /** Validates the configuration and freezes the seed list. */
   public RunConfiguration {
@@ -48,8 +51,9 @@ public record RunConfiguration(
     if (seedMethods == null || seedMethods.isEmpty()) {
       throw new IllegalArgumentException("At least one seed method is required");
     }
-    if (algorithmType == null || mappingPolicy == null) {
-      throw new IllegalArgumentException("algorithmType and mappingPolicy are required");
+    if (algorithmType == null || mappingPolicy == null || objectives == null) {
+      throw new IllegalArgumentException(
+          "algorithmType, mappingPolicy and objectives are required");
     }
     if (!Float.isFinite(lddtCutoff) || lddtCutoff <= 0f) {
       throw new IllegalArgumentException("lddtCutoff must be positive: " + lddtCutoff);
@@ -58,6 +62,45 @@ public record RunConfiguration(
       throw new IllegalArgumentException("progressInterval must be positive: " + progressInterval);
     }
     seedMethods = List.copyOf(seedMethods);
+  }
+
+  /**
+   * Creates a configuration with the published objectives, SOPwTP and lDDT.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param algorithmType search algorithm
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      AlgorithmType algorithmType,
+      MappingPolicy mappingPolicy,
+      float lddtCutoff,
+      int progressInterval) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        algorithmType,
+        mappingPolicy,
+        lddtCutoff,
+        progressInterval,
+        ObjectiveSet.SOPWTP_LDDT);
   }
 
   /**
@@ -126,6 +169,7 @@ public record RunConfiguration(
     map.put("runDirectory", runDirectory.toAbsolutePath().toString());
     map.put("randomSeed", randomSeed);
     map.put("algorithmType", algorithmType);
+    map.put("objectives", objectives);
     map.put("maxEvaluations", algorithm.maxEvaluations());
     map.put("populationSize", algorithm.populationSize());
     map.put("offspringPopulationSize", algorithm.offspringPopulationSize());

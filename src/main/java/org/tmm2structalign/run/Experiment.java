@@ -15,8 +15,6 @@ import org.tmm2structalign.io.FastaAlignmentReader;
 import org.tmm2structalign.io.InvalidInputFileException;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.StructuralLddt;
-import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
 import org.tmm2structalign.structure.StructureLoader;
@@ -25,7 +23,7 @@ import org.tmm2structalign.structure.StructureLoader;
  * Input data of a run, loaded from a {@link RunConfiguration}: proteins, structures, problem and
  * seed alignments.
  *
- * @param problem problem with the SOPwTP and lDDT objectives
+ * @param problem problem with the configured objectives
  * @param structures structures and mapping report of every protein
  * @param seeds seed alignments, in the configured order
  */
@@ -65,10 +63,9 @@ public record Experiment(
         new StructuralMsaProblem(
             configuration.dataset(),
             proteins,
-            List.of(
-                TopologyAwareSumOfPairs.withDefaultParameters(),
-                new StructuralLddt(
-                    structures, configuration.lddtCutoff())));
+            configuration
+                .objectives()
+                .create(proteins, structures, configuration.lddtCutoff()));
     return new Experiment(problem, structures, loadSeeds(configuration, proteins));
   }
 

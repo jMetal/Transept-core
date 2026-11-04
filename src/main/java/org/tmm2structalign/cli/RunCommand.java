@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
 import org.tmm2structalign.algorithm.MutationType;
+import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.ExperimentRunner.RunSummary;
@@ -108,6 +109,14 @@ public final class RunCommand implements Callable<Integer> {
   AlgorithmType algorithm;
 
   @Option(
+      names = "--objectives",
+      defaultValue = "SOPWTP_LDDT",
+      description =
+          "Objectives to optimise: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}"
+              + " (published). LDDT is a single objective.")
+  ObjectiveSet objectives;
+
+  @Option(
       names = "--mapping-policy",
       defaultValue = "VERIFIED",
       description =
@@ -143,7 +152,8 @@ public final class RunCommand implements Callable<Integer> {
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
-              progressInterval);
+              progressInterval,
+              objectives);
       RunSummary summary = new ExperimentRunner().run(configuration);
       System.out.println(
           "Run finished: " + summary.evaluations() + " evaluations, " + summary.frontSize()
