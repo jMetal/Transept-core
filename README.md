@@ -82,7 +82,7 @@ explains every step and file.
 | [T4. Choosing an alignment and evaluating it against GPCRdb](docs/tutorials/T4-choosing-and-evaluating.md) | Reading the non-dominated alignments, extremes and knee, and comparing them and the seeds with the GPCRdb reference alignments |
 | T5. Comparing algorithms and operators | *In preparation* |
 | [T6. Using your own dataset](docs/tutorials/T6-your-own-dataset.md) | The input files a dataset needs, how to compute the distance matrices, and how to check that structures and seeds are read correctly |
-| T7. Adding a variation operator | *In preparation* |
+| [T7. Adding a variation operator](docs/tutorials/T7-adding-an-operator.md) | The rules every operator follows, the tests it needs, how to expose it in the command line, and how to decide whether it is worth keeping |
 
 Reference:
 
