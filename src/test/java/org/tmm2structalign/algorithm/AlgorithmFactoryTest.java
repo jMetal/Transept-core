@@ -128,6 +128,63 @@ class AlgorithmFactoryTest {
   }
 
   @Nested
+  @DisplayName("When choosing the operators")
+  class Operators {
+
+    @ParameterizedTest
+    @EnumSource(MutationType.class)
+    @DisplayName("given a mutation, when running NSGA-II with each crossover, then it is valid")
+    void givenMutation_whenRunningNsgaTwoWithEachCrossover_thenFrontIsValid(MutationType mutation) {
+      for (CrossoverType crossover : CrossoverType.values()) {
+        // Arrange
+        AlgorithmFactory factory =
+            new AlgorithmFactory(
+                problem,
+                seeds,
+                new AlgorithmConfiguration(
+                    EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.9, 1.0, 1, mutation,
+                    InitializationType.CROSSOVER, crossover),
+                structures,
+                new SeededRandom(7));
+        SearchRun run = factory.create(AlgorithmType.NSGA_II);
+
+        // Act
+        run.run();
+
+        // Assert
+        assertFalse(run.front().isEmpty(), mutation + "/" + crossover);
+        for (MsaSolution solution : run.front()) {
+          assertEquals(3, solution.toMsa().size());
+        }
+      }
+    }
+
+    @Test
+    @DisplayName("given the mutation types, when asked, then only the original may break helices")
+    void givenMutationTypes_whenAsked_thenOnlyTheOriginalMayBreakHelices() {
+      for (MutationType type : MutationType.values()) {
+        assertEquals(type != MutationType.GAP_SHIFT, type.isTmSafe());
+      }
+    }
+
+    @Test
+    @DisplayName("given the shorter constructors, when built, then the published crossover is used")
+    void givenShorterConstructors_whenBuilt_thenThePublishedOperatorsAreUsed() {
+      // Act
+      AlgorithmConfiguration configuration =
+          new AlgorithmConfiguration(10, 4, 4, 0.8, 0.2, 1, MutationType.GAP_SHIFT,
+              InitializationType.CROSSOVER);
+
+      // Assert
+      assertEquals(CrossoverType.SINGLE_POINT, configuration.crossoverType());
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> new AlgorithmConfiguration(10, 4, 4, 0.8, 0.2, 1, MutationType.GAP_SHIFT,
+              InitializationType.CROSSOVER, null));
+    }
+  }
+
+  @Nested
   @DisplayName("When the configuration does not suit the algorithm")
   class InvalidConfiguration {
 

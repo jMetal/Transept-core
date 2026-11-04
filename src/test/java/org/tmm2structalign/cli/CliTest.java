@@ -164,6 +164,32 @@ class CliTest {
           .contains("\"mutationProbability\":1.0"));
     }
 
+    @Test
+    @DisplayName("given new operators, when running, then the configuration records them")
+    void givenNewOperators_whenRunning_thenConfigurationRecordsThem() throws IOException {
+      // Act
+      int status =
+          TmStructAlignCli.execute(
+              "run",
+              "--data-root", dataRoot.toString(),
+              "--dataset", SyntheticDataset.NAME,
+              "--seeds", "left,right",
+              "--output-root", outputRoot.toString(),
+              "--run-id", "operators",
+              "--seed", "3",
+              "--max-evaluations", "50",
+              "--population-size", "8",
+              "--crossover", "TWO_POINT",
+              "--mutation", "RANDOM_CHOICE");
+
+      // Assert
+      String config =
+          Files.readString(outputRoot.resolve("ejecuciones/synthetic/operators/config.json"));
+      assertEquals(0, status);
+      assertTrue(config.contains("\"crossoverType\":\"TWO_POINT\""), config);
+      assertTrue(config.contains("\"mutationType\":\"RANDOM_CHOICE\""), config);
+    }
+
     @ParameterizedTest
     @CsvSource({"PAES, , 1.0", "NSGA_II, , 0.2", "SMS_EMOA, , 0.2", "PAES, 0.5, 0.5"})
     @DisplayName("given an algorithm, when resolving pm, then the explicit or default is used")
