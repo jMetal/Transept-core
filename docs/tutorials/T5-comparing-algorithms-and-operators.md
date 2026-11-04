@@ -141,6 +141,15 @@ Formulations with a different number of objectives cannot be compared by hypervo
 measures a different space. Compare them instead by the agreement with the reference alignments
 of an alignment chosen with a rule fixed in advance (for example, the best lDDT), and by the
 spread of that agreement over the returned alignments ([T4](T4-choosing-and-evaluating.md)).
+`scripts/formulation_study.py` does this for every run of a dataset (rule R1: best lDDT; R2: the
+knee) and writes a file that `compare_runs.py` reads:
+
+```bash
+python3 scripts/formulation_study.py comparison classF \
+  --data-root ../Dataset_Structural_GPCRs/GPCRdb --output comparison/formulations_classF.csv
+python3 scripts/compare_runs.py comparison/formulations_classF.csv --baseline nsgaii \
+  --indicator r1_pair_f1
+```
 
 ## Step 6: good practice
 
