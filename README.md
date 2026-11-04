@@ -47,151 +47,49 @@ For reproducible analyses, cite the Zenodo version-specific DOI and use the arch
 
 ---
 
-## How it works
+## Getting started
 
-- **Representation.** One gap layout per protein: the sorted runs of gap columns of its aligned
-  row (`alignment.GapIntervals`). Residues are never stored; the alignment is decoded from the
-  ungapped sequences.
-- **Initial population.** An explicit list of seed alignments (precomputed with other tools),
-  without duplicates, completed with crossover children up to the population size
-  (`--initialization` selects alternatives). For MOEA/D the seeds are spread over equally spaced
-  subproblems.
-- **Crossover** (`TmSafeSinglePointCrossover`). Single cut at a column of the first parent; the
-  cut is rejected if it separates two consecutive TM residues of any protein. Remaining residues
-  of every protein are taken from the second parent. `--crossover TWO_POINT` uses two cuts.
-- **Mutation** (`TmAwareGapShiftMutation`). Moves a gap block of one protein to a new position
-  chosen by rejection sampling: TM residues are avoided (acceptance 0.05), loops and residues
-  without structure are preferred (0.90 / 0.95). `--mutation` selects mutations that never break
-  a helix (see the options table).
-  Gaps inside helices inherited from the seeds are kept: TM integrity is not a formal constraint.
-- **Structure mapping.** AlphaFold residues are mapped to the input sequence by PDB numbering
-  when the residues agree, or by sequence alignment otherwise (e.g. OXER1 and MCHR1, whose
-  AlphaFold model is a different isoform). Every mapping is reported in the run metadata.
-
-## Requirements and build
-
-- Java 21 and Maven 3.9+.
-- Dependencies (jMetal 7.11, picocli, BioJava) are downloaded from Maven Central. Until jMetal
-  7.11 is released, install `7.11-SNAPSHOT` locally from the jMetal sources (`mvn install`).
+Requirements: Java 21 and Maven 3.9+. Dependencies (jMetal, picocli, BioJava) are downloaded from
+Maven Central; until jMetal 7.11 is released, install `7.11-SNAPSHOT` locally from the jMetal
+sources (`mvn install -DskipTests`).
 
 ```bash
-mvn clean verify     # compile, unit and integration tests, Checkstyle, coverage
-mvn clean package    # target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar
-```
+git clone https://github.com/TM-M2StructAlign/TM-M2StructAlign.git
+git clone https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs.git
+git -C Dataset_Structural_GPCRs checkout v1.0.0
+cd TM-M2StructAlign
+mvn clean package -DskipTests      # target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar
 
-The benchmark data lives in the companion repository
-[Dataset_Structural_GPCRs](https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs); the
-commands below take its `GPCRdb` directory as `--data-root`.
-
-## Usage
-
-### Run the algorithm
-
-```bash
 java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
-  --output-root results \
-  --run-id seed_000 \
-  --seed 0 \
-  --max-evaluations 10000 \
-  --population-size 100 \
-  --threads 4
+  --output-root results --run-id first --seed 1 \
+  --max-evaluations 500 --population-size 20
 ```
 
-| Option | Default | Meaning |
-| --- | --- | --- |
-| `--data-root` | (required) | `GPCRdb` directory of the dataset repository |
-| `--dataset` | (required) | Dataset name, e.g. `classF` or `classA_001_19` |
-| `--output-root` / `--run-id` | (required) | The run writes to `<output-root>/ejecuciones/<dataset>/<run-id>/` |
-| `--seeds` | (required) | Tools whose `precomputed/<dataset>/<tool>_<dataset>.fasta` seed the population |
-| `--seed` | (required) | Random seed; the same seed and options reproduce the run exactly |
-| `--max-evaluations` | 10000 | Stopping criterion |
-| `--population-size` | 100 | Population and offspring size |
-| `--threads` | 1 | Parallel evaluation threads (results do not depend on it) |
-| `--algorithm` | `NSGA_II` | Search algorithm (see below) |
-| `--initialization` | `CROSSOVER` | Non-seed members: `CROSSOVER` (original), `CROSSOVER_DISTINCT` (no duplicates after removing gap-only columns) or `PERTURBED` (crossover child + 10 mutations) |
-| `--crossover` | `SINGLE_POINT` | `SINGLE_POINT` (original) or `TWO_POINT`; both never cut a TM helix |
-| `--mutation` | `GAP_SHIFT` | `GAP_SHIFT` (original: discourages gaps inside TM helices). The rest never break a helix: `TM_SAFE_GAP_SHIFT`, `INSERT_GAP` (one gap per row, +1 column), `SPLIT_RESIDUE_RUN` (new one-gap run between residues of every row, +1 column), `MERGE_GAP_RUNS` (joins two consecutive runs of a row) and `RANDOM_CHOICE` (one of the four, uniformly) |
-| `--crossover-probability` / `--mutation-probability` | 0.8 / 0.2 (1.0 for PAES) | Operator probabilities |
-| `--mapping-policy` | `VERIFIED` | `VERIFIED`, `NUMBERED_ONLY` or `LEGACY` (original, unchecked mapping) |
-| `--lddt-aggregation` | `HARMONIC_OVER_LENGTH` | Original aggregation, or `PAIR_MEAN` |
-| `--progress-interval` | 100 | Evaluations between progress records |
+The run writes the alignments of the final population (`MSASol<i>.fasta`) and their objective
+values (`FUN.csv`) to `results/ejecuciones/classF/first/`. [T1](docs/tutorials/T1-first-run.md)
+explains every step and file.
 
-Options can be stored in a file, one per line, and passed as `@run-classF.args`. A batch of ten
-seeds on Windows is available in `scripts/run_10_seeds_windows.ps1`.
+## Documentation
 
-### Algorithms
-
-All algorithms use the same objectives, operators and seeded initial population; they stop after
-`--max-evaluations`.
-
-| `--algorithm` | Algorithm | Notes |
-| --- | --- | --- |
-| `NSGA_II` | NSGA-II | Published configuration (default) |
-| `NSGA_III` | NSGA-III | Population size must be a multiple of 4 |
-| `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
-| `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
-| `MOEA_D` | MOEA/D | Normalised PBI aggregation, neighbourhood of 20; seeds spread over the subproblems; steady state |
-| `PAES` | PAES, (1+1) with a crowding-distance archive | Mutation only; starts from the first seed; archive size = population size |
-| `RANDOM_SEARCH` | Random search, gaps at random | Sanity check (weak baseline) |
-| `RANDOM_SEEDED` | Random search, seeds + 10 random mutations | Sanity check (strong baseline) |
-
-SMS-EMOA, MOEA/D and PAES need jMetal 7.11, which lets them start from a given population or
-solution.
-
-### Score precomputed alignments
-
-```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
-  --data-root ../Dataset_Structural_GPCRs/GPCRdb \
-  --datasets classF,classT2_19 \
-  --output baselines.csv
-```
-
-### Compare with the GPCRdb reference alignments
-
-`org.tmm2structalign.evaluation.EvaluationMain` computes Pair F1, TM-Pair F1 and TM-gap rate
-for every alignment of a result tree; see [docs/evaluation-metrics.md](docs/evaluation-metrics.md).
-`scripts/pareto_analysis.py` analyses the fronts of several runs (Python 3 with NumPy and
-Matplotlib).
-
-## Output files
-
-Each run writes to `<output-root>/ejecuciones/<dataset>/<run-id>/` and never overwrites an
-existing directory.
-
-| File | Content |
+| Tutorial | What you will learn |
 | --- | --- |
-| `FUN.csv` | One line per solution: SOPwTP and lDDT, comma-separated, no header (jMetal convention). Values are reported as computed (both higher is better), not negated |
-| `MSASol<i>.fasta` | Alignment of line `i` of `FUN.csv` |
-| `config.json` | Full run configuration |
-| `metadata.json` | Git commit, timing, seed files with SHA-256 (and duplicates), structure mapping of every protein, proteins without structure |
-| `progress.jsonl` | One JSON line per progress record (evaluations, elapsed time, best values) |
-| `runtime.csv` | `runtime_ms,runtime_seconds,evaluations` with one row |
-| `seed.txt` | Random seed |
-| `error.json` | Only if the run failed: exception type and message |
+| [T1. First run in five minutes](docs/tutorials/T1-first-run.md) | Build, run on the smallest dataset, read the results, repeat a run exactly |
+| [T2. Problem formulation, encoding and variation operators](docs/tutorials/T2-problem-formulation.md) | The objectives, the constraints, how alignments are encoded, and what every crossover and mutation does, with a runnable example |
+| T3. Reproducing the published experiments | *In preparation* |
+| T4. Choosing an alignment and evaluating it against GPCRdb | *In preparation* |
+| T5. Comparing algorithms and operators | *In preparation* |
+| T6. Using your own dataset | *In preparation* |
+| T7. Adding a variation operator | *In preparation* |
 
-## Project layout
+Reference:
 
-```text
-src/main/java/org/tmm2structalign/
-  model/       proteins, topology
-  alignment/   gap layouts, decoded alignments, jMetal solution
-  io/          3-line topology, FASTA, distance matrices, PDB readers
-  structure/   sequence-structure mapping and structural neighbourhoods
-  objective/   SOPwTP, lDDT, substitution matrices
-  operator/    crossover and mutation
-  problem/     jMetal problem
-  algorithm/   initial populations, NSGA-II assembly, factory of the other algorithms
-  run/         run configuration, execution, outputs, baseline scoring
-  cli/         command line (picocli)
-  evaluation/  comparison with reference alignments
-src/main/java/org/tm_msaligner/   legacy irace tuning code (kept as is)
-docs/evaluation-metrics.md         reference-based metrics
-scripts/                           Pareto analysis, batch of runs on Windows
-```
+- [Command line](docs/reference/cli.md): every option of `run` and `baseline`, the algorithms and
+  operators, and the comparison with reference alignments.
+- [Output files](docs/reference/outputs.md): the files of a run and their formats.
+- [Metrics](docs/reference/metrics.md): the objectives and the reference-based metrics.
 
 ## Development
 
@@ -202,6 +100,9 @@ scripts/                           Pareto analysis, batch of runs on Windows
 - Integration tests that need the real dataset run only when `GPCR_DATASET` points to the
   `GPCRdb` directory. `BaselineOracleIT` checks that the objectives reproduce the values of the
   original implementation stored in the dataset's `baselines.csv`.
+- User documentation lives in `docs/tutorials/` and `docs/reference/`, in Markdown.
+  `FormulationTourTest` fails if tutorial T2 no longer shows the output of
+  `example.FormulationTour`: update the tutorial when an objective or an operator changes.
 - The state before the November 2026 rewrite (Java 17, jMetal 6.2, original runner) is tagged
   `legacy-v1.0`.
 

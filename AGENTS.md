@@ -82,7 +82,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `evaluation` | Comparison with GPCRdb reference alignments (`EvaluationMain`) |
 
 `org.tm_msaligner` contains only the irace tuning code (`auto`) and the 27 legacy classes it
-needs; see §8.
+needs; see §9.
 
 ## 5. Conventions
 
@@ -141,7 +141,21 @@ belong to the authors, so ask before implementing work that depends on them.
 When fixing a finding, reference its id in the commit body (e.g. `Refs: A2`) and, if the notes
 are available locally, update `../notes/review/02-code-review.md`.
 
-## 8. Do not
+## 8. Documentation
+
+User documentation is Markdown in the repository (no site generator): the short `README.md`,
+tutorials in `docs/tutorials/` (T1, T2, ...) and reference pages in `docs/reference/` (`cli.md`,
+`outputs.md`, `metrics.md`). Write it in English. Each tutorial starts with a table (level,
+version, time, machine of the timings, prerequisites) and has numbered steps with the exact
+commands and their expected output.
+
+- When you add or change an option, an output file or an operator, update `docs/reference/` and
+  the affected tutorials in a `docs:` commit.
+- `example.FormulationTour` prints the example of T2; `FormulationTourTest` checks that T2 shows
+  its current output. If the output changes, paste the new output into T2.
+- Internal notes do not belong here (see §7).
+
+## 9. Do not
 
 - Modify files in `Dataset_Structural_GPCRs` that belong to the published v1.0.0 snapshot without
   an explicit request. Data changes go to a new version (v1.1.0).
@@ -154,7 +168,7 @@ are available locally, update `../notes/review/02-code-review.md`.
   etc.). The authors will decide later whether to continue that line. Only API renames that a
   dependency upgrade makes unavoidable are allowed.
 
-## 9. Future work: graphical user interface
+## 10. Future work: graphical user interface
 
 Once the rewrite is complete, the authors plan a GUI for the tool, probably a Python
 **Streamlit** application that drives the Java core. Design the core so that a GUI can be added
