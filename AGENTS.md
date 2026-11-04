@@ -123,8 +123,9 @@ needs; see §9.
    breaks a helix: the crossover never cuts one and every mutation forbids it. Gaps inside helices
    inherited from the seeds are kept. Do not change defaults without asking the authors.
 7. **Superseded components are removed, not kept as options** (the original mutation, the
-   original lDDT aggregation, the legacy mapping, the two-point crossover): reproducing the
-   published results is the job of tag `legacy-v1.0`.
+   original lDDT aggregation, the legacy mapping, the two-point crossover, the original filling
+   of the initial population): reproducing the published results is the job of tag
+   `legacy-v1.0`.
 8. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
    numbers are consumed); same seed + same version is bit-identical.
 

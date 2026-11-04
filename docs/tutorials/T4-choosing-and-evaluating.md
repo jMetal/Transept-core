@@ -22,8 +22,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
   --max-evaluations 10000 --population-size 100 --threads 4
 ```
 
-This is the default configuration (NSGA-II, `TM_SAFE_GAP_SHIFT` mutation), with seed 42. It takes about
-30 seconds.
+This is the default configuration (NSGA-II, `TM_SAFE_GAP_SHIFT` mutation), with seed 42. It takes
+about 30 seconds.
 
 ## Step 2: the non-dominated alignments
 
@@ -36,28 +36,27 @@ python3 scripts/summarize_front.py results/ejecuciones/classF/seed_042
 ```
 
 ```text
-100 solutions, 81 distinct non-dominated
+100 solutions, 88 distinct non-dominated
 file            SOPwTP    lDDT    ...  note
-MSASol0.fasta     61113  0.5651        best SOPwTP
-MSASol97.fasta    61084  0.5658
+MSASol0.fasta     61332  0.8002        best SOPwTP
+MSASol78.fasta    61267  0.8004
 ...
-MSASol6.fasta     58204  0.6062        knee
-MSASol3.fasta     57106  0.6072
-MSASol4.fasta     50107  0.6074
+MSASol47.fasta    59498  0.8114        knee
 ...
-MSASol1.fasta     48650  0.6141        best lDDT
+MSASol92.fasta    56196  0.8207
+MSASol1.fasta     56171  0.8209        best lDDT
 ```
 
-Here every solution of the population is non-dominated, but 19 of them repeat another one. Three
+Here every solution of the population is non-dominated, but 12 of them repeat another one. Three
 alignments stand out:
 
 - the **extremes**: the best SOPwTP (`MSASol0`) and the best lDDT (`MSASol1`);
-- the **knee** (`MSASol6`): after scaling both objectives to [0, 1] over the front, the solution
+- the **knee** (`MSASol47`): after scaling both objectives to [0, 1] over the front, the solution
   closest to the ideal point (1, 1). It is a common default when no objective is preferred.
 
-Look at the values between `MSASol3` and `MSASol4`: the front has a **jump**. The last seven
-alignments gain less than 0.007 of lDDT and lose about 7 000 of SOPwTP. A jump like this deserves
-a closer look before trusting the alignments beyond it.
+The front is smooth: along it, every gain of lDDT costs some SOPwTP, without jumps. A jump (a
+large loss of one objective for a tiny gain of the other) would deserve a closer look before
+trusting the alignments beyond it.
 
 ## Step 3: compare with the reference alignments
 
@@ -88,26 +87,27 @@ python3 scripts/summarize_front.py results/ejecuciones/classF/seed_042 \
 
 ```text
 file            SOPwTP    lDDT    pair-F1  TM-pair-F1  TM-gap-rate  note
-MSASol0.fasta     61113  0.5651    0.5448      0.9998       0.0052  best SOPwTP
+MSASol0.fasta     61332  0.8002    0.5380      0.9995       0.0061  best SOPwTP
 ...
-MSASol6.fasta     58204  0.6062    0.5566      0.9998       0.0025  knee
-MSASol3.fasta     57106  0.6072    0.5557      0.9998       0.0043
-MSASol4.fasta     50107  0.6074    0.5144      0.9354       0.0624
+MSASol47.fasta    59498  0.8114    0.5555      0.9998       0.0052  knee
 ...
-MSASol1.fasta     48650  0.6141    0.5143      0.9354       0.0648  best lDDT
+MSASol92.fasta    56196  0.8207    0.5637      0.9998       0.0044
+MSASol1.fasta     56171  0.8209    0.5639      0.9998       0.0045  best lDDT
 ```
 
 ## Step 4: interpret
 
-- **The knee is the best choice here.** It shares the highest pair F1 of the front (0.5566), and half
-  the TM-gap rate of the best-SOPwTP extreme.
-- **The best-lDDT extreme is the worst alignment.** Beyond the jump, the alignments put gaps inside
-  transmembrane helices: the TM-gap rate grows from 0.0025 to 0.062 and the TM-pair F1 falls from
-  0.9998 to 0.935. The default mutation only *discourages* such gaps, and the lDDT rewards them a
-  little because it favours compact alignments and hardly notices a helix out of register
-  ([T2](T2-problem-formulation.md)). Do not choose by the second objective alone.
-- **Transmembrane regions are easy in classF.** Every alignment except those beyond the jump has a
-  TM-pair F1 of 0.9998: the differences are in the loops and the termini.
+- **The pair F1 grows with the lDDT.** Along the front, from the best SOPwTP to the best lDDT, the
+  agreement with the reference goes from 0.538 to 0.564, almost monotonically. Here the
+  best-lDDT extreme is the best alignment of the run, and the knee lies in the middle (0.5555).
+- **No alignment breaks a helix.** The TM-gap rate stays between 0.0044 and 0.0061 and comes from
+  the seeds: neither the crossover nor the mutation ever puts a gap inside a transmembrane helix
+  ([T2](T2-problem-formulation.md)).
+- **Transmembrane regions are easy in classF.** Every alignment has a TM-pair F1 of at least
+  0.9995: the differences are in the loops and the termini.
+- **A local structural score is not enough.** The lDDT is superposition-free and local: it hardly
+  notices a helix out of register. That it agrees with the reference here does not make it a
+  substitute for one; check the chosen alignments whenever a reference exists.
 
 ## Step 5: compare with the seeds
 
@@ -134,16 +134,18 @@ java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
 | MAFFT | 0.5442 | 0.9998 | 0.0052 |
 | Kalign | 0.5413 | 0.9995 | 0.0032 |
 
-The knee (pair F1 0.5566) is better than five of the six seeds, but not than ClustalW (0.5598).
-On this dataset and with this budget, the search mostly recombines what the seeds already have.
+The knee (pair F1 0.5555) is better than five of the six seeds; the best-lDDT extreme (0.5639) is
+better than all of them, ClustalW (0.5598) included. The gains are small: on this dataset the
+search mostly recombines and polishes what the seeds already have.
 
 ## Step 6: draw conclusions carefully
 
 - **One run is one sample.** The search is stochastic: repeat it with several seeds and compare
   distributions ([T3](T3-several-seeds.md), [T5](T5-comparing-algorithms-and-operators.md)).
 - **Choose the rule before looking at the reference.** Picking the alignment with the best pair F1
-  uses the reference to choose and overstates what the method achieves. Report the knee, or the
-  rule you decided in advance, and use the reference only to evaluate.
+  uses the reference to choose and overstates what the method achieves. Report the knee or the
+  best-lDDT extreme, or the rule you decided in advance, and use the reference only to evaluate.
 - **The reference exists only for the benchmark.** On your own proteins
-  ([T6](T6-your-own-dataset.md)), you choose with the objectives alone: prefer the knee, and look at
-  the TM-gap behaviour of the extremes with the topology in hand.
+  ([T6](T6-your-own-dataset.md)), you choose with the objectives alone. In the benchmark the
+  best-lDDT extreme agreed best with the reference in most of the runs made while developing the
+  tool, but the knee is a safer default when the two objectives disagree strongly.

@@ -50,8 +50,8 @@ python3 scripts/pareto_analysis.py results classF --output results/analysis_clas
 
 ```text
 Analyzed 1000 solutions from 10 runs
-Combined non-dominated objective vectors: 51
-Balanced compromise: seed_189/MSASol1.fasta
+Combined non-dominated objective vectors: 67
+Balanced compromise: seed_063/MSASol23.fasta
 Results: results/analysis_classF
 ```
 
@@ -85,20 +85,21 @@ Both objectives are scaled to [0, 1] over all the runs, so that they can be comp
 
 ```text
 run       hypervolume  igd_plus  nondominated  contribution
-seed_000  0.772        0.026     17             6
-seed_021  0.639        0.057     35             5
-seed_042  0.705        0.046     37             0
-seed_063  0.622        0.057     25             8
-seed_084  0.621        0.057     34             18
-seed_105  0.866        0.013     34             29
-seed_126  0.749        0.031     36             25
-seed_147  0.684        0.043     31             18
-seed_168  0.686        0.046     30             31
-seed_189  0.880        0.009     45             24
+seed_000  0.551        0.039     45             10
+seed_021  0.464        0.093     43             0
+seed_042  0.499        0.072     50             3
+seed_063  0.554        0.031     41             48
+seed_084  0.500        0.075     61             0
+seed_105  0.533        0.051     59             0
+seed_126  0.512        0.068     62             0
+seed_147  0.471        0.084     48             1
+seed_168  0.550        0.041     53             6
+seed_189  0.609        0.009     55             64
 ```
 
-The hypervolume goes from 0.62 to 0.88 (median 0.70, interquartile range 0.12), and one run
-(`seed_042`) contributes nothing to the combined front. A conclusion drawn from a single run
+The hypervolume goes from 0.46 to 0.61 (median 0.52, interquartile range 0.05). Two runs
+(`seed_063` and `seed_189`) provide most of the combined front, and four contribute nothing to
+it. A conclusion drawn from a single run
 would depend heavily on the seed: this is why studies use 10 or more, and report medians and
 spreads instead of single values.
 
@@ -109,14 +110,14 @@ spreads instead of single values.
 
 | Selection | Rule | Run / row | SOPwTP | lDDT |
 | --- | --- | --- | --- | --- |
-| `extreme_f1` | Best SOPwTP | seed_189 / 0 | 61 341 | 0.5664 |
-| `extreme_f2` | Best lDDT | seed_105 / 1 | 43 912 | 0.6150 |
-| `compromise_balanced` | Closest to the ideal point with weights (0.5, 0.5) | seed_189 / 1 | 56 644 | 0.6113 |
-| `compromise_sensitivity` | The same with weights (0.7, 0.3) | seed_189 / 20 | 56 649 | 0.6113 |
+| `extreme_f1` | Best SOPwTP | seed_147 / 0 | 61 372 | 0.8004 |
+| `extreme_f2` | Best lDDT | seed_189 / 1 | 55 407 | 0.8234 |
+| `compromise_balanced` | Closest to the ideal point with weights (0.5, 0.5) | seed_063 / 23 | 58 856 | 0.8152 |
+| `compromise_sensitivity` | The same with weights (0.7, 0.3) | seed_189 / 48 | 60 261 | 0.8088 |
 
 The weights are options of the script (`--weight-f1`, `--weight-f2`, and
-`--sensitivity-weight-f1`, `--sensitivity-weight-f2`). Here both compromises are practically the
-same alignment, which is a sign that the choice is robust to the weights.
+`--sensitivity-weight-f1`, `--sensitivity-weight-f2`). Giving more weight to SOPwTP moves the
+compromise towards the best-SOPwTP end of the front.
 
 Evaluate them against the GPCRdb reference as in [T4](T4-choosing-and-evaluating.md):
 
@@ -130,21 +131,22 @@ java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
 ```
 
 ```text
-compromise_balanced.fasta     Pair-F1=0.556683  TM-Pair-F1=0.999820  TM-gap-rate=0.004091
-compromise_sensitivity.fasta  Pair-F1=0.556683  TM-Pair-F1=0.999820  TM-gap-rate=0.004091
-extreme_f1.fasta              Pair-F1=0.539880  TM-Pair-F1=0.999460  TM-gap-rate=0.006080
-extreme_f2.fasta              Pair-F1=0.485455  TM-Pair-F1=0.894802  TM-gap-rate=0.016705
+compromise_balanced.fasta     Pair-F1=0.556866  TM-Pair-F1=0.999820  TM-gap-rate=0.005170
+compromise_sensitivity.fasta  Pair-F1=0.554828  TM-Pair-F1=0.999820  TM-gap-rate=0.005170
+extreme_f1.fasta              Pair-F1=0.540159  TM-Pair-F1=0.999820  TM-gap-rate=0.005170
+extreme_f2.fasta              Pair-F1=0.568437  TM-Pair-F1=0.999820  TM-gap-rate=0.004318
 ```
 
-As in T4, the compromise is the best of the four and the best-lDDT extreme the worst: it pays for
-its structural score with gaps inside transmembrane helices.
+As in T4, the agreement with the reference grows from the best-SOPwTP end to the best-lDDT end:
+the best-lDDT extreme is the best of the four, and the best-SOPwTP extreme the worst.
 
 ## Step 5: compare with the seeds
 
 The combined front is only interesting if it improves on the starting alignments. Evaluate the
 seeds as in [T4, Step 5](T4-choosing-and-evaluating.md#step-5-compare-with-the-seeds): on
-`classF` the compromise (pair F1 0.5567) is better than five of the six seeds, and slightly worse
-than ClustalW (0.5598).
+`classF` the balanced compromise (pair F1 0.5569) is better than five of the six seeds and
+slightly worse than ClustalW (0.5598), and the best-lDDT extreme (0.5684) is better than all of
+them.
 
 ## Step 6: towards a real study
 
@@ -163,5 +165,6 @@ also:
 
 This version does not reproduce the published experiments: it corrects the structure mapping of
 OXER1 and MCHR1, removes gap-only columns, defines the structural objective as the mean of the
-anchor scores and uses a mutation that never breaks a helix. To reproduce the published results,
+anchor scores, uses a mutation that never breaks a helix and fills the initial population without
+duplicates. To reproduce the published results,
 use the code at tag `legacy-v1.0`.

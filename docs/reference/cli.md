@@ -44,10 +44,12 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--max-evaluations` | 10000 | Stopping criterion |
 | `--population-size` | 100 | Population size; also the offspring size and, for PAES, the archive size |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
-| `--initialization` | `CROSSOVER` | Members of the initial population besides the seeds: `CROSSOVER` (crossover children, original), `CROSSOVER_DISTINCT` (no two members equal after removing gap-only columns) or `PERTURBED` (crossover child followed by 10 mutations) |
 | `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
+
+The initial population holds the distinct seeds and, for the rest, distinct crossover children
+([T2, Step 7](../tutorials/T2-problem-formulation.md#step-7-the-initial-population)).
 
 | `--algorithm` | Algorithm | Notes |
 | --- | --- | --- |

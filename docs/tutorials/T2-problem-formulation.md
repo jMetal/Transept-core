@@ -213,13 +213,11 @@ instead:
 ## Step 7: the initial population
 
 The population starts with the **seed alignments** given with `--seeds`, in that order and without
-duplicates. The rest is filled according to `--initialization`:
-
-| Value | Members besides the seeds |
-| --- | --- |
-| `CROSSOVER` (default) | Children of the single-point crossover applied to random pairs of members |
-| `CROSSOVER_DISTINCT` | The same, but a child equal to an existing member after compaction is discarded; the original fills 15–28 % of the population with such duplicates |
-| `PERTURBED` | Crossover children followed by 10 mutations |
+duplicates. The rest is filled with children of the single-point crossover (Step 8) applied to
+random pairs of members. A child equal to an existing member once its gap-only columns are removed
+is discarded: without this check, 15–28 % of the population were such duplicates. If the
+crossover stops producing new alignments (few, very similar seeds), the remaining members are
+copies of random members changed by 10 mutations.
 
 With MOEA/D the seeds are spread over equally spaced subproblems, so that they do not all start
 at one end of the front.

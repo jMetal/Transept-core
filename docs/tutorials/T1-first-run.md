@@ -86,7 +86,7 @@ The algorithm is NSGA-II, the default. After some log lines from jMetal, the run
 Run finished: 500 evaluations, 20 solutions in results/ejecuciones/classF/first
 ```
 
-It takes about 7 seconds. The run directory must not exist: to repeat a run, give it another
+It takes about 6 seconds. The run directory must not exist: to repeat a run, give it another
 `--run-id`.
 
 ## Step 5: read the results
@@ -107,23 +107,26 @@ results/ejecuciones/classF/first/
 **`FUN.csv`** has one line per solution, with SOPwTP and lDDT. Higher is better for both:
 
 ```text
-60715.0,0.5658766634807596
-50511.0,0.5919589201483112
-60715.0,0.5658766634807596
+61281.0,0.8000945492779323
+57638.0,0.8122004593862518
+57638.0,0.8122004593862518
+61281.0,0.8000945492779323
+60777.0,0.802523090910181
 ...
 ```
 
 The solutions trade one objective for the other: the first has the best SOPwTP and the worst
-lDDT, the second the opposite. The file holds the final population, so some lines repeat (the
-first and the third, here): the population can contain copies of the same alignment.
+lDDT, the second the opposite. The file holds the final population, so some lines repeat (here
+the first and the fourth, and the second and the third): the search can produce copies of the
+same alignment.
 
 **`MSASol<i>.fasta`** is the alignment of line `i`, in aligned FASTA. Any alignment viewer (Jalview,
 AliView, ...) opens it:
 
 ```text
 >fzd2_human
-----------------------------------MR--------PRSALP--RLLL----
-----P--LL-----------------------LLPAAGPAQFHGEKGI------SIPDHG
+MR----PRSALP-----------------------------------------RLLL---
+----PLLLL-----PAAGPAQ--------------------FHGEKGISIPD--------
 ...
 ```
 
@@ -138,7 +141,7 @@ not contribute to the lDDT.
 It can be followed while a long run is active (`tail -f`):
 
 ```json
-{"evaluations":100,"elapsedMs":1476,"best":{"SOPwTP":60715.0,"lDDT":0.5916449458100664}}
+{"evaluations":100,"elapsedMs":1302,"best":{"SOPwTP":60715.0,"lDDT":0.8104647910532942}}
 ```
 
 The [output reference](../reference/outputs.md) describes every field.

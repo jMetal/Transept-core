@@ -18,7 +18,6 @@ the comparison is fair, how to measure them, and how to tell a real difference f
 | --- | --- |
 | `--algorithm` | `NSGA_II` (default), `NSGA_III`, `AGE_MOEA`, `AGE_MOEA_II`, `SMS_EMOA`, `MOEA_D`, `PAES`, and the random searches `RANDOM_SEARCH` and `RANDOM_SEEDED` |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` (default), `MERGE_GAP_RUNS`, `RANDOM_CHOICE` |
-| `--initialization` | `CROSSOVER` (default), `CROSSOVER_DISTINCT`, `PERTURBED` |
 
 All algorithms start from the same seed alignments, use the same operators and stop after the same
 number of evaluations, so that only the option under study changes. Some need care:
@@ -40,7 +39,7 @@ use the same seeds for every configuration:
 ```bash
 for seed in 1 2 3 4 5 6; do
   for config in "nsgaii:--algorithm NSGA_II" \
-                "nsgaii-tmsafe:--algorithm NSGA_II --mutation TM_SAFE_GAP_SHIFT" \
+                "nsgaii-randomchoice:--algorithm NSGA_II --mutation RANDOM_CHOICE" \
                 "smsemoa:--algorithm SMS_EMOA" \
                 "moead:--algorithm MOEA_D" \
                 "randomseeded:--algorithm RANDOM_SEEDED"; do
@@ -54,8 +53,10 @@ for seed in 1 2 3 4 5 6; do
 done
 ```
 
-The 30 runs take about 10 minutes. A run of NSGA-II takes about 8 seconds; SMS-EMOA and MOEA/D
-about 32 seconds, because they cannot evaluate in parallel.
+The configurations are the default (NSGA-II with the `TM_SAFE_GAP_SHIFT` mutation), NSGA-II with
+the `RANDOM_CHOICE` mutation, two other algorithms and the strong sanity check. The 30 runs take
+about 9 minutes. A run of NSGA-II takes about 9 seconds; SMS-EMOA and MOEA/D about 31 seconds,
+because they cannot evaluate in parallel.
 
 ## Step 3: measure every run
 
@@ -67,8 +68,8 @@ python3 scripts/pareto_analysis.py comparison classF --output comparison/analysi
 ```
 
 ```text
-Analyzed 2425 solutions from 30 runs
-Combined non-dominated objective vectors: 51
+Analyzed 2410 solutions from 30 runs
+Combined non-dominated objective vectors: 88
 ```
 
 `indicators_by_run.csv` has the hypervolume and the IGD+ of every run ([T3](T3-several-seeds.md),
@@ -91,11 +92,11 @@ python3 scripts/compare_runs.py comparison/analysis_classF/indicators_by_run.csv
 ```text
 hypervolume (higher is better), baseline nsgaii
 configuration        runs   median      IQR    wins       p
-nsgaii                  6    0.841    0.130
-moead                   6    0.741    0.052     1/6   0.094
-nsgaii-tmsafe           6    0.809    0.134     3/6   1.000
-randomseeded            6    0.303    0.116     0/6   0.031
-smsemoa                 6    0.811    0.115     2/6   0.688
+nsgaii                  6    0.925    0.035
+moead                   6    0.898    0.030     0/6   0.031
+nsgaii-randomchoice     6    0.939    0.023     5/6   0.438
+randomseeded            6    0.032    0.051     0/6   0.031
+smsemoa                 6    0.935    0.013     4/6   1.000
 ```
 
 `--indicator igd_plus` compares by IGD+ instead:
@@ -103,11 +104,11 @@ smsemoa                 6    0.811    0.115     2/6   0.688
 ```text
 igd_plus (lower is better), baseline nsgaii
 configuration        runs   median      IQR    wins       p
-nsgaii                  6    0.026    0.028
-moead                   6    0.056    0.024     0/6   0.031
-nsgaii-tmsafe           6    0.026    0.021     3/6   1.000
-randomseeded            6    0.443    0.142     0/6   0.031
-smsemoa                 6    0.026    0.022     3/6   1.000
+nsgaii                  6    0.019    0.013
+moead                   6    0.033    0.009     0/6   0.031
+nsgaii-randomchoice     6    0.011    0.008     5/6   0.062
+randomseeded            6    1.032    0.169     0/6   0.031
+smsemoa                 6    0.018    0.007     4/6   1.000
 ```
 
 | Column | Meaning |
@@ -118,16 +119,18 @@ smsemoa                 6    0.026    0.022     3/6   1.000
 
 ## Step 5: interpret
 
-- **The search works.** Every algorithm is far better than `RANDOM_SEEDED` (hypervolume 0.30
-  against 0.74–0.84): the operators and the selection add much more than random perturbations of
+- **The search works.** Every algorithm is far better than `RANDOM_SEEDED` (hypervolume 0.03
+  against 0.90–0.94): the operators and the selection add much more than random perturbations of
   the seeds. With six seeds, 0.031 is the smallest possible p-value, reached when one
   configuration wins on every seed.
-- **MOEA/D is worse than NSGA-II** on this problem: it loses on every seed in IGD+ (p = 0.031) and
-  contributes 1 of the 51 solutions of the combined front.
-- **NSGA-II, NSGA-II with the TM-safe mutation and SMS-EMOA are indistinguishable** with these
-  runs: the differences in median are smaller than the spread, and the p-values are large.
-  SMS-EMOA contributes the most solutions to the combined front (69 against 46 of NSGA-II), but
-  costs four times as much time.
+- **MOEA/D is worse than NSGA-II** on this problem: it loses on every seed in both indicators
+  (p = 0.031) and contributes none of the 88 solutions of the combined front.
+- **`RANDOM_CHOICE` looks promising but is not proven.** It wins on 5 of 6 seeds and contributes
+  most of the combined front (111 solutions, against 20 of NSGA-II with the default mutation), but
+  the p-values (0.44 and 0.06) do not support a difference. It is a candidate for a larger study,
+  not a reason to change the default.
+- **NSGA-II and SMS-EMOA are indistinguishable** with these runs: the differences in median are
+  smaller than the spread, and the p-values are large. SMS-EMOA costs three times as much time.
 - **"Not significant" does not mean "equal".** Six seeds detect only large differences. To claim
   that two configurations are equivalent, or to detect small differences, use more seeds (10 to
   30), more than one dataset, and a budget close to the one of the real study.
