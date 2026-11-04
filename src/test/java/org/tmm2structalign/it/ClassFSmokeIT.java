@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.ExperimentRunner.RunSummary;
 import org.tmm2structalign.run.RunConfiguration;
@@ -43,7 +44,8 @@ class ClassFSmokeIT {
             type,
             MappingPolicy.VERIFIED,
             15f,
-            50);
+            50,
+            objectives(type));
 
     // Act
     RunSummary summary = new ExperimentRunner().run(configuration);
@@ -53,5 +55,10 @@ class ClassFSmokeIT {
     assertTrue(summary.evaluations() >= 200);
     assertTrue(Files.readString(summary.runDirectory().resolve("metadata.json"))
         .contains("\"proteinsWithoutStructure\":[]"));
+  }
+
+  /** Formulation that suits the algorithm: the genetic algorithm optimises the lDDT alone. */
+  private static ObjectiveSet objectives(AlgorithmType type) {
+    return type == AlgorithmType.GENETIC_ALGORITHM ? ObjectiveSet.LDDT : ObjectiveSet.SOPWTP_LDDT;
   }
 }

@@ -113,7 +113,7 @@ public final class RunCommand implements Callable<Integer> {
       defaultValue = "SOPWTP_LDDT",
       description =
           "Objectives to optimise: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}"
-              + " (published). LDDT is a single objective.")
+              + " (published). LDDT needs GENETIC_ALGORITHM, and GENETIC_ALGORITHM needs LDDT.")
   ObjectiveSet objectives;
 
   @Option(

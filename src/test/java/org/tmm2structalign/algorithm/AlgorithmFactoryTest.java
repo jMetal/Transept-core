@@ -55,8 +55,24 @@ class AlgorithmFactoryTest {
   }
 
   private AlgorithmFactory factory(int populationSize, double mutationProbability) {
+    return factory(problem, populationSize, mutationProbability);
+  }
+
+  /** Factory whose problem suits the algorithm: one objective for the genetic algorithm. */
+  private AlgorithmFactory factory(
+      AlgorithmType type, int populationSize, double mutationProbability) {
+    StructuralMsaProblem suited =
+        type == AlgorithmType.GENETIC_ALGORITHM
+            ? new StructuralMsaProblem(
+                "test", proteins, List.of(new StructuralLddt(structures, 15f)))
+            : problem;
+    return factory(suited, populationSize, mutationProbability);
+  }
+
+  private AlgorithmFactory factory(
+      StructuralMsaProblem chosen, int populationSize, double mutationProbability) {
     return new AlgorithmFactory(
-        problem,
+        chosen,
         seeds,
         new AlgorithmConfiguration(EVALUATIONS, populationSize, populationSize, 0.8,
             mutationProbability, 1),
@@ -95,7 +111,7 @@ class AlgorithmFactoryTest {
     @DisplayName("given an algorithm type, when run, then the budget is used and progress reported")
     void givenAlgorithmType_whenRun_thenBudgetIsUsedAndProgressReported(AlgorithmType type) {
       // Arrange
-      SearchRun run = factory(POPULATION_SIZE, 1.0).create(type);
+      SearchRun run = factory(type, POPULATION_SIZE, 1.0).create(type);
       List<Integer> progress = new ArrayList<>();
       run.onProgress(progress::add);
 

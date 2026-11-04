@@ -24,11 +24,15 @@ import org.uma.jmetal.component.catalogue.common.evaluation.impl.SequentialEvalu
 import org.uma.jmetal.component.catalogue.common.solutionscreation.SolutionsCreation;
 import org.uma.jmetal.component.catalogue.common.termination.Termination;
 import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
+import org.uma.jmetal.component.catalogue.ea.replacement.impl.MuPlusLambdaReplacement;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEA2EnvironmentalSelection;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEAEnvironmentalSelection;
+import org.uma.jmetal.component.catalogue.ea.selection.impl.NaryTournamentSelection;
+import org.uma.jmetal.component.catalogue.ea.variation.impl.CrossoverAndMutationVariation;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
+import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
 
 /**
@@ -40,6 +44,9 @@ import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
  * evaluations.
  */
 public final class AlgorithmFactory {
+
+  /** Name reported by jMetal for the genetic algorithm. */
+  public static final String GENETIC_ALGORITHM_NAME = "GeneticAlgorithm";
 
   /** Neighbourhood size of MOEA/D (capped by the population size). */
   public static final int MOEAD_NEIGHBORHOOD_SIZE = 20;
@@ -79,9 +86,12 @@ public final class AlgorithmFactory {
    *
    * @param type algorithm to build
    * @return the run, ready to start
-   * @throws IllegalArgumentException if the configuration does not suit the algorithm
+   * @throws IllegalArgumentException if the configuration does not suit the algorithm, or the
+   *     number of objectives does not suit it: the genetic algorithm needs exactly one, the
+   *     multiobjective algorithms at least two (the random searches accept any number)
    */
   public SearchRun create(AlgorithmType type) {
+    checkObjectives(type);
     if (type.isSteadyState() && configuration.threads() > 1) {
       LOGGER.warning(
           type + " evaluates one solution per iteration; " + configuration.threads()
@@ -98,6 +108,7 @@ public final class AlgorithmFactory {
       case SMS_EMOA -> SearchRun.of(smsEmoa());
       case MOEA_D -> SearchRun.of(moead());
       case PAES -> SearchRun.of(paes());
+      case GENETIC_ALGORITHM -> SearchRun.of(geneticAlgorithm());
       case RANDOM_SEARCH ->
           SearchRun.of(
               new RandomSearchAlgorithm<>(
@@ -123,6 +134,39 @@ public final class AlgorithmFactory {
                   evaluation(),
                   termination()));
     };
+  }
+
+  private void checkObjectives(AlgorithmType type) {
+    boolean randomSearch =
+        type == AlgorithmType.RANDOM_SEARCH || type == AlgorithmType.RANDOM_SEEDED;
+    if (type == AlgorithmType.GENETIC_ALGORITHM && objectives() != 1) {
+      throw new IllegalArgumentException(
+          "GENETIC_ALGORITHM optimises a single objective, got " + objectives()
+              + "; use --objectives LDDT");
+    }
+    if (type != AlgorithmType.GENETIC_ALGORITHM && !randomSearch && objectives() < 2) {
+      throw new IllegalArgumentException(
+          type + " needs at least two objectives; use GENETIC_ALGORITHM for one");
+    }
+  }
+
+  /**
+   * Generational genetic algorithm: binary tournament on the single objective, the same
+   * variation as NSGA-II and (mu + lambda) replacement, which keeps the best solutions.
+   */
+  private EvolutionaryAlgorithm<MsaSolution> geneticAlgorithm() {
+    var variation =
+        new CrossoverAndMutationVariation<>(
+            configuration.offspringPopulationSize(), crossover(), mutation());
+    ObjectiveComparator<MsaSolution> fitness = new ObjectiveComparator<>(0);
+    return new EvolutionaryAlgorithm<>(
+        GENETIC_ALGORITHM_NAME,
+        population(),
+        evaluation(),
+        termination(),
+        new NaryTournamentSelection<>(2, variation.matingPoolSize(), fitness),
+        variation,
+        new MuPlusLambdaReplacement<>(fitness));
   }
 
   private EvolutionaryAlgorithm<MsaSolution> nsgaThree() {

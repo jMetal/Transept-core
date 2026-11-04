@@ -16,6 +16,11 @@ public enum AlgorithmType {
   MOEA_D(true, true),
   /** PAES, a (1+1) evolution strategy with a crowding-distance archive; mutation only. */
   PAES(true, false),
+  /**
+   * Generational genetic algorithm with (mu + lambda) replacement, for a single objective; it uses
+   * the same operators and seeded population as NSGA-II.
+   */
+  GENETIC_ALGORITHM(false, true),
   /** Random search over alignments with gaps placed at random (weak baseline). */
   RANDOM_SEARCH(false, false),
   /** Random search over seeds perturbed with random mutations (strong baseline). */

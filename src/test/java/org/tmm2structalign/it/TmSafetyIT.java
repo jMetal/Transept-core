@@ -18,6 +18,7 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.RunConfiguration;
 import org.tmm2structalign.structure.MappingPolicy;
@@ -62,7 +63,10 @@ class TmSafetyIT {
             type,
             MappingPolicy.VERIFIED,
             15f,
-            100);
+            100,
+            type == AlgorithmType.GENETIC_ALGORITHM
+                ? ObjectiveSet.LDDT
+                : ObjectiveSet.SOPWTP_LDDT);
 
     // Act
     int solutions = new ExperimentRunner().run(configuration).frontSize();

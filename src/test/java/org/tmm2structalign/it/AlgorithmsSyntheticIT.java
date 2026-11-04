@@ -20,6 +20,7 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.ExperimentRunner.RunSummary;
 import org.tmm2structalign.run.RunConfiguration;
@@ -106,6 +107,12 @@ class AlgorithmsSyntheticIT {
                 type,
                 MappingPolicy.VERIFIED,
                 15f,
-                40));
+                40,
+                objectives(type)));
+  }
+
+  /** Formulation that suits the algorithm: the genetic algorithm optimises the lDDT alone. */
+  private static ObjectiveSet objectives(AlgorithmType type) {
+    return type == AlgorithmType.GENETIC_ALGORITHM ? ObjectiveSet.LDDT : ObjectiveSet.SOPWTP_LDDT;
   }
 }
