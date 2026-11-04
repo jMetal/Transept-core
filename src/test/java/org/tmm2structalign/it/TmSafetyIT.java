@@ -13,6 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.algorithm.CrossoverType;
+import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
@@ -29,7 +31,7 @@ import org.tmm2structalign.testing.SyntheticDataset;
  * With seeds that have no gaps inside helices, the TM-safe crossover and the TM-safe mutation
  * must never produce an alignment with a gap run between two transmembrane residues.
  */
-@DisplayName("Integration tests: transmembrane helices are never broken with the TM-safe mutation")
+@DisplayName("Integration tests: transmembrane helices are never broken with TM-safe operators")
 class TmSafetyIT {
 
   @TempDir Path directory;
@@ -70,6 +72,48 @@ class TmSafetyIT {
     int solutions = new ExperimentRunner().run(configuration).frontSize();
 
     // Assert
+    assertEquals(0, breakingRuns(configuration, run, solutions), type + " broke a helix");
+    assertEquals(
+        true, Files.readString(run.resolve("config.json")).contains("TM_SAFE_GAP_SHIFT"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(
+      value = MutationType.class,
+      names = {"GAP_SHIFT"},
+      mode = EnumSource.Mode.EXCLUDE)
+  @DisplayName("given a TM-safe mutation and any crossover, when running, then no helix breaks")
+  void givenTmSafeMutationAndAnyCrossover_whenRunning_thenNoHelixBreaks(MutationType mutation)
+      throws IOException {
+    for (CrossoverType crossover : CrossoverType.values()) {
+      // Arrange
+      Path run = directory.resolve("operators").resolve(mutation + "-" + crossover);
+      RunConfiguration configuration =
+          new RunConfiguration(
+              dataRoot,
+              SyntheticDataset.NAME,
+              List.of("left", "right"),
+              run,
+              11L,
+              new AlgorithmConfiguration(
+                  400, 8, 8, 0.9, 1.0, 1, mutation, InitializationType.CROSSOVER, crossover),
+              AlgorithmType.NSGA_II,
+              MappingPolicy.VERIFIED,
+              LddtAggregation.HARMONIC_OVER_LENGTH,
+              15f,
+              100);
+
+      // Act
+      int solutions = new ExperimentRunner().run(configuration).frontSize();
+
+      // Assert
+      assertEquals(
+          0, breakingRuns(configuration, run, solutions), mutation + "/" + crossover);
+    }
+  }
+
+  private static int breakingRuns(RunConfiguration configuration, Path run, int solutions)
+      throws IOException {
     ProteinSet proteins = new ThreeLineTopologyReader().read(configuration.topologyFile());
     int breaking = 0;
     for (int index = 0; index < solutions; index++) {
@@ -79,8 +123,6 @@ class TmSafetyIT {
         breaking += Alignments.helixBreakingRuns(proteins.get(sequence), msa.rows().get(sequence));
       }
     }
-    assertEquals(0, breaking, type + " produced gaps inside helices");
-    assertEquals(
-        true, Files.readString(run.resolve("config.json")).contains("TM_SAFE_GAP_SHIFT"));
+    return breaking;
   }
 }
