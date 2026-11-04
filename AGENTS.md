@@ -168,7 +168,14 @@ commands and their expected output.
   etc.). The authors will decide later whether to continue that line. Only API renames that a
   dependency upgrade makes unavoidable are allowed.
 
-## 10. Future work: graphical user interface
+## 10. Graphical user interface
+
+A first prototype exists in the sibling repository `TM-M2StructAlign-Studio` (Streamlit, local
+use). It drives this tool only through the `run` command and the output files, so treat the CLI
+options and the output formats as its public API: when you change them, update
+`tmstudio/options.py` and the readers of the studio.
+
+The original guidance for the interface follows.
 
 Once the rewrite is complete, the authors plan a GUI for the tool, probably a Python
 **Streamlit** application that drives the Java core. Design the core so that a GUI can be added
