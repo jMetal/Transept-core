@@ -8,7 +8,7 @@ the planned graphical interface.
 
 | File | Content |
 | --- | --- |
-| `FUN.csv` | One line per solution of the final front: SOPwTP and lDDT, comma-separated, no header |
+| `FUN.csv` | One line per solution of the result of the algorithm: SOPwTP and lDDT, comma-separated, no header |
 | `MSASol<i>.fasta` | Alignment of line `i` of `FUN.csv` (0-based), aligned FASTA |
 | `config.json` | Full configuration of the run |
 | `metadata.json` | Provenance and diagnostics of the run |
@@ -20,7 +20,12 @@ the planned graphical interface.
 ### `FUN.csv`
 
 Both objectives are written as computed, and **higher is better for both**. jMetal minimises, so
-the solutions store them negated internally, but the file does not. Example:
+the solutions store them negated internally, but the file does not.
+
+The solutions are the result returned by the algorithm: the final population (NSGA-II, NSGA-III,
+AGE-MOEA, SMS-EMOA, MOEA/D, random search) or the archive (PAES). The result is not filtered, so
+it can contain dominated solutions and repeated ones (two lines with the same values, usually the
+same alignment); `scripts/pareto_analysis.py` keeps the non-dominated ones (repeated lines included). Example:
 
 ```text
 61113.0,0.565144899719245
