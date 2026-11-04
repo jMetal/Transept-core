@@ -72,6 +72,36 @@ class MsaTest {
     }
 
     @Test
+    @DisplayName("given a wrong residue, when building, then the message points to it")
+    void givenWrongResidue_whenBuilding_thenMessagePointsToIt() {
+      // Act
+      IllegalArgumentException exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> Msa.fromAlignedRows(proteins, List.of("ACDEF", "AC-DW")));
+
+      // Assert
+      assertTrue(
+          exception.getMessage().endsWith("residue 4 is 'W' instead of 'E'"),
+          exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("given a row of another length, when building, then the message counts residues")
+    void givenRowOfAnotherLength_whenBuilding_thenMessageCountsResidues() {
+      // Act
+      IllegalArgumentException exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> Msa.fromAlignedRows(proteins, List.of("ACDEF", "AC-D-")));
+
+      // Assert
+      assertTrue(
+          exception.getMessage().endsWith("expected 4 residues, found 3"),
+          exception.getMessage());
+    }
+
+    @Test
     @DisplayName("given a missing row, when building, then an exception is thrown")
     void givenMissingRow_whenBuilding_thenIllegalArgumentExceptionIsThrown() {
       // Act & Assert
