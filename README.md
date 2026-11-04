@@ -81,7 +81,7 @@ explains every step and file.
 | T3. Reproducing the published experiments | *In preparation* |
 | T4. Choosing an alignment and evaluating it against GPCRdb | *In preparation* |
 | T5. Comparing algorithms and operators | *In preparation* |
-| T6. Using your own dataset | *In preparation* |
+| [T6. Using your own dataset](docs/tutorials/T6-your-own-dataset.md) | The input files a dataset needs, how to compute the distance matrices, and how to check that structures and seeds are read correctly |
 | T7. Adding a variation operator | *In preparation* |
 
 Reference:
