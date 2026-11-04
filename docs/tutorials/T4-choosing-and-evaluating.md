@@ -22,7 +22,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
   --max-evaluations 10000 --population-size 100 --threads 4
 ```
 
-This is the published configuration (NSGA-II, `GAP_SHIFT` mutation), with seed 42. It takes about
+This is the default configuration (NSGA-II, `GAP_SHIFT` mutation), with seed 42. It takes about
 30 seconds.
 
 ## Step 2: the non-dominated alignments

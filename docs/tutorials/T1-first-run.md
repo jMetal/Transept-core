@@ -164,8 +164,9 @@ several seeds ([T3](T3-reproducing-the-paper.md)).
 
 ## Step 7: a real run
 
-The configuration of the published experiments uses 10 000 evaluations and populations of 100.
-With four evaluation threads it takes about 30 seconds on `classF`:
+A useful run needs more evaluations and a larger population. With the defaults of the command
+line (10 000 evaluations, populations of 100) and four evaluation threads it takes about
+30 seconds on `classF`:
 
 ```bash
 java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
@@ -175,7 +176,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
   --max-evaluations 10000 --population-size 100 --threads 4
 ```
 
-Larger datasets take longer: `classA_002` (76 proteins) needs over an hour per run.
+Larger datasets take much longer: the cost grows with the square of the number of proteins and
+with their length, so `classA_002` (76 proteins) is about two orders of magnitude slower.
 
 ## What next
 
