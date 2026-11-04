@@ -74,7 +74,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `io` | Readers for 3-line topology, aligned FASTA (tool-specific ids), `_D.csv`/`_idx.csv`, PDB chains; FASTA writer |
 | `structure` | `SequenceStructureMapper` (numbering checked by residue identity, alignment fallback), `StructureLoader`, `ProteinStructures`, `StructuralNeighborhood` |
 | `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
-| `operator` | `TmSafeSinglePointCrossover` (default), `TmSafeMultiPointCrossover` (`--crossover TWO_POINT`), `TmAwareGapShiftMutation` (original, default), TM-safe mutations (`TmSafeGapShiftMutation`, `TmSafeInsertGapMutation`, `TmSafeSplitResidueRunMutation`, `MergeAdjacentGapRunsMutation`, `RandomChoiceMutation`; see `docs/review/06-operators.md`), `TmBoundaries`, `RandomSource` |
+| `operator` | `TmSafeSinglePointCrossover` (default), `TmSafeMultiPointCrossover` (`--crossover TWO_POINT`), `TmAwareGapShiftMutation` (original, default), TM-safe mutations (`TmSafeGapShiftMutation`, `TmSafeInsertGapMutation`, `TmSafeSplitResidueRunMutation`, `MergeAdjacentGapRunsMutation`, `RandomChoiceMutation`), `TmBoundaries`, `RandomSource` |
 | `problem` | `StructuralMsaProblem` |
 | `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, random search), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
@@ -111,7 +111,7 @@ needs; see §8.
    `--mapping-policy LEGACY` only to reproduce published numbers.
 3. **Seeds.** Caretta outputs are residue-level misaligned for most classes, and the structural
    tools' outputs in the full classA_002/003/004 datasets do not match the GPCRdb sequences.
-   Choose `--seeds` deliberately (see `docs/review/01-caretta-mtmalign.md`).
+   Choose `--seeds` deliberately.
 4. **Differential oracle.** `BaselineOracleIT` compares the objectives with the dataset's
    `baselines.csv` (frozen in `src/test/resources/oracle`). If you change an objective on
    purpose, update the oracle expectations in the same change and explain why.
@@ -128,15 +128,18 @@ needs; see §8.
 
 ## 7. Current work (November 2026)
 
-Branch `antonio`. Review documents in `docs/review/` (`01` Caretta/mTM-align, `02` code review
-with ids A*/M*/B*, `03` dataset review with ids D*, `04` work plan; `scripts/` diagnostics).
+Branch `antonio` (and `feat/algorithms` for the algorithms and operators). The authors' internal
+review notes (code review with ids A*/M*/B*, dataset review with ids D*, work plan, operator and
+initialization proposals, diagnostic scripts) are kept **outside the repository**, in the sibling
+directory `../notes/`, and are not versioned; versions up to 2026-11-04 remain in the git history
+under `docs/review/`. Do not add internal notes to this repository.
 Part 1 of the plan (platform migration, rewrite of the structural core with tests, removal of
 the old structural flow) is done; tag `legacy-v1.0` marks the pre-rewrite state. Part 2
 (new operators, objectives, algorithm improvements) is pending; Phase 0 decisions of the plan
 belong to the authors, so ask before implementing work that depends on them.
 
-When fixing a finding, reference its id in the commit body (e.g. `Refs: A2`) and update
-`docs/review/02-code-review.md`.
+When fixing a finding, reference its id in the commit body (e.g. `Refs: A2`) and, if the notes
+are available locally, update `../notes/review/02-code-review.md`.
 
 ## 8. Do not
 

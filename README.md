@@ -62,7 +62,7 @@ For reproducible analyses, cite the Zenodo version-specific DOI and use the arch
 - **Mutation** (`TmAwareGapShiftMutation`). Moves a gap block of one protein to a new position
   chosen by rejection sampling: TM residues are avoided (acceptance 0.05), loops and residues
   without structure are preferred (0.90 / 0.95). `--mutation` selects mutations that never break
-  a helix (see the options table and [docs/review/06-operators.md](docs/review/06-operators.md)).
+  a helix (see the options table).
   Gaps inside helices inherited from the seeds are kept: TM integrity is not a formal constraint.
 - **Structure mapping.** AlphaFold residues are mapped to the input sequence by PDB numbering
   when the residues agree, or by sequence alignment otherwise (e.g. OXER1 and MCHR1, whose
@@ -189,7 +189,6 @@ src/main/java/org/tmm2structalign/
   cli/         command line (picocli)
   evaluation/  comparison with reference alignments
 src/main/java/org/tm_msaligner/   legacy irace tuning code (kept as is)
-docs/review/                       code and dataset review, work plan, operator survey
 docs/evaluation-metrics.md         reference-based metrics
 scripts/                           Pareto analysis, batch of runs on Windows
 ```
