@@ -13,23 +13,13 @@ public enum MutationType {
    */
   TM_SAFE_GAP_SHIFT,
   /**
-   * Inserts one gap at a random valid position of every row ({@code TmSafeInsertGapMutation},
-   * IRG of TM-MSAligner). The alignment grows by one column.
-   */
-  INSERT_GAP,
-  /**
-   * Opens a new one-gap run between two residues of every row ({@code
-   * TmSafeSplitResidueRunMutation}, SANGG of TM-MSAligner). The alignment grows by one column.
-   */
-  SPLIT_RESIDUE_RUN,
-  /**
    * Merges two consecutive gap runs of one row ({@code MergeAdjacentGapRunsMutation}, MAGG of
    * TM-MSAligner).
    */
   MERGE_GAP_RUNS,
   /**
-   * Applies one of {@code TM_SAFE_GAP_SHIFT}, {@code INSERT_GAP}, {@code SPLIT_RESIDUE_RUN} and
-   * {@code MERGE_GAP_RUNS}, chosen uniformly at random each time ({@code RandomChoiceMutation}).
+   * Applies {@code TM_SAFE_GAP_SHIFT} or {@code MERGE_GAP_RUNS}, chosen uniformly at random each
+   * time ({@code RandomChoiceMutation}).
    */
   RANDOM_CHOICE;
 

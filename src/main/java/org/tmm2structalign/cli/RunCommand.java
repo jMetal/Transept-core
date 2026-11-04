@@ -105,9 +105,8 @@ public final class RunCommand implements Callable<Integer> {
       defaultValue = "GAP_SHIFT",
       description =
           "Mutation operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE} (original);"
-              + " all the others never break a transmembrane helix. INSERT_GAP and"
-              + " SPLIT_RESIDUE_RUN lengthen the alignment by one column; RANDOM_CHOICE picks"
-              + " one of the TM-safe mutations each time.")
+              + " all the others never break a transmembrane helix. RANDOM_CHOICE picks"
+              + " TM_SAFE_GAP_SHIFT or MERGE_GAP_RUNS each time.")
   MutationType mutation;
 
   @Option(

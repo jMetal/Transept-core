@@ -9,10 +9,8 @@ import org.tmm2structalign.operator.RandomChoiceMutation;
 import org.tmm2structalign.operator.RandomSource;
 import org.tmm2structalign.operator.TmAwareGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeGapShiftMutation;
-import org.tmm2structalign.operator.TmSafeInsertGapMutation;
 import org.tmm2structalign.operator.TmSafeMultiPointCrossover;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
-import org.tmm2structalign.operator.TmSafeSplitResidueRunMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
@@ -239,16 +237,12 @@ public final class AlgorithmFactory {
       case TM_SAFE_GAP_SHIFT ->
           new TmSafeGapShiftMutation(
               probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random);
-      case INSERT_GAP -> new TmSafeInsertGapMutation(probability, 1, random);
-      case SPLIT_RESIDUE_RUN -> new TmSafeSplitResidueRunMutation(probability, 1, random);
       case MERGE_GAP_RUNS -> new MergeAdjacentGapRunsMutation(probability, random);
       case RANDOM_CHOICE ->
           new RandomChoiceMutation(
               probability,
               List.of(
                   mutation(MutationType.TM_SAFE_GAP_SHIFT, 1.0),
-                  mutation(MutationType.INSERT_GAP, 1.0),
-                  mutation(MutationType.SPLIT_RESIDUE_RUN, 1.0),
                   mutation(MutationType.MERGE_GAP_RUNS, 1.0)),
               1,
               random);
