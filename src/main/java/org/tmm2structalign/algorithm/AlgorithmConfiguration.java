@@ -11,6 +11,7 @@ package org.tmm2structalign.algorithm;
  * @param threads number of evaluation threads; 1 evaluates sequentially
  * @param mutationType mutation operator
  * @param initializationType how the non-seed members of the initial population are created
+ * @param crossoverType crossover operator
  */
 public record AlgorithmConfiguration(
     int maxEvaluations,
@@ -20,7 +21,8 @@ public record AlgorithmConfiguration(
     double mutationProbability,
     int threads,
     MutationType mutationType,
-    InitializationType initializationType) {
+    InitializationType initializationType,
+    CrossoverType crossoverType) {
 
   /** Crossover probability used in the published experiments. */
   public static final double DEFAULT_CROSSOVER_PROBABILITY = 0.8;
@@ -36,9 +38,43 @@ public record AlgorithmConfiguration(
     requirePositive(threads, "threads");
     requireProbability(crossoverProbability, "crossoverProbability");
     requireProbability(mutationProbability, "mutationProbability");
-    if (mutationType == null || initializationType == null) {
-      throw new IllegalArgumentException("mutationType and initializationType are required");
+    if (mutationType == null || initializationType == null || crossoverType == null) {
+      throw new IllegalArgumentException(
+          "mutationType, initializationType and crossoverType are required");
     }
+  }
+
+  /**
+   * Creates a configuration with the original single-point crossover.
+   *
+   * @param maxEvaluations stopping criterion, number of evaluations
+   * @param populationSize population size
+   * @param offspringPopulationSize offspring created per generation
+   * @param crossoverProbability probability of the TM-safe crossover
+   * @param mutationProbability probability of the gap-shift mutation
+   * @param threads number of evaluation threads; 1 evaluates sequentially
+   * @param mutationType mutation operator
+   * @param initializationType how the non-seed members of the initial population are created
+   */
+  public AlgorithmConfiguration(
+      int maxEvaluations,
+      int populationSize,
+      int offspringPopulationSize,
+      double crossoverProbability,
+      double mutationProbability,
+      int threads,
+      MutationType mutationType,
+      InitializationType initializationType) {
+    this(
+        maxEvaluations,
+        populationSize,
+        offspringPopulationSize,
+        crossoverProbability,
+        mutationProbability,
+        threads,
+        mutationType,
+        initializationType,
+        CrossoverType.SINGLE_POINT);
   }
 
   /**

@@ -4,10 +4,15 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
+import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
+import org.tmm2structalign.operator.RandomChoiceMutation;
 import org.tmm2structalign.operator.RandomSource;
 import org.tmm2structalign.operator.TmAwareGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeGapShiftMutation;
+import org.tmm2structalign.operator.TmSafeInsertGapMutation;
+import org.tmm2structalign.operator.TmSafeMultiPointCrossover;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
+import org.tmm2structalign.operator.TmSafeSplitResidueRunMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
@@ -25,6 +30,7 @@ import org.uma.jmetal.component.catalogue.common.termination.Termination;
 import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEA2EnvironmentalSelection;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEAEnvironmentalSelection;
+import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
@@ -209,8 +215,12 @@ public final class AlgorithmFactory {
     return () -> SeededPopulationCreation.spreadSeeds(creation.create(), seedCount);
   }
 
-  private TmSafeSinglePointCrossover crossover() {
-    return new TmSafeSinglePointCrossover(configuration.crossoverProbability(), random);
+  private CrossoverOperator<MsaSolution> crossover() {
+    double probability = configuration.crossoverProbability();
+    return switch (configuration.crossoverType()) {
+      case SINGLE_POINT -> new TmSafeSinglePointCrossover(probability, random);
+      case TWO_POINT -> new TmSafeMultiPointCrossover(probability, 2, random);
+    };
   }
 
   private MutationOperator<MsaSolution> mutation() {
@@ -218,13 +228,30 @@ public final class AlgorithmFactory {
   }
 
   private MutationOperator<MsaSolution> mutation(double probability) {
-    return switch (configuration.mutationType()) {
+    return mutation(configuration.mutationType(), probability);
+  }
+
+  private MutationOperator<MsaSolution> mutation(MutationType type, double probability) {
+    return switch (type) {
       case GAP_SHIFT ->
           new TmAwareGapShiftMutation(
               probability, structures, TmAwareGapShiftMutation.DEFAULT_MAX_TRIES, random);
       case TM_SAFE_GAP_SHIFT ->
           new TmSafeGapShiftMutation(
               probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random);
+      case INSERT_GAP -> new TmSafeInsertGapMutation(probability, 1, random);
+      case SPLIT_RESIDUE_RUN -> new TmSafeSplitResidueRunMutation(probability, 1, random);
+      case MERGE_GAP_RUNS -> new MergeAdjacentGapRunsMutation(probability, random);
+      case RANDOM_CHOICE ->
+          new RandomChoiceMutation(
+              probability,
+              List.of(
+                  mutation(MutationType.TM_SAFE_GAP_SHIFT, 1.0),
+                  mutation(MutationType.INSERT_GAP, 1.0),
+                  mutation(MutationType.SPLIT_RESIDUE_RUN, 1.0),
+                  mutation(MutationType.MERGE_GAP_RUNS, 1.0)),
+              1,
+              random);
     };
   }
 

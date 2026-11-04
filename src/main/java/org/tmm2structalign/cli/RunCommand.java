@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.algorithm.CrossoverType;
 import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.objective.LddtAggregation;
@@ -87,6 +88,14 @@ public final class RunCommand implements Callable<Integer> {
   double crossoverProbability;
 
   @Option(
+      names = "--crossover",
+      defaultValue = "SINGLE_POINT",
+      description =
+          "Crossover operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE} (original)."
+              + " Both never cut a transmembrane helix.")
+  CrossoverType crossover;
+
+  @Option(
       names = "--mutation-probability",
       description = "Default: 1.0 for PAES (mutation-only), 0.2 for the other algorithms.")
   Double mutationProbability;
@@ -96,7 +105,9 @@ public final class RunCommand implements Callable<Integer> {
       defaultValue = "GAP_SHIFT",
       description =
           "Mutation operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE} (original);"
-              + " TM_SAFE_GAP_SHIFT never breaks a transmembrane helix.")
+              + " all the others never break a transmembrane helix. INSERT_GAP and"
+              + " SPLIT_RESIDUE_RUN lengthen the alignment by one column; RANDOM_CHOICE picks"
+              + " one of the TM-safe mutations each time.")
   MutationType mutation;
 
   @Option(
@@ -156,7 +167,8 @@ public final class RunCommand implements Callable<Integer> {
                   effectiveMutationProbability(),
                   threads,
                   mutation,
-                  initialization),
+                  initialization,
+                  crossover),
               algorithm,
               mappingPolicy,
               lddtAggregation,
