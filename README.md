@@ -8,16 +8,17 @@ protein-coupled receptors guided by predicted topology and AlphaFold2 structures
 ## Overview
 
 TM-M2StructAlign refines alignments produced by existing tools (MAFFT, Kalign, ClustalW...)
-with an NSGA-II built on [jMetal](https://github.com/jMetal/jMetal). Every solution is an
-alignment, and two objectives are optimised at the same time:
+with a multiobjective evolutionary algorithm built on [jMetal](https://github.com/jMetal/jMetal):
+NSGA-II in the published configuration, and other algorithms for comparison. Every solution is
+an alignment, and two objectives are maximised at the same time:
 
 | Objective | What it rewards |
 | --- | --- |
 | **SOPwTP** (topology-aware sum of pairs) | Residue pairs scored with PHAT when both residues are transmembrane (TM) and BLOSUM62 otherwise; affine gap penalties that are higher in TM regions (8/3) than elsewhere (3/1) |
 | **lDDT** (structural consistency) | Superposition-free lDDT computed from AlphaFold2 Cα distance matrices (inclusion radius 15 Å): aligned residues should have the same local distances in every structure |
 
-The search never cuts a TM helix when recombining alignments, and moves gap blocks preferably
-into loops. The result is a set of Pareto-optimal alignments that trade sequence and structural
+The search never cuts a TM helix when recombining alignments, and the default mutation moves
+gap blocks preferably into loops. The result is a set of Pareto-optimal alignments that trade sequence and structural
 consistency.
 
 ## Project ecosystem
@@ -52,13 +53,17 @@ For reproducible analyses, cite the Zenodo version-specific DOI and use the arch
   row (`alignment.GapIntervals`). Residues are never stored; the alignment is decoded from the
   ungapped sequences.
 - **Initial population.** An explicit list of seed alignments (precomputed with other tools),
-  without duplicates, completed with crossover children up to the population size.
+  without duplicates, completed with crossover children up to the population size
+  (`--initialization` selects alternatives). For MOEA/D the seeds are spread over equally spaced
+  subproblems.
 - **Crossover** (`TmSafeSinglePointCrossover`). Single cut at a column of the first parent; the
   cut is rejected if it separates two consecutive TM residues of any protein. Remaining residues
-  of every protein are taken from the second parent.
+  of every protein are taken from the second parent. `--crossover TWO_POINT` uses two cuts.
 - **Mutation** (`TmAwareGapShiftMutation`). Moves a gap block of one protein to a new position
   chosen by rejection sampling: TM residues are avoided (acceptance 0.05), loops and residues
-  without structure are preferred (0.90 / 0.95).
+  without structure are preferred (0.90 / 0.95). `--mutation` selects mutations that never break
+  a helix (see the options table and [docs/review/06-operators.md](docs/review/06-operators.md)).
+  Gaps inside helices inherited from the seeds are kept: TM integrity is not a formal constraint.
 - **Structure mapping.** AlphaFold residues are mapped to the input sequence by PDB numbering
   when the residues agree, or by sequence alignment otherwise (e.g. OXER1 and MCHR1, whose
   AlphaFold model is a different isoform). Every mapping is reported in the run metadata.
@@ -97,6 +102,9 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 
 | Option | Default | Meaning |
 | --- | --- | --- |
+| `--data-root` | (required) | `GPCRdb` directory of the dataset repository |
+| `--dataset` | (required) | Dataset name, e.g. `classF` or `classA_001_19` |
+| `--output-root` / `--run-id` | (required) | The run writes to `<output-root>/ejecuciones/<dataset>/<run-id>/` |
 | `--seeds` | (required) | Tools whose `precomputed/<dataset>/<tool>_<dataset>.fasta` seed the population |
 | `--seed` | (required) | Random seed; the same seed and options reproduce the run exactly |
 | `--max-evaluations` | 10000 | Stopping criterion |
@@ -125,7 +133,7 @@ All algorithms use the same objectives, operators and seeded initial population;
 | `NSGA_III` | NSGA-III | Population size must be a multiple of 4 |
 | `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
 | `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
-| `MOEA_D` | MOEA/D | Normalised PBI aggregation; steady state |
+| `MOEA_D` | MOEA/D | Normalised PBI aggregation, neighbourhood of 20; seeds spread over the subproblems; steady state |
 | `PAES` | PAES, (1+1) with a crowding-distance archive | Mutation only; starts from the first seed; archive size = population size |
 | `RANDOM_SEARCH` | Random search, gaps at random | Sanity check (weak baseline) |
 | `RANDOM_SEEDED` | Random search, seeds + 10 random mutations | Sanity check (strong baseline) |
@@ -146,7 +154,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
 
 `org.tmm2structalign.evaluation.EvaluationMain` computes Pair F1, TM-Pair F1 and TM-gap rate
 for every alignment of a result tree; see [docs/evaluation-metrics.md](docs/evaluation-metrics.md).
-`scripts/pareto_analysis.py` analyses the fronts of several runs.
+`scripts/pareto_analysis.py` analyses the fronts of several runs (Python 3 with NumPy and
+Matplotlib).
 
 ## Output files
 
@@ -155,7 +164,7 @@ existing directory.
 
 | File | Content |
 | --- | --- |
-| `FUN.csv` | One line per solution: SOPwTP and lDDT, comma-separated, no header (jMetal convention) |
+| `FUN.csv` | One line per solution: SOPwTP and lDDT, comma-separated, no header (jMetal convention). Values are reported as computed (both higher is better), not negated |
 | `MSASol<i>.fasta` | Alignment of line `i` of `FUN.csv` |
 | `config.json` | Full run configuration |
 | `metadata.json` | Git commit, timing, seed files with SHA-256 (and duplicates), structure mapping of every protein, proteins without structure |
@@ -175,12 +184,14 @@ src/main/java/org/tmm2structalign/
   objective/   SOPwTP, lDDT, substitution matrices
   operator/    crossover and mutation
   problem/     jMetal problem
-  algorithm/   seeded population and NSGA-II assembly
+  algorithm/   initial populations, NSGA-II assembly, factory of the other algorithms
   run/         run configuration, execution, outputs, baseline scoring
   cli/         command line (picocli)
   evaluation/  comparison with reference alignments
 src/main/java/org/tm_msaligner/   legacy irace tuning code (kept as is)
-docs/review/                       code and dataset review, work plan
+docs/review/                       code and dataset review, work plan, operator survey
+docs/evaluation-metrics.md         reference-based metrics
+scripts/                           Pareto analysis, batch of runs on Windows
 ```
 
 ## Development
