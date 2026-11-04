@@ -34,8 +34,8 @@ same alignment); `scripts/pareto_analysis.py` keeps the non-dominated ones (repe
 
 ### `config.json`
 
-Every option of the run, with defaults resolved, for example `"crossoverType":"SINGLE_POINT"`,
-`"mutationType":"GAP_SHIFT"`, `"mutationProbability":0.2` and `"lddtCutoff":15.0`. Together with
+Every option of the run, with defaults resolved, for example
+`"mutationType":"TM_SAFE_GAP_SHIFT"`, `"mutationProbability":0.2` and `"lddtCutoff":15.0`. Together with
 the dataset version and the git commit of `metadata.json`, it is enough to repeat the run.
 
 ### `metadata.json`

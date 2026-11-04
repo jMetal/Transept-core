@@ -17,8 +17,7 @@ the comparison is fair, how to measure them, and how to tell a real difference f
 | Option | Values |
 | --- | --- |
 | `--algorithm` | `NSGA_II` (default), `NSGA_III`, `AGE_MOEA`, `AGE_MOEA_II`, `SMS_EMOA`, `MOEA_D`, `PAES`, and the random searches `RANDOM_SEARCH` and `RANDOM_SEEDED` |
-| `--mutation` | `GAP_SHIFT` (default), `TM_SAFE_GAP_SHIFT`, `MERGE_GAP_RUNS`, `RANDOM_CHOICE` |
-| `--crossover` | `SINGLE_POINT` (default), `TWO_POINT` |
+| `--mutation` | `TM_SAFE_GAP_SHIFT` (default), `MERGE_GAP_RUNS`, `RANDOM_CHOICE` |
 | `--initialization` | `CROSSOVER` (default), `CROSSOVER_DISTINCT`, `PERTURBED` |
 
 All algorithms start from the same seed alignments, use the same operators and stop after the same

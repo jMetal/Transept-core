@@ -104,8 +104,7 @@ is mapped in this order:
 3. Otherwise the structure is not used (status `LOW_IDENTITY`).
 
 Without a PDB file, the numbering cannot be checked and is used as is (status `UNVERIFIED`).
-`NUMBERED_ONLY` skips step 2, and `LEGACY` trusts the numbering without checks, as the original
-implementation did.
+`NUMBERED_ONLY` skips step 2.
 
 In the benchmark, the AlphaFold models of OXER1 and MCHR1 are of a different isoform than the
 GPCRdb sequences: by numbering only 8 % and 7 % of their residues agree, while the alignment maps

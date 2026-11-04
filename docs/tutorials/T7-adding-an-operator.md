@@ -117,10 +117,9 @@ Write at least these tests:
    as documented.
 3. **Edge cases.** The operator cannot act (rule 4), probability 0, invalid arguments.
 
-The integration test `TmSafetyIT` runs NSGA-II with every TM-safe mutation and crossover of the
-command line on a synthetic dataset and checks that no final alignment breaks a helix. It covers
-every value of `MutationType` except `GAP_SHIFT`, so a new mutation is tested automatically; keep
-`MutationType.isTmSafe()` consistent with it.
+The integration test `TmSafetyIT` runs NSGA-II with every mutation of the command line on a
+synthetic dataset and checks that no final alignment breaks a helix. It covers every value of
+`MutationType`, so a new mutation is tested automatically.
 
 ## Step 5: make it available
 
@@ -164,6 +163,6 @@ was removed. The same happened to a mutation that moved a whole helix a few colu
 
 A crossover follows the same rules. Reuse `TmSafeSinglePointCrossover`: its public methods
 `compatibleCuts(first)` (the cuts that do not split a helix) and `recombine(first, second, cut)`
-(the child of one cut) are the building blocks of `TmSafeMultiPointCrossover`, which applies
-several cuts in sequence. A crossover must return copies when it does not recombine, and must check
+(the child of one cut) are the building blocks of any crossover with several cuts (a two-point
+version was built this way, evaluated and removed because it did not improve the results). A crossover must return copies when it does not recombine, and must check
 that both parents align the same protein set.

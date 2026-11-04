@@ -45,9 +45,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--population-size` | 100 | Population size; also the offspring size and, for PAES, the archive size |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
 | `--initialization` | `CROSSOVER` | Members of the initial population besides the seeds: `CROSSOVER` (crossover children, original), `CROSSOVER_DISTINCT` (no two members equal after removing gap-only columns) or `PERTURBED` (crossover child followed by 10 mutations) |
-| `--crossover` | `SINGLE_POINT` | `SINGLE_POINT` (original) or `TWO_POINT`; both never cut a transmembrane helix |
-| `--crossover-probability` | 0.8 | Probability of applying the crossover to each child |
-| `--mutation` | `GAP_SHIFT` | Mutation operator (see below) |
+| `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
+| `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
 
 | `--algorithm` | Algorithm | Notes |
@@ -63,8 +62,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 
 | `--mutation` | Never breaks a helix | Effect |
 | --- | --- | --- |
-| `GAP_SHIFT` | No | Original: moves a gap run of one row; positions inside helices are only discouraged |
-| `TM_SAFE_GAP_SHIFT` | Yes | Moves a gap run of one row to a position that does not split a helix |
+| `TM_SAFE_GAP_SHIFT` (default) | Yes | Moves a gap run of one row to a position that does not split a helix |
 | `MERGE_GAP_RUNS` | Yes | Joins two consecutive gap runs of one row |
 | `RANDOM_CHOICE` | Yes | `TM_SAFE_GAP_SHIFT` or `MERGE_GAP_RUNS`, chosen uniformly each time |
 
@@ -74,8 +72,7 @@ The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes eve
 
 | Option | Default | Meaning |
 | --- | --- | --- |
-| `--mapping-policy` | `VERIFIED` | How AlphaFold residues are mapped to the sequence: `VERIFIED` (numbering checked by residue identity, sequence alignment otherwise), `NUMBERED_ONLY` (numbering only, structure dropped if residues disagree) or `LEGACY` (numbering without checks, as in the original implementation) |
-| `--lddt-aggregation` | `HARMONIC_OVER_LENGTH` | lDDT aggregation: `HARMONIC_OVER_LENGTH` (original) or `PAIR_MEAN` |
+| `--mapping-policy` | `VERIFIED` | How AlphaFold residues are mapped to the sequence: `VERIFIED` (numbering checked by residue identity, sequence alignment otherwise) or `NUMBERED_ONLY` (numbering only, structure dropped if residues disagree) |
 
 ## `baseline`
 
@@ -93,7 +90,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
 | `--data-root` | (required) | `GPCRdb` directory |
 | `--datasets` | (required) | Dataset names, comma-separated |
 | `--output` | standard output | CSV file to write (see [outputs](outputs.md)) |
-| `--mapping-policy`, `--lddt-aggregation` | as in `run` | |
+| `--mapping-policy` | as in `run` | |
 
 ## Comparison with the reference alignments
 

@@ -74,7 +74,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `io` | Readers for 3-line topology, aligned FASTA (tool-specific ids), `_D.csv`/`_idx.csv`, PDB chains; FASTA writer |
 | `structure` | `SequenceStructureMapper` (numbering checked by residue identity, alignment fallback), `StructureLoader`, `ProteinStructures`, `StructuralNeighborhood` |
 | `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
-| `operator` | `TmSafeSinglePointCrossover` (default), `TmSafeMultiPointCrossover` (`--crossover TWO_POINT`), `TmAwareGapShiftMutation` (original, default), TM-safe mutations (`TmSafeGapShiftMutation`, `MergeAdjacentGapRunsMutation`, `RandomChoiceMutation`), `TmBoundaries`, `RandomSource` |
+| `operator` | `TmSafeSinglePointCrossover`, mutations that never break a helix (`TmSafeGapShiftMutation` (default), `MergeAdjacentGapRunsMutation`, `RandomChoiceMutation`), `TmBoundaries`, `RandomSource`. Operators evaluated and removed are listed in tutorial T2 and the internal notes |
 | `problem` | `StructuralMsaProblem` |
 | `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, random search), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
@@ -103,27 +103,29 @@ needs; see §9.
 
 ## 6. Pitfalls (read before touching these areas)
 
-1. **The lDDT objective rewards compact alignments** (`HARMONIC_OVER_LENGTH` divides by the
-   alignment length) and is nearly blind to helix register shifts. Do not draw conclusions from
-   objective 2 alone; check against reference-based metrics. See finding A3.
-2. **Structure mapping.** `VERIFIED` (default) changes the lDDT of classA_002, classA_004 and
-   classA_004_19 with respect to the published values (OXER1/MCHR1 were mis-mapped). Use
-   `--mapping-policy LEGACY` only to reproduce published numbers.
+1. **Objective 2 differs from the published one.** The lDDT is the mean of the anchor scores; the
+   original aggregation (harmonic mean with occupancy, divided by the length) rewarded compact
+   alignments and was removed (finding A3). Like any superposition-free local score, it is nearly
+   blind to helix register shifts: check alignments against reference-based metrics.
+2. **Structure mapping.** The verified mapping corrects OXER1 and MCHR1, which the original
+   implementation mis-mapped; it changes the lDDT of classA_002, classA_004 and classA_004_19.
+   The published values can only be reproduced with tag `legacy-v1.0`.
 3. **Seeds.** Caretta outputs are residue-level misaligned for most classes, and the structural
    tools' outputs in the full classA_002/003/004 datasets do not match the GPCRdb sequences.
    Choose `--seeds` deliberately.
-4. **Differential oracle.** `BaselineOracleIT` compares the objectives with the dataset's
-   `baselines.csv` (frozen in `src/test/resources/oracle`). If you change an objective on
-   purpose, update the oracle expectations in the same change and explain why.
+4. **Differential oracle.** `BaselineOracleIT` checks SOPwTP against the original values of the
+   dataset's `baselines.csv` and lDDT against a regression snapshot (`lddt-snapshot.csv`), both in
+   `src/test/resources/oracle`. If you change an objective on purpose, regenerate the snapshot in
+   the same change and explain why.
 5. `.gitignore` excludes `*.fasta` except under `src/test/resources/`. Prefer generating fixtures
    in `@TempDir`.
-6. **TM integrity is not a formal constraint** (`numberOfConstraints() = 0`). The crossover never
-   cuts a helix; the original mutation only discourages it; `TmSafeGapShiftMutation` forbids it.
-   Gaps inside helices inherited from the seeds are kept. Which mutation becomes the default is
-   pending a decision of the authors: do not change the default without asking. The same applies
-   to `--initialization` (`CROSSOVER` is the original; `CROSSOVER_DISTINCT` removes the 15-28 %
-   effective duplicates measured in the original initial population).
-7. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
+6. **TM integrity is not a formal constraint** (`numberOfConstraints() = 0`), but no operator
+   breaks a helix: the crossover never cuts one and every mutation forbids it. Gaps inside helices
+   inherited from the seeds are kept. Do not change defaults without asking the authors.
+7. **Superseded components are removed, not kept as options** (the original mutation, the
+   original lDDT aggregation, the legacy mapping, the two-point crossover): reproducing the
+   published results is the job of tag `legacy-v1.0`.
+8. Results are not bit-identical to the published ones (jMetal 6.2 → 7.10 changes how random
    numbers are consumed); same seed + same version is bit-identical.
 
 ## 7. Current work (November 2026)

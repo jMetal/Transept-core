@@ -161,9 +161,7 @@ also:
 - **Compare against baselines**, such as the seeds themselves and the random searches of
   [T5](T5-comparing-algorithms-and-operators.md).
 
-To repeat the published experiments, use the settings of the article (budget, population, seeds)
-together with `--mapping-policy LEGACY`: the original implementation mapped the AlphaFold models of
-OXER1 and MCHR1 incorrectly, and the default policy fixes it, which changes the lDDT in
-`classA_002`, `classA_004` and `classA_004_19`. Even then, the results will not be identical bit
-for bit, because the version of jMetal used by the article consumed random numbers differently;
-they should agree statistically.
+This version does not reproduce the published experiments: it corrects the structure mapping of
+OXER1 and MCHR1, removes gap-only columns, defines the structural objective as the mean of the
+anchor scores and uses a mutation that never breaks a helix. To reproduce the published results,
+use the code at tag `legacy-v1.0`.
