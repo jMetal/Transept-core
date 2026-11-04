@@ -8,7 +8,6 @@ import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
 import org.tmm2structalign.operator.RandomChoiceMutation;
 import org.tmm2structalign.operator.RandomSource;
 import org.tmm2structalign.operator.TmSafeGapShiftMutation;
-import org.tmm2structalign.operator.TmSafeMultiPointCrossover;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
@@ -213,11 +212,7 @@ public final class AlgorithmFactory {
   }
 
   private CrossoverOperator<MsaSolution> crossover() {
-    double probability = configuration.crossoverProbability();
-    return switch (configuration.crossoverType()) {
-      case SINGLE_POINT -> new TmSafeSinglePointCrossover(probability, random);
-      case TWO_POINT -> new TmSafeMultiPointCrossover(probability, 2, random);
-    };
+    return new TmSafeSinglePointCrossover(configuration.crossoverProbability(), random);
   }
 
   private MutationOperator<MsaSolution> mutation() {

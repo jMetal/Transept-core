@@ -179,14 +179,12 @@ class CliTest {
               "--seed", "3",
               "--max-evaluations", "50",
               "--population-size", "8",
-              "--crossover", "TWO_POINT",
               "--mutation", "RANDOM_CHOICE");
 
       // Assert
       String config =
           Files.readString(outputRoot.resolve("ejecuciones/synthetic/operators/config.json"));
       assertEquals(0, status);
-      assertTrue(config.contains("\"crossoverType\":\"TWO_POINT\""), config);
       assertTrue(config.contains("\"mutationType\":\"RANDOM_CHOICE\""), config);
     }
 

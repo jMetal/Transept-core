@@ -222,9 +222,8 @@ at one end of the front.
 
 ## Step 8: crossover
 
-The crossovers combine two parent alignments **without ever cutting a transmembrane helix**.
-
-**Single point** (`--crossover SINGLE_POINT`, the default, class `TmSafeSinglePointCrossover`):
+The crossover (class `TmSafeSinglePointCrossover`) combines two parent alignments **without ever
+cutting a transmembrane helix**:
 
 1. Choose a cut column `c` of the first parent at random among the **valid cuts**: columns that are
    not gap-only and where, for every protein, the residues on the left and the residue on the
@@ -254,24 +253,16 @@ single-point child, cut at column 1:
     P--TLLIAVLGKE
     PQSTLVAILGNE-
     SOPwTP 72.0   lDDT 0.8717   broken helices 0
-two-point child, cuts at columns 1 and 10:
-    PQTLLVAVLGNKE
-    P--TLLIAVLGKE
-    PQSTLVAILGN-E
-    SOPwTP 80.0   lDDT 0.8703   broken helices 0
 ```
 
 Columns 3 to 8 are not valid cuts: they would separate residues of the helices. Column 12 is not
-either, because the cut must leave at least one column on each side. In the single-point child,
+either, because the cut must leave at least one column on each side. In the child,
 `p2` keeps `P-` from the first parent and then needs its remaining residues `TLLIAVLGKE` from the
 second parent, where they start at column 3 instead of column 2 as for the other proteins: one gap
 of padding keeps them in register. The trailing columns that are gaps in every row disappear when
 the child is evaluated.
 
-**Two points** (`--crossover TWO_POINT`, class `TmSafeMultiPointCrossover`) repeats the operation
-alternating the donor: the beginning comes from the first parent, the middle from the second, and
-the end from the first again. Every cut is chosen among the valid cuts of the partial child after
-the previous cut. With one point it gives exactly the same children as the single-point crossover.
+A two-point variant was also evaluated; it did not improve the results and was removed.
 
 ## Step 9: mutation
 

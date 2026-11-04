@@ -13,7 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.algorithm.CrossoverType;
 import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.alignment.Msa;
@@ -79,34 +78,31 @@ class TmSafetyIT {
 
   @ParameterizedTest
   @EnumSource(MutationType.class)
-  @DisplayName("given a TM-safe mutation and any crossover, when running, then no helix breaks")
-  void givenTmSafeMutationAndAnyCrossover_whenRunning_thenNoHelixBreaks(MutationType mutation)
-      throws IOException {
-    for (CrossoverType crossover : CrossoverType.values()) {
-      // Arrange
-      Path run = directory.resolve("operators").resolve(mutation + "-" + crossover);
-      RunConfiguration configuration =
-          new RunConfiguration(
-              dataRoot,
-              SyntheticDataset.NAME,
-              List.of("left", "right"),
-              run,
-              11L,
-              new AlgorithmConfiguration(
-                  400, 8, 8, 0.9, 1.0, 1, mutation, InitializationType.CROSSOVER, crossover),
-              AlgorithmType.NSGA_II,
-              MappingPolicy.VERIFIED,
-              LddtAggregation.HARMONIC_OVER_LENGTH,
-              15f,
-              100);
+  @DisplayName("given a mutation, when running, then no helix breaks")
+  void givenMutation_whenRunning_thenNoHelixBreaks(MutationType mutation) throws IOException {
+    // Arrange
+    Path run = directory.resolve("operators").resolve(mutation.toString());
+    RunConfiguration configuration =
+        new RunConfiguration(
+            dataRoot,
+            SyntheticDataset.NAME,
+            List.of("left", "right"),
+            run,
+            11L,
+            new AlgorithmConfiguration(
+                400, 8, 8, 0.9, 1.0, 1, mutation, InitializationType.CROSSOVER),
+            AlgorithmType.NSGA_II,
+            MappingPolicy.VERIFIED,
+            LddtAggregation.HARMONIC_OVER_LENGTH,
+            15f,
+            100);
 
-      // Act
-      int solutions = new ExperimentRunner().run(configuration).frontSize();
+    // Act
+    int solutions = new ExperimentRunner().run(configuration).frontSize();
 
-      // Assert
-      assertEquals(
-          0, breakingRuns(configuration, run, solutions), mutation + "/" + crossover);
-    }
+    // Assert
+    assertEquals(
+        0, breakingRuns(configuration, run, solutions), mutation.toString());
   }
 
   private static int breakingRuns(RunConfiguration configuration, Path run, int solutions)

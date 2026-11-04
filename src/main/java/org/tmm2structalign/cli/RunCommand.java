@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.algorithm.CrossoverType;
 import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.objective.LddtAggregation;
@@ -88,14 +87,6 @@ public final class RunCommand implements Callable<Integer> {
   double crossoverProbability;
 
   @Option(
-      names = "--crossover",
-      defaultValue = "SINGLE_POINT",
-      description =
-          "Crossover operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE} (original)."
-              + " Both never cut a transmembrane helix.")
-  CrossoverType crossover;
-
-  @Option(
       names = "--mutation-probability",
       description = "Default: 1.0 for PAES (mutation-only), 0.2 for the other algorithms.")
   Double mutationProbability;
@@ -166,8 +157,7 @@ public final class RunCommand implements Callable<Integer> {
                   effectiveMutationProbability(),
                   threads,
                   mutation,
-                  initialization,
-                  crossover),
+                  initialization),
               algorithm,
               mappingPolicy,
               lddtAggregation,

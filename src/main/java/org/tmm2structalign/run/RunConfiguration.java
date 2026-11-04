@@ -138,7 +138,6 @@ public record RunConfiguration(
     map.put("offspringPopulationSize", algorithm.offspringPopulationSize());
     map.put("crossoverProbability", algorithm.crossoverProbability());
     map.put("mutationProbability", algorithm.mutationProbability());
-    map.put("crossoverType", algorithm.crossoverType());
     map.put("mutationType", algorithm.mutationType());
     map.put("initializationType", algorithm.initializationType());
     map.put("threads", algorithm.threads());

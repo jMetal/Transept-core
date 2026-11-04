@@ -18,7 +18,6 @@ import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
 import org.tmm2structalign.operator.RandomSource;
 import org.tmm2structalign.operator.TmSafeGapShiftMutation;
-import org.tmm2structalign.operator.TmSafeMultiPointCrossover;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.MappingStatus;
@@ -166,9 +165,6 @@ public final class FormulationTour {
         single.compatibleCuts(first)));
     out.append("single-point child, cut at column 1:\n");
     describe(out, null, single.recombine(first, second, 1));
-    out.append("two-point child, cuts at columns 1 and 10:\n");
-    describe(out, null, new TmSafeMultiPointCrossover(1.0, 2).recombine(first, second,
-        List.of(1, 10)));
   }
 
   private void mutationSection(StringBuilder out) {
