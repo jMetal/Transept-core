@@ -94,13 +94,14 @@ class AlgorithmFactoryTest {
       "MOEA_D, MOEAD",
       "PAES, PAES",
       "RANDOM_SEARCH, RandomSearch",
-      "RANDOM_SEEDED, RandomSeededSearch"
+      "RANDOM_SEEDED, RandomSeededSearch",
+      "GENETIC_ALGORITHM, GeneticAlgorithm"
     })
     @DisplayName("given an algorithm type, when built, then jMetal reports the expected name")
     void givenAlgorithmType_whenBuilt_thenJmetalReportsExpectedName(
         AlgorithmType type, String name) {
       // Act
-      SearchRun run = factory(POPULATION_SIZE, 0.2).create(type);
+      SearchRun run = factory(type, POPULATION_SIZE, 0.2).create(type);
 
       // Assert
       assertEquals(name, run.name());
@@ -223,6 +224,136 @@ class AlgorithmFactoryTest {
       assertFalse(AlgorithmType.PAES.usesCrossover());
       assertTrue(AlgorithmType.NSGA_III.usesCrossover());
       assertFalse(AlgorithmType.RANDOM_SEARCH.usesCrossover());
+      assertTrue(AlgorithmType.GENETIC_ALGORITHM.usesCrossover());
+    }
+  }
+
+  @Nested
+  @DisplayName("When the number of objectives must suit the algorithm")
+  class Formulations {
+
+    private StructuralMsaProblem lddtOnly() {
+      return new StructuralMsaProblem(
+          "test", proteins, List.of(new StructuralLddt(structures, 15f)));
+    }
+
+    @Test
+    @DisplayName("given two objectives, when building the genetic algorithm, then it fails")
+    void givenTwoObjectives_whenBuildingGeneticAlgorithm_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory = factory(POPULATION_SIZE, 0.2);
+
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class, () -> factory.create(AlgorithmType.GENETIC_ALGORITHM));
+    }
+
+    @Test
+    @DisplayName("given one objective, when building NSGA-II, then it fails")
+    void givenOneObjective_whenBuildingNsgaTwo_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory = factory(lddtOnly(), POPULATION_SIZE, 0.2);
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.NSGA_II));
+    }
+
+    @Test
+    @DisplayName("given one objective, when running the seeded random search, then it works")
+    void givenOneObjective_whenRunningSeededRandomSearch_thenItWorks() {
+      // Arrange
+      SearchRun run =
+          factory(lddtOnly(), POPULATION_SIZE, 1.0).create(AlgorithmType.RANDOM_SEEDED);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertFalse(run.front().isEmpty());
+    }
+
+    @Test
+    @DisplayName("given the genetic algorithm, when run, then it keeps or improves the best seed")
+    void givenGeneticAlgorithm_whenRun_thenItKeepsTheBestSeedOrImprovesIt() {
+      // Arrange
+      StructuralMsaProblem single = lddtOnly();
+      double bestSeed = Double.POSITIVE_INFINITY;
+      for (Msa seed : seeds) {
+        MsaSolution solution = single.createSolution(seed);
+        single.evaluate(solution);
+        bestSeed = Math.min(bestSeed, solution.objectives()[0]);
+      }
+      SearchRun run =
+          factory(single, POPULATION_SIZE, 0.2).create(AlgorithmType.GENETIC_ALGORITHM);
+
+      // Act
+      run.run();
+
+      // Assert: objectives are stored minimised
+      assertEquals(AlgorithmFactory.GENETIC_ALGORITHM_NAME, run.name());
+      double best =
+          run.front().stream()
+              .mapToDouble(solution -> solution.objectives()[0])
+              .min()
+              .orElseThrow();
+      assertTrue(best <= bestSeed, best + " > " + bestSeed);
+    }
+  }
+
+  @Nested
+  @DisplayName("When returning an external archive")
+  class ExternalArchive {
+
+    private AlgorithmFactory archiving() {
+      return new AlgorithmFactory(
+          problem,
+          seeds,
+          new AlgorithmConfiguration(
+              EVALUATIONS * 2, POPULATION_SIZE, POPULATION_SIZE, 0.8, 1.0, 1,
+              MutationType.TM_SAFE_GAP_SHIFT, true),
+          structures,
+          new SeededRandom(5));
+    }
+
+    @Test
+    @DisplayName("given NSGA-II, when run, then the front is bounded and mutually non-dominated")
+    void givenNsgaTwo_whenRun_thenFrontIsBoundedAndMutuallyNonDominated() {
+      // Arrange
+      SearchRun run = archiving().create(AlgorithmType.NSGA_II);
+
+      // Act
+      run.run();
+
+      // Assert
+      List<MsaSolution> front = run.front();
+      assertFalse(front.isEmpty());
+      assertTrue(front.size() <= POPULATION_SIZE, "archive size " + front.size());
+      for (MsaSolution first : front) {
+        for (MsaSolution second : front) {
+          assertFalse(dominates(first.objectives(), second.objectives()));
+        }
+      }
+    }
+
+    @Test
+    @DisplayName("given another algorithm, when building it with the archive, then it fails")
+    void givenAnotherAlgorithm_whenBuildingWithArchive_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory = archiving();
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.SMS_EMOA));
+    }
+
+    private static boolean dominates(double[] first, double[] second) {
+      boolean better = false;
+      for (int index = 0; index < first.length; index++) {
+        if (first[index] > second[index]) {
+          return false;
+        }
+        better |= first[index] < second[index];
+      }
+      return better;
     }
   }
 }

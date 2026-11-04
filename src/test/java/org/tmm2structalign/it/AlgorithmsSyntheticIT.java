@@ -12,9 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.alignment.GapColumnCompactor;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
@@ -86,6 +88,52 @@ class AlgorithmsSyntheticIT {
     assertEquals(
         Files.readString(first.resolve("MSASol0.fasta")),
         Files.readString(second.resolve("MSASol0.fasta")));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "GENETIC_ALGORITHM, LDDT, false, 1",
+    "NSGA_II, SOPWTP_LDDT, true, 2",
+    "NSGA_II, SOPWTP_LDDT_COVERAGE, true, 3"
+  })
+  @DisplayName("given a formulation, when run twice, then FUN.csv has its objectives and repeats")
+  void givenFormulation_whenRunningTwice_thenFunHasItsObjectivesAndRepeats(
+      AlgorithmType type, ObjectiveSet objectives, boolean archive, int columns)
+      throws IOException {
+    // Act
+    Path first = formulation(type, objectives, archive, "first").runDirectory();
+    final Path second = formulation(type, objectives, archive, "second").runDirectory();
+
+    // Assert
+    List<String> fun = Files.readAllLines(first.resolve("FUN.csv"));
+    assertFalse(fun.isEmpty());
+    assertTrue(fun.size() <= POPULATION);
+    fun.forEach(line -> assertEquals(columns, line.split(",").length, line));
+    assertEquals(fun, Files.readAllLines(second.resolve("FUN.csv")));
+    String config = Files.readString(first.resolve("config.json"));
+    assertTrue(config.contains("\"objectives\":\"" + objectives + "\""), config);
+    assertTrue(config.contains("\"externalArchive\":" + archive), config);
+  }
+
+  private RunSummary formulation(
+      AlgorithmType type, ObjectiveSet objectives, boolean archive, String runId)
+      throws IOException {
+    return new ExperimentRunner()
+        .run(
+            new RunConfiguration(
+                dataRoot,
+                SyntheticDataset.NAME,
+                List.of("left", "right", "true"),
+                directory.resolve("formulations").resolve(objectives + "_" + runId),
+                21L,
+                new AlgorithmConfiguration(
+                    EVALUATIONS, POPULATION, POPULATION, 0.8, 0.2, 1,
+                    MutationType.TM_SAFE_GAP_SHIFT, archive),
+                type,
+                MappingPolicy.VERIFIED,
+                15f,
+                40,
+                objectives));
   }
 
   private RunSummary run(AlgorithmType type, String runId, long seed) throws IOException {
