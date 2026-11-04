@@ -293,8 +293,10 @@ def plot_results(solutions: list[Solution], combined: list[Solution], selections
                  baselines: list[dict[str, object]], output: Path, args: argparse.Namespace) -> None:
     fig, ax = plt.subplots(figsize=(7.2, 5.8), constrained_layout=True)
     all_points = np.asarray([[s.n1, s.n2] for s in solutions])
+    runs = len({s.run for s in solutions})
     ax.scatter(all_points[:, 0], all_points[:, 1], s=22, color="#b7bcc5", alpha=0.38,
-               linewidths=0, label="All solutions (10 runs)", zorder=1)
+               linewidths=0, label=f"All solutions ({runs} run{'s' if runs != 1 else ''})",
+               zorder=1)
     ordered = sorted(combined, key=lambda s: (s.n1, -s.n2))
     front_points = np.asarray([[s.n1, s.n2] for s in ordered])
     ax.plot(front_points[:, 0], front_points[:, 1], "o-", color="#1769aa", linewidth=1.8,
