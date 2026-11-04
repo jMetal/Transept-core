@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare configurations from the per-run indicators of pareto_analysis.py.
+"""Compare configurations from the per-run indicators of pareto_analysis.py or formulation_study.py.
 
 Usage:
     compare_runs.py <indicators_by_run.csv> --baseline <configuration> [--indicator hypervolume]
@@ -19,6 +19,11 @@ import sys
 from collections import defaultdict
 
 LOWER_IS_BETTER = {"igd_plus"}
+
+
+def lower_is_better(indicator: str) -> bool:
+    """IGD+ and TM-gap rates (also prefixed, e.g. r1_tm_gap_rate) are better when lower."""
+    return indicator in LOWER_IS_BETTER or indicator.endswith("tm_gap_rate")
 
 
 def wilcoxon_exact(first: list[float], second: list[float]) -> float:
@@ -49,7 +54,10 @@ def wilcoxon_exact(first: list[float], second: list[float]) -> float:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("indicators", help="indicators_by_run.csv written by pareto_analysis.py")
+    parser.add_argument(
+        "indicators",
+        help="indicators_by_run.csv of pareto_analysis.py or the output of formulation_study.py",
+    )
     parser.add_argument("--baseline", required=True, help="Configuration to compare against")
     parser.add_argument("--indicator", default="hypervolume")
     args = parser.parse_args()
@@ -60,11 +68,12 @@ def main() -> None:
             configuration, separator, seed = row["run"].rpartition("_seed_")
             if not separator:
                 sys.exit(f"Run '{row['run']}' does not follow <configuration>_seed_<seed>")
-            values[configuration][seed] = float(row[args.indicator])
+            if row[args.indicator] != "":  # undefined for this run, e.g. R2 with one objective
+                values[configuration][seed] = float(row[args.indicator])
     if args.baseline not in values:
         sys.exit(f"No runs of the baseline '{args.baseline}'; found: {', '.join(sorted(values))}")
 
-    lower = args.indicator in LOWER_IS_BETTER
+    lower = lower_is_better(args.indicator)
     baseline = values[args.baseline]
     print(f"{args.indicator} ({'lower' if lower else 'higher'} is better), "
           f"baseline {args.baseline}")
