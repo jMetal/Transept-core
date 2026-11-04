@@ -80,7 +80,7 @@ explains every step and file.
 | [T2. Problem formulation, encoding and variation operators](docs/tutorials/T2-problem-formulation.md) | The objectives, the constraints, how alignments are encoded, and what every crossover and mutation does, with a runnable example |
 | [T3. A study with several seeds](docs/tutorials/T3-several-seeds.md) | Running 10 seeds, combining their fronts, measuring how much the runs differ, and choosing alignments from the combined front |
 | [T4. Choosing an alignment and evaluating it against GPCRdb](docs/tutorials/T4-choosing-and-evaluating.md) | Reading the non-dominated alignments, extremes and knee, and comparing them and the seeds with the GPCRdb reference alignments |
-| T5. Comparing algorithms and operators | *In preparation* |
+| [T5. Comparing algorithms and operators](docs/tutorials/T5-comparing-algorithms-and-operators.md) | Running several configurations fairly, measuring them with hypervolume and IGD+, and telling real differences from noise with paired tests |
 | [T6. Using your own dataset](docs/tutorials/T6-your-own-dataset.md) | The input files a dataset needs, how to compute the distance matrices, and how to check that structures and seeds are read correctly |
 | [T7. Adding a variation operator](docs/tutorials/T7-adding-an-operator.md) | The rules every operator follows, the tests it needs, how to expose it in the command line, and how to decide whether it is worth keeping |
 
