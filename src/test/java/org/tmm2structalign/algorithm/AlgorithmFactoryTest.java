@@ -140,8 +140,7 @@ class AlgorithmFactoryTest {
               problem,
               seeds,
               new AlgorithmConfiguration(
-                  EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.9, 1.0, 1, mutation,
-                  InitializationType.CROSSOVER),
+                  EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.9, 1.0, 1, mutation),
               structures,
               new SeededRandom(7));
       SearchRun run = factory.create(AlgorithmType.NSGA_II);

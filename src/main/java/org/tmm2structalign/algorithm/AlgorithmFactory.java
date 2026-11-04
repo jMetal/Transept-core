@@ -193,15 +193,8 @@ public final class AlgorithmFactory {
   }
 
   private SeededPopulationCreation population() {
-    return configuration.initializationType() == InitializationType.CROSSOVER
-        ? new SeededPopulationCreation(problem, seeds, configuration.populationSize(), random)
-        : new SeededPopulationCreation(
-            problem,
-            seeds,
-            configuration.populationSize(),
-            random,
-            configuration.initializationType(),
-            mutation(1.0));
+    return new SeededPopulationCreation(
+        problem, seeds, configuration.populationSize(), random, mutation(1.0));
   }
 
   /** MOEA/D population: seeds spread over equally spaced subproblems. */

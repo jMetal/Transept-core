@@ -20,24 +20,23 @@ import org.uma.jmetal.operator.mutation.MutationOperator;
  *
  * <p>Seeds are de-duplicated (identical alignments count once), kept in the given order, and
  * truncated to the population size if there are too many: the first ones in the list are kept.
- * The rest of the population is filled according to the {@link InitializationType}: children of
- * the TM-safe crossover applied to random pairs of distinct members (the original strategy),
- * optionally without duplicates or followed by mutations. The result has exactly the requested
- * size (review finding M2).
+ * The rest of the population is filled with children of the TM-safe crossover applied to random
+ * pairs of members, discarding children equivalent to a member (equal once gap-only columns are
+ * removed). If the crossover stops producing new alignments, the remaining members are mutated
+ * copies of random members. The result has exactly the requested size (review finding M2).
  */
 public final class SeededPopulationCreation implements SolutionsCreation<MsaSolution> {
 
-  /** Crossovers tried per missing member before {@code CROSSOVER_DISTINCT} gives up. */
+  /** Crossovers tried per missing member before falling back to mutated copies. */
   public static final int DISTINCT_ATTEMPTS_PER_MEMBER = 10;
 
-  /** Mutations applied to every crossover child by {@code PERTURBED}. */
+  /** Mutations applied to a copy of a member when the crossover produces no new alignment. */
   public static final int PERTURBATION_MUTATIONS = PerturbedSeedCreation.DEFAULT_MUTATIONS;
 
   private final StructuralMsaProblem problem;
   private final List<Msa> seeds;
   private final int populationSize;
   private final RandomSource random;
-  private final InitializationType type;
   private final MutationOperator<MsaSolution> mutation;
 
   /**
@@ -47,40 +46,13 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
    * @param seeds seed alignments, in order of preference
    * @param populationSize number of solutions to create
    * @param random source of random numbers for parent selection and crossover
-   */
-  public SeededPopulationCreation(
-      StructuralMsaProblem problem, List<Msa> seeds, int populationSize, RandomSource random) {
-    if (populationSize < 1) {
-      throw new IllegalArgumentException("Population size must be positive: " + populationSize);
-    }
-    if (seeds == null || seeds.isEmpty()) {
-      throw new IllegalArgumentException("At least one seed alignment is required");
-    }
-    this.problem = problem;
-    this.seeds = List.copyOf(seeds);
-    this.populationSize = populationSize;
-    this.random = random;
-    this.type = InitializationType.CROSSOVER;
-    this.mutation = null;
-  }
-
-  /**
-   * Creates the population builder with a given initialization strategy.
-   *
-   * @param problem problem whose proteins the seeds align
-   * @param seeds seed alignments, in order of preference
-   * @param populationSize number of solutions to create
-   * @param random source of random numbers for parent selection and crossover
-   * @param type how the non-seed members are created
-   * @param mutation mutation applied by {@code CROSSOVER_DISTINCT} and {@code PERTURBED}; it
-   *     should mutate with probability 1
+   * @param mutation mutation used for the fallback copies; it should mutate with probability 1
    */
   public SeededPopulationCreation(
       StructuralMsaProblem problem,
       List<Msa> seeds,
       int populationSize,
       RandomSource random,
-      InitializationType type,
       MutationOperator<MsaSolution> mutation) {
     if (populationSize < 1) {
       throw new IllegalArgumentException("Population size must be positive: " + populationSize);
@@ -88,14 +60,13 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
     if (seeds == null || seeds.isEmpty()) {
       throw new IllegalArgumentException("At least one seed alignment is required");
     }
-    if (type == null || (type != InitializationType.CROSSOVER && mutation == null)) {
-      throw new IllegalArgumentException("The initialization needs a type and a mutation");
+    if (mutation == null) {
+      throw new IllegalArgumentException("A mutation is required");
     }
     this.problem = problem;
     this.seeds = List.copyOf(seeds);
     this.populationSize = populationSize;
     this.random = random;
-    this.type = type;
     this.mutation = mutation;
   }
 
@@ -126,14 +97,7 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
           "At least two distinct seed alignments are needed to fill a population of "
               + populationSize);
     }
-    TmSafeSinglePointCrossover crossover = new TmSafeSinglePointCrossover(1.0, random);
-    if (type == InitializationType.PERTURBED) {
-      fillWithPerturbedChildren(population, crossover);
-    } else if (type == InitializationType.CROSSOVER_DISTINCT) {
-      fillWithDistinctChildren(population, crossover);
-    } else {
-      fillWithChildren(population, crossover);
-    }
+    fillWithDistinctChildren(population, new TmSafeSinglePointCrossover(1.0, random));
     return population;
   }
 
@@ -163,28 +127,6 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
       }
     }
     return new ArrayList<>(List.of(spread));
-  }
-
-  private void fillWithChildren(
-      List<MsaSolution> population, TmSafeSinglePointCrossover crossover) {
-    while (population.size() < populationSize) {
-      for (MsaSolution child : crossover.execute(randomParents(population))) {
-        if (population.size() < populationSize) {
-          population.add(child);
-        }
-      }
-    }
-  }
-
-  private void fillWithPerturbedChildren(
-      List<MsaSolution> population, TmSafeSinglePointCrossover crossover) {
-    while (population.size() < populationSize) {
-      for (MsaSolution child : crossover.execute(randomParents(population))) {
-        if (population.size() < populationSize) {
-          population.add(perturb(child));
-        }
-      }
-    }
   }
 
   private void fillWithDistinctChildren(

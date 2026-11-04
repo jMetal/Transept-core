@@ -2,7 +2,6 @@ package org.tmm2structalign.algorithm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,8 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.alignment.GapColumnCompactor;
 import org.tmm2structalign.alignment.GapIntervals;
 import org.tmm2structalign.alignment.Msa;
@@ -54,44 +51,25 @@ class SeededPopulationCreationTest {
                 proteins, List.of("ACDEFGHIKLMN", "ACDE-GHIKLMN", "AC-EFGHIKL-N")));
   }
 
-  private SeededPopulationCreation creation(InitializationType type, long seed) {
+  private SeededPopulationCreation creation(List<Msa> chosen, long seed) {
     return new SeededPopulationCreation(
         problem,
-        seeds,
+        chosen,
         SIZE,
         new SeededRandom(seed),
-        type,
         new TmSafeGapShiftMutation(1.0, Alignments.unstructured(proteins), 60,
             new SeededRandom(seed + 100)));
   }
 
   @Nested
-  @DisplayName("When creating the population with each strategy")
-  class Strategies {
+  @DisplayName("When creating the population")
+  class Creating {
 
     @Test
-    @DisplayName("given the crossover strategy, when creating, then it matches the original")
-    void givenCrossoverStrategy_whenCreating_thenItMatchesTheOriginal() {
-      // Arrange
-      SeededPopulationCreation original =
-          new SeededPopulationCreation(problem, seeds, SIZE, new SeededRandom(3));
-
+    @DisplayName("given three seeds, when creating, then the seeds come first and size is exact")
+    void givenThreeSeeds_whenCreating_thenSeedsComeFirstAndSizeIsExact() {
       // Act
-      List<MsaSolution> expected = original.create();
-      List<MsaSolution> actual = creation(InitializationType.CROSSOVER, 3).create();
-
-      // Assert
-      assertEquals(
-          expected.stream().map(MsaSolution::variables).toList(),
-          actual.stream().map(MsaSolution::variables).toList());
-    }
-
-    @ParameterizedTest
-    @EnumSource(InitializationType.class)
-    @DisplayName("given any strategy, when creating, then the seeds come first and size is exact")
-    void givenAnyStrategy_whenCreating_thenSeedsComeFirstAndSizeIsExact(InitializationType type) {
-      // Act
-      List<MsaSolution> population = creation(type, 5).create();
+      List<MsaSolution> population = creation(seeds, 5).create();
 
       // Assert
       assertEquals(SIZE, population.size());
@@ -102,10 +80,10 @@ class SeededPopulationCreationTest {
     }
 
     @Test
-    @DisplayName("given the distinct strategy, when creating, then no two members are equivalent")
-    void givenDistinctStrategy_whenCreating_thenNoTwoMembersAreEquivalent() {
+    @DisplayName("given three seeds, when creating, then no two members are equivalent")
+    void givenThreeSeeds_whenCreating_thenNoTwoMembersAreEquivalent() {
       // Act
-      List<MsaSolution> population = creation(InitializationType.CROSSOVER_DISTINCT, 7).create();
+      List<MsaSolution> population = creation(seeds, 7).create();
 
       // Assert: equivalence ignores gap-only columns, which evaluation removes
       Set<List<GapIntervals>> distinct = new HashSet<>();
@@ -116,18 +94,10 @@ class SeededPopulationCreationTest {
     }
 
     @Test
-    @DisplayName("given the perturbed strategy with the TM-safe mutation, then no helix is broken")
-    void givenPerturbedStrategyWithTmSafeMutation_whenCreating_thenNoHelixIsBroken() {
+    @DisplayName("given seeds without gaps in helices, when creating, then no helix is broken")
+    void givenSeedsWithoutGapsInHelices_whenCreating_thenNoHelixIsBroken() {
       // Arrange: only the seeds padded at the ends, which have no gaps inside helices
-      SeededPopulationCreation creation =
-          new SeededPopulationCreation(
-              problem,
-              seeds.subList(0, 2),
-              SIZE,
-              new SeededRandom(9),
-              InitializationType.PERTURBED,
-              new TmSafeGapShiftMutation(
-                  1.0, Alignments.unstructured(proteins), 60, new SeededRandom(19)));
+      SeededPopulationCreation creation = creation(seeds.subList(0, 2), 9);
 
       // Act
       List<MsaSolution> population = creation.create();
@@ -142,17 +112,6 @@ class SeededPopulationCreationTest {
         }
       }
       assertEquals(0, breaking);
-    }
-
-    @Test
-    @DisplayName("given a strategy that mutates and no mutation, when creating, then it fails")
-    void givenStrategyThatMutatesAndNoMutation_whenCreating_thenIllegalArgumentExceptionIsThrown() {
-      // Act & Assert
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SeededPopulationCreation(
-                  problem, seeds, SIZE, new SeededRandom(1), InitializationType.PERTURBED, null));
     }
   }
 

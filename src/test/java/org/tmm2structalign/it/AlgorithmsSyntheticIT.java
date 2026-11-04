@@ -12,12 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.algorithm.InitializationType;
-import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.alignment.GapColumnCompactor;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
@@ -88,44 +85,6 @@ class AlgorithmsSyntheticIT {
     assertEquals(
         Files.readString(first.resolve("MSASol0.fasta")),
         Files.readString(second.resolve("MSASol0.fasta")));
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-    "NSGA_II, CROSSOVER",
-    "NSGA_II, CROSSOVER_DISTINCT",
-    "NSGA_II, PERTURBED",
-    "MOEA_D, CROSSOVER",
-    "MOEA_D, CROSSOVER_DISTINCT",
-    "MOEA_D, PERTURBED"
-  })
-  @DisplayName("given an initialization, when running, then it completes and is recorded")
-  void givenInitialization_whenRunning_thenItCompletesAndIsRecorded(
-      AlgorithmType type, InitializationType initialization) throws IOException {
-    // Arrange
-    Path runDirectory = directory.resolve("init").resolve(type + "_" + initialization);
-    RunConfiguration configuration =
-        new RunConfiguration(
-            dataRoot,
-            SyntheticDataset.NAME,
-            List.of("left", "right", "true"),
-            runDirectory,
-            13L,
-            new AlgorithmConfiguration(
-                EVALUATIONS, POPULATION, POPULATION, 0.8, 0.2, 1,
-                MutationType.TM_SAFE_GAP_SHIFT, initialization),
-            type,
-            MappingPolicy.VERIFIED,
-            15f,
-            40);
-
-    // Act
-    RunSummary summary = new ExperimentRunner().run(configuration);
-
-    // Assert
-    assertTrue(summary.evaluations() >= EVALUATIONS);
-    assertTrue(Files.readString(runDirectory.resolve("config.json"))
-        .contains("\"initializationType\":\"" + initialization + "\""));
   }
 
   private RunSummary run(AlgorithmType type, String runId, long seed) throws IOException {

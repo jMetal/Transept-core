@@ -43,6 +43,11 @@ class AlgorithmTest {
             Msa.fromAlignedRows(proteins, List.of("-ACDEFGHIK", "-ACDEGHIK-", "--ACEFGHIK")));
   }
 
+  private TmSafeGapShiftMutation mutation() {
+    return new TmSafeGapShiftMutation(
+        1.0, Alignments.unstructured(proteins), 60, new SeededRandom(99));
+  }
+
   @Nested
   @DisplayName("When creating the initial population")
   class InitialPopulation {
@@ -53,7 +58,7 @@ class AlgorithmTest {
     void givenPopulationSize_whenCreating_thenExactlyThatManyAreCreated(int size) {
       // Arrange
       SeededPopulationCreation creation =
-          new SeededPopulationCreation(problem, seeds, size, new SeededRandom(size));
+          new SeededPopulationCreation(problem, seeds, size, new SeededRandom(size), mutation());
 
       // Act
       List<MsaSolution> population = creation.create();
@@ -68,7 +73,7 @@ class AlgorithmTest {
       // Arrange
       List<Msa> duplicated = List.of(seeds.get(0), seeds.get(1), seeds.get(0));
       SeededPopulationCreation creation =
-          new SeededPopulationCreation(problem, duplicated, 2, new SeededRandom(1));
+          new SeededPopulationCreation(problem, duplicated, 2, new SeededRandom(1), mutation());
 
       // Act
       List<MsaSolution> population = creation.create();
@@ -85,7 +90,7 @@ class AlgorithmTest {
       // Arrange
       SeededPopulationCreation creation =
           new SeededPopulationCreation(
-              problem, List.of(seeds.get(0), seeds.get(0)), 4, new SeededRandom(1));
+              problem, List.of(seeds.get(0), seeds.get(0)), 4, new SeededRandom(1), mutation());
 
       // Act & Assert
       assertThrows(IllegalArgumentException.class, creation::create);
@@ -97,10 +102,15 @@ class AlgorithmTest {
       // Act & Assert
       assertThrows(
           IllegalArgumentException.class,
-          () -> new SeededPopulationCreation(problem, seeds, 0, new SeededRandom(1)));
+          () -> new SeededPopulationCreation(problem, seeds, 0, new SeededRandom(1), mutation()));
       assertThrows(
           IllegalArgumentException.class,
-          () -> new SeededPopulationCreation(problem, List.of(), 3, new SeededRandom(1)));
+          () ->
+              new SeededPopulationCreation(
+                  problem, List.of(), 3, new SeededRandom(1), mutation()));
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> new SeededPopulationCreation(problem, seeds, 3, new SeededRandom(1), null));
     }
   }
 
@@ -150,7 +160,7 @@ class AlgorithmTest {
       // Arrange
       AlgorithmConfiguration configuration = AlgorithmConfiguration.withDefaults(60, 6, threads);
       SeededPopulationCreation population =
-          new SeededPopulationCreation(problem, seeds, 6, new SeededRandom(3));
+          new SeededPopulationCreation(problem, seeds, 6, new SeededRandom(3), mutation());
       EvolutionaryAlgorithm<MsaSolution> algorithm =
           TmStructAlign.createDefault(
               problem,

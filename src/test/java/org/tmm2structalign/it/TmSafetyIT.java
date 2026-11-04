@@ -13,7 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
@@ -88,7 +87,7 @@ class TmSafetyIT {
             run,
             11L,
             new AlgorithmConfiguration(
-                400, 8, 8, 0.9, 1.0, 1, mutation, InitializationType.CROSSOVER),
+                400, 8, 8, 0.9, 1.0, 1, mutation),
             AlgorithmType.NSGA_II,
             MappingPolicy.VERIFIED,
             15f,
