@@ -18,6 +18,8 @@ the comparison is fair, how to measure them, and how to tell a real difference f
 | --- | --- |
 | `--algorithm` | `NSGA_II` (default), `NSGA_III`, `AGE_MOEA`, `AGE_MOEA_II`, `SMS_EMOA`, `MOEA_D`, `PAES`, and the random searches `RANDOM_SEARCH` and `RANDOM_SEEDED` |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` (default), `MERGE_GAP_RUNS`, `RANDOM_CHOICE` |
+| `--objectives` | `SOPWTP_LDDT` (default), `LDDT` (with `--algorithm GENETIC_ALGORITHM`), `SOPWTP_LDDT_COVERAGE` |
+| `--external-archive` | Off (default) or on (NSGA-II only) |
 
 All algorithms start from the same seed alignments, use the same operators and stop after the same
 number of evaluations, so that only the option under study changes. Some need care:
@@ -134,6 +136,11 @@ smsemoa                 6    0.018    0.007     4/6   1.000
 - **"Not significant" does not mean "equal".** Six seeds detect only large differences. To claim
   that two configurations are equivalent, or to detect small differences, use more seeds (10 to
   30), more than one dataset, and a budget close to the one of the real study.
+
+Formulations with a different number of objectives cannot be compared by hypervolume: each one
+measures a different space. Compare them instead by the agreement with the reference alignments
+of an alignment chosen with a rule fixed in advance (for example, the best lDDT), and by the
+spread of that agreement over the returned alignments ([T4](T4-choosing-and-evaluating.md)).
 
 ## Step 6: good practice
 

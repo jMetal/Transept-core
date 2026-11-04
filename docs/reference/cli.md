@@ -47,6 +47,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
+| `--external-archive` | off | Return a bounded archive (population size, crowding distance) of the non-dominated solutions found during the search instead of the final population. NSGA-II only |
 
 The initial population holds the distinct seeds and, for the rest, distinct crossover children
 ([T2, Step 7](../tutorials/T2-problem-formulation.md#step-7-the-initial-population)).
@@ -61,6 +62,10 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 | `PAES` | PAES, (1+1) with a crowding-distance archive | Mutation only; starts from the first seed |
 | `RANDOM_SEARCH` | Random search, gaps at random | Sanity check (weak baseline); ignores the seeds and the operators |
 | `RANDOM_SEEDED` | Random search, seeds + 10 random mutations | Sanity check (strong baseline) |
+| `GENETIC_ALGORITHM` | Generational GA, binary tournament, (μ+λ) replacement | Single objective only (`--objectives LDDT`); same seeded population and operators as NSGA-II |
+
+The multiobjective algorithms need at least two objectives; the random searches accept any
+number.
 
 | `--mutation` | Never breaks a helix | Effect |
 | --- | --- | --- |
@@ -74,6 +79,7 @@ The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes eve
 
 | Option | Default | Meaning |
 | --- | --- | --- |
+| `--objectives` | `SOPWTP_LDDT` | Objectives to optimise, in the order of `FUN.csv`: `LDDT` (lDDT alone, for `GENETIC_ALGORITHM`), `SOPWTP_LDDT` (published formulation) or `SOPWTP_LDDT_COVERAGE` (adds the aligned-pair coverage, [metrics](metrics.md)) |
 | `--mapping-policy` | `VERIFIED` | How AlphaFold residues are mapped to the sequence: `VERIFIED` (numbering checked by residue identity, sequence alignment otherwise) or `NUMBERED_ONLY` (numbering only, structure dropped if residues disagree) |
 
 ## `baseline`

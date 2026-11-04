@@ -16,6 +16,9 @@ GPCRs. It optimizes two objectives:
    AlphaFold2 Cα distance matrices (R0 = 15 Å).
 
 Both are maximized; `problem.StructuralMsaProblem` negates them for jMetal minimization.
+`--objectives` selects other formulations for experiments (the lDDT alone, or a third objective,
+the aligned-pair coverage); the code does not assume two objectives, except the Python scripts
+and the studio, which expect the default.
 
 ## 2. Workspace layout
 
@@ -73,10 +76,10 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `alignment` | `GapIntervals` (immutable gap runs of one row), `Msa` (decoded integer view, TM flag of gaps), `GapColumnCompactor`, `MsaSolution` (jMetal solution, one `GapIntervals` per protein) |
 | `io` | Readers for 3-line topology, aligned FASTA (tool-specific ids), `_D.csv`/`_idx.csv`, PDB chains; FASTA writer |
 | `structure` | `SequenceStructureMapper` (numbering checked by residue identity, alignment fallback), `StructureLoader`, `ProteinStructures`, `StructuralNeighborhood` |
-| `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
+| `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt`, `AlignedPairCoverage`, `ObjectiveSet` (formulations of `--objectives`), `SubstitutionMatrix` |
 | `operator` | `TmSafeSinglePointCrossover`, mutations that never break a helix (`TmSafeGapShiftMutation` (default), `MergeAdjacentGapRunsMutation`, `RandomChoiceMutation`), `TmBoundaries`, `RandomSource`. Operators evaluated and removed are listed in tutorial T2 and the internal notes |
 | `problem` | `StructuralMsaProblem` |
-| `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, random search), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
+| `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, a single-objective GA, random search), `ArchivingEvaluation`, `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
 | `cli` | `run` and `baseline` commands |
 | `evaluation` | Comparison with GPCRdb reference alignments (`EvaluationMain`) |

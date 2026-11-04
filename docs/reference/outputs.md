@@ -8,7 +8,7 @@ the planned graphical interface.
 
 | File | Content |
 | --- | --- |
-| `FUN.csv` | One line per solution of the result of the algorithm: SOPwTP and lDDT, comma-separated, no header |
+| `FUN.csv` | One line per solution of the result of the algorithm: the objectives (by default SOPwTP and lDDT; see `--objectives`), comma-separated, no header |
 | `MSASol<i>.fasta` | Alignment of line `i` of `FUN.csv` (0-based), aligned FASTA |
 | `config.json` | Full configuration of the run |
 | `metadata.json` | Provenance and diagnostics of the run |
@@ -23,7 +23,8 @@ Both objectives are written as computed, and **higher is better for both**. jMet
 the solutions store them negated internally, but the file does not.
 
 The solutions are the result returned by the algorithm: the final population (NSGA-II, NSGA-III,
-AGE-MOEA, SMS-EMOA, MOEA/D, random search) or the archive (PAES). The result is not filtered, so
+AGE-MOEA, SMS-EMOA, MOEA/D, the genetic algorithm, random search) or the archive (PAES, and
+NSGA-II with `--external-archive`). The result is not filtered, so
 it can contain dominated solutions and repeated ones (two lines with the same values, usually the
 same alignment); `scripts/pareto_analysis.py` keeps the non-dominated ones (repeated lines included). Example:
 

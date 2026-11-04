@@ -7,6 +7,13 @@ The two objectives that the search maximises are defined in the
 of pairs, and **lDDT**, a structural consistency score computed from AlphaFold2 distance matrices.
 They do not use any reference alignment.
 
+`--objectives` can change the formulation ([cli](cli.md)): the lDDT alone, or a third objective,
+the **aligned-pair coverage**. For every pair of proteins it counts the columns where both have a
+residue and divides by the length of the shorter protein; the objective is the sum of those
+counts over all pairs divided by the sum of the maxima, in [0, 1]. It measures how much the
+alignment aligns, not whether it aligns the right residues, and complements the lDDT, which is a
+mean over the aligned residues and ignores how many there are.
+
 ## Comparison with a reference alignment
 
 `org.tmm2structalign.evaluation` compares an alignment with the GPCRdb reference alignment of the
