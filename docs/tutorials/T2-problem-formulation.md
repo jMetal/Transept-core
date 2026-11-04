@@ -368,13 +368,8 @@ gap boundary, so it never breaks a helix; when one of the two runs breaks a heli
 moved, which repairs the break. The length of the alignment does not change. In the first child,
 the run of `p2` at column 10 moves to column 2.
 
-**Other mutations available:**
-
-| `--mutation` | Effect |
-| --- | --- |
-| `INSERT_GAP` | Inserts one gap in every row, at a random position that does not break a helix; the alignment grows by one column |
-| `SPLIT_RESIDUE_RUN` | The same, but each gap opens a new run between two residues |
-| `RANDOM_CHOICE` | Applies one of `TM_SAFE_GAP_SHIFT`, `INSERT_GAP`, `SPLIT_RESIDUE_RUN` and `MERGE_GAP_RUNS`, chosen uniformly each time |
+**`RANDOM_CHOICE`** (class `RandomChoiceMutation`) applies `TM_SAFE_GAP_SHIFT` or
+`MERGE_GAP_RUNS`, chosen uniformly at random each time the child is mutated.
 
 **How much a mutation changes an alignment** matters as much as what it does. Applied once to each
 seed alignment of `classF`:
@@ -383,13 +378,13 @@ seed alignment of `classF`:
 | --- | --- | --- | --- |
 | `TM_SAFE_GAP_SHIFT` | 82 % | −8 378 | −0.0047 |
 | `MERGE_GAP_RUNS` | 50 % | −687 | −0.0003 |
-| `INSERT_GAP` | 100 % | −44 185 | −0.0331 |
-| `SPLIT_RESIDUE_RUN` | 100 % | −40 094 | −0.0318 |
+| Insert a gap in every row (removed) | 100 % | −44 185 | −0.0331 |
 
-`INSERT_GAP` and `SPLIT_RESIDUE_RUN` place the gap of each row at an independent position, so
-between two such positions the residues of one row are shifted with respect to the other: on
-average a third of the alignment for every pair of proteins. Their children never survive the
-selection, and in practice they do not contribute to the search.
+The last row is a mutation of TM-MSAligner that inserted one gap in every row, each at an
+independent position. Between the gaps of two rows, the residues of one row are shifted with
+respect to the other: on average a third of the alignment for every pair of proteins. Its children
+never survived the selection, so it did not take part in the search, and it was removed together
+with its variant that opened the gap between two residues.
 
 ## Step 10: reproducibility
 

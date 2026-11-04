@@ -65,10 +65,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | --- | --- | --- |
 | `GAP_SHIFT` | No | Original: moves a gap run of one row; positions inside helices are only discouraged |
 | `TM_SAFE_GAP_SHIFT` | Yes | Moves a gap run of one row to a position that does not split a helix |
-| `INSERT_GAP` | Yes | One gap at a random position of every row; the alignment grows by one column |
-| `SPLIT_RESIDUE_RUN` | Yes | A new one-gap run between two residues of every row; the alignment grows by one column |
 | `MERGE_GAP_RUNS` | Yes | Joins two consecutive gap runs of one row |
-| `RANDOM_CHOICE` | Yes | One of the four previous TM-safe mutations, chosen uniformly each time |
+| `RANDOM_CHOICE` | Yes | `TM_SAFE_GAP_SHIFT` or `MERGE_GAP_RUNS`, chosen uniformly each time |
 
 The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes every operator.
 
