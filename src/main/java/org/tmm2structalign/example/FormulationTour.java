@@ -11,7 +11,6 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSequence;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.Objective;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
@@ -72,8 +71,7 @@ public final class FormulationTour {
     List<Objective> objectives =
         List.of(
             TopologyAwareSumOfPairs.withDefaultParameters(),
-            new StructuralLddt(
-                structures, StructuralLddt.DEFAULT_CUTOFF, LddtAggregation.HARMONIC_OVER_LENGTH));
+            new StructuralLddt(structures, StructuralLddt.DEFAULT_CUTOFF));
     problem = new StructuralMsaProblem("tour", proteins, objectives);
   }
 

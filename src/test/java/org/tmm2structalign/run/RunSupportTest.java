@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.MappingPolicy;
@@ -110,7 +109,6 @@ class RunSupportTest {
           1L,
           AlgorithmConfiguration.withDefaults(100, 10, 1),
           MappingPolicy.VERIFIED,
-          LddtAggregation.HARMONIC_OVER_LENGTH,
           15f,
           progressInterval);
     }

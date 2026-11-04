@@ -68,7 +68,7 @@ public record Experiment(
             List.of(
                 TopologyAwareSumOfPairs.withDefaultParameters(),
                 new StructuralLddt(
-                    structures, configuration.lddtCutoff(), configuration.lddtAggregation())));
+                    structures, configuration.lddtCutoff())));
     return new Experiment(problem, structures, loadSeeds(configuration, proteins));
   }
 

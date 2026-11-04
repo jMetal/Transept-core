@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.structure.MappingPolicy;
 
 /**
@@ -23,7 +22,6 @@ import org.tmm2structalign.structure.MappingPolicy;
  * @param algorithm algorithm parameters
  * @param algorithmType search algorithm
  * @param mappingPolicy policy for mapping sequences onto structures
- * @param lddtAggregation aggregation of the structural objective
  * @param lddtCutoff inclusion radius of the structural objective, in Å
  * @param progressInterval evaluations between progress records
  */
@@ -36,7 +34,6 @@ public record RunConfiguration(
     AlgorithmConfiguration algorithm,
     AlgorithmType algorithmType,
     MappingPolicy mappingPolicy,
-    LddtAggregation lddtAggregation,
     float lddtCutoff,
     int progressInterval) {
 
@@ -51,9 +48,8 @@ public record RunConfiguration(
     if (seedMethods == null || seedMethods.isEmpty()) {
       throw new IllegalArgumentException("At least one seed method is required");
     }
-    if (algorithmType == null || mappingPolicy == null || lddtAggregation == null) {
-      throw new IllegalArgumentException(
-          "algorithmType, mappingPolicy and lddtAggregation are required");
+    if (algorithmType == null || mappingPolicy == null) {
+      throw new IllegalArgumentException("algorithmType and mappingPolicy are required");
     }
     if (!Float.isFinite(lddtCutoff) || lddtCutoff <= 0f) {
       throw new IllegalArgumentException("lddtCutoff must be positive: " + lddtCutoff);
@@ -74,7 +70,6 @@ public record RunConfiguration(
    * @param randomSeed seed of the global jMetal generator
    * @param algorithm algorithm parameters
    * @param mappingPolicy policy for mapping sequences onto structures
-   * @param lddtAggregation aggregation of the structural objective
    * @param lddtCutoff inclusion radius of the structural objective, in Å
    * @param progressInterval evaluations between progress records
    */
@@ -86,8 +81,7 @@ public record RunConfiguration(
       long randomSeed,
       AlgorithmConfiguration algorithm,
       MappingPolicy mappingPolicy,
-      LddtAggregation lddtAggregation,
-      float lddtCutoff,
+        float lddtCutoff,
       int progressInterval) {
     this(
         dataRoot,
@@ -98,7 +92,6 @@ public record RunConfiguration(
         algorithm,
         AlgorithmType.NSGA_II,
         mappingPolicy,
-        lddtAggregation,
         lddtCutoff,
         progressInterval);
   }
@@ -142,7 +135,6 @@ public record RunConfiguration(
     map.put("initializationType", algorithm.initializationType());
     map.put("threads", algorithm.threads());
     map.put("mappingPolicy", mappingPolicy);
-    map.put("lddtAggregation", lddtAggregation);
     map.put("lddtCutoff", (double) lddtCutoff);
     map.put("progressInterval", progressInterval);
     return map;

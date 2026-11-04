@@ -13,7 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.ExperimentRunner.RunSummary;
 import org.tmm2structalign.run.RunConfiguration;
@@ -43,7 +42,6 @@ class ClassFSmokeIT {
                 200, 12, 12, 0.8, type == AlgorithmType.PAES ? 1.0 : 0.2, 2),
             type,
             MappingPolicy.VERIFIED,
-            LddtAggregation.HARMONIC_OVER_LENGTH,
             15f,
             50);
 

@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.problem.StructuralMsaProblem;
@@ -47,7 +46,7 @@ class AlgorithmFactoryTest {
             proteins,
             List.of(
                 TopologyAwareSumOfPairs.withDefaultParameters(),
-                new StructuralLddt(structures, 15f, LddtAggregation.HARMONIC_OVER_LENGTH)));
+                new StructuralLddt(structures, 15f)));
     seeds =
         List.of(
             Msa.fromAlignedRows(proteins, List.of("ACDEFGHIK-", "ACDE-GHIK-", "AC-EFGHIK-")),

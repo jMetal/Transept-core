@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.RunConfiguration;
 import org.tmm2structalign.structure.MappingPolicy;
@@ -58,7 +57,6 @@ class SanityCheckIT {
                 AlgorithmConfiguration.withDefaults(300, 10, 1),
                 type,
                 MappingPolicy.VERIFIED,
-                LddtAggregation.HARMONIC_OVER_LENGTH,
                 15f,
                 100));
     return Files.readAllLines(runDirectory.resolve("FUN.csv")).stream()

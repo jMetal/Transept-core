@@ -24,7 +24,6 @@ import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.Objective;
 import org.tmm2structalign.run.Experiment;
 import org.tmm2structalign.run.RunConfiguration;
@@ -171,7 +170,6 @@ class StructuralMsaProblemTest {
                       1L,
                       AlgorithmConfiguration.withDefaults(10, 4, 1),
                       MappingPolicy.VERIFIED,
-                      LddtAggregation.HARMONIC_OVER_LENGTH,
                       15f,
                       10))
               .problem();

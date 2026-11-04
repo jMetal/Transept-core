@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.RunConfiguration;
 import org.tmm2structalign.structure.MappingPolicy;
@@ -80,7 +79,6 @@ class ReproducibilityIT {
                 seed,
                 AlgorithmConfiguration.withDefaults(300, 8, threads),
                 MappingPolicy.VERIFIED,
-                LddtAggregation.HARMONIC_OVER_LENGTH,
                 15f,
                 100));
     StringBuilder results = new StringBuilder(Files.readString(runDirectory.resolve("FUN.csv")));

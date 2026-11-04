@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.tmm2structalign.io.InvalidInputFileException;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.BaselineScorer.BaselineScore;
 import org.tmm2structalign.structure.MappingPolicy;
 import org.tmm2structalign.testing.SyntheticDataset;
@@ -33,7 +32,7 @@ class BaselineScorerTest {
     Files.writeString(
         root.resolve("precomputed/synthetic/broken_synthetic.fasta"), ">prot0_synth\nAAAA\n");
     scorer =
-        new BaselineScorer(root, MappingPolicy.VERIFIED, LddtAggregation.HARMONIC_OVER_LENGTH, 15f);
+        new BaselineScorer(root, MappingPolicy.VERIFIED, 15f);
   }
 
   @Nested

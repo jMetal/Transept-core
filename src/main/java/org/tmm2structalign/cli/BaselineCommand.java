@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.run.BaselineScorer;
 import org.tmm2structalign.run.BaselineScorer.BaselineScore;
@@ -43,17 +42,11 @@ public final class BaselineCommand implements Callable<Integer> {
           "Sequence-structure mapping: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}.")
   MappingPolicy mappingPolicy;
 
-  @Option(
-      names = "--lddt-aggregation",
-      defaultValue = "HARMONIC_OVER_LENGTH",
-      description = "lDDT aggregation: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}.")
-  LddtAggregation lddtAggregation;
-
   @Override
   public Integer call() throws IOException {
     BaselineScorer scorer =
         new BaselineScorer(
-            dataRoot, mappingPolicy, lddtAggregation, StructuralLddt.DEFAULT_CUTOFF);
+            dataRoot, mappingPolicy, StructuralLddt.DEFAULT_CUTOFF);
     List<BaselineScore> scores = new ArrayList<>();
     for (String dataset : datasets) {
       scores.addAll(scorer.score(dataset));

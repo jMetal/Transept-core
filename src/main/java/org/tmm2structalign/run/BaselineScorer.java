@@ -12,7 +12,6 @@ import org.tmm2structalign.io.FastaAlignmentReader;
 import org.tmm2structalign.io.InvalidInputFileException;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.Objective;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
@@ -47,7 +46,6 @@ public final class BaselineScorer {
 
   private final Path dataRoot;
   private final MappingPolicy mappingPolicy;
-  private final LddtAggregation aggregation;
   private final float cutoff;
 
   /**
@@ -55,14 +53,12 @@ public final class BaselineScorer {
    *
    * @param dataRoot dataset root ({@code .../GPCRdb})
    * @param mappingPolicy sequence-to-structure mapping policy
-   * @param aggregation aggregation of the structural objective
    * @param cutoff inclusion radius of the structural objective, in Å
    */
   public BaselineScorer(
-      Path dataRoot, MappingPolicy mappingPolicy, LddtAggregation aggregation, float cutoff) {
+      Path dataRoot, MappingPolicy mappingPolicy, float cutoff) {
     this.dataRoot = dataRoot;
     this.mappingPolicy = mappingPolicy;
-    this.aggregation = aggregation;
     this.cutoff = cutoff;
   }
 
@@ -100,7 +96,7 @@ public final class BaselineScorer {
     List<Objective> objectives =
         List.of(
             TopologyAwareSumOfPairs.withDefaultParameters(),
-            new StructuralLddt(structures, cutoff, aggregation));
+            new StructuralLddt(structures, cutoff));
 
     List<Path> files = PrecomputedAlignments.list(directory);
     List<BaselineScore> scores = new ArrayList<>(files.size());

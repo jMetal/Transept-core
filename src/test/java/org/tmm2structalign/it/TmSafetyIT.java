@@ -19,7 +19,6 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.RunConfiguration;
 import org.tmm2structalign.structure.MappingPolicy;
@@ -63,7 +62,6 @@ class TmSafetyIT {
                 400, 8, 8, 0.9, 1.0, 1, MutationType.TM_SAFE_GAP_SHIFT),
             type,
             MappingPolicy.VERIFIED,
-            LddtAggregation.HARMONIC_OVER_LENGTH,
             15f,
             100);
 
@@ -93,7 +91,6 @@ class TmSafetyIT {
                 400, 8, 8, 0.9, 1.0, 1, mutation, InitializationType.CROSSOVER),
             AlgorithmType.NSGA_II,
             MappingPolicy.VERIFIED,
-            LddtAggregation.HARMONIC_OVER_LENGTH,
             15f,
             100);
 

@@ -13,12 +13,15 @@ import org.tmm2structalign.structure.StructuralNeighborhood;
  * both have a structurally mapped residue, the query neighbours closer than R0 are looked up in
  * the target through the alignment; each neighbour scores 1, 0.75, 0.5, 0.25 or 0 depending on
  * whether the distance difference is below 0.5, 1, 2 or 4 Å, weighted by
- * {@code 1 - d / R0}. Unaligned neighbours count in the denominator only. Per-anchor scores are
- * combined according to {@link LddtAggregation}.
+ * {@code 1 - d / R0}. Unaligned neighbours count in the denominator only. The objective is the
+ * mean of all anchor scores, which does not depend on the length of the alignment.
  *
- * <p>Port of {@code LDDTStructuralScore}; with {@link LddtAggregation#HARMONIC_OVER_LENGTH} and
- * the same residue mapping it reproduces its values. Arithmetic is kept in {@code float} where
- * the original used it.
+ * <p>The original implementation ({@code LDDTStructuralScore}, tag {@code legacy-v1.0}) combined
+ * the anchor scores per column with the column occupancy (harmonic mean) and divided by the
+ * alignment length. That aggregation rewarded compact alignments and was negatively correlated
+ * with the agreement with the GPCRdb reference alignments in 4 of 5 datasets; the mean of the
+ * anchor scores is positively correlated in all of them and gives better alignments in the
+ * search. Arithmetic is kept in {@code float} where the original used it.
  */
 public final class StructuralLddt implements Objective {
 
@@ -29,7 +32,6 @@ public final class StructuralLddt implements Objective {
   public static final float DEFAULT_CUTOFF = 15.0f;
 
   private final ProteinStructures structures;
-  private final LddtAggregation aggregation;
   private final StructuralNeighborhood[] neighborhoods;
   private final float[][][] distances;
 
@@ -38,12 +40,9 @@ public final class StructuralLddt implements Objective {
    *
    * @param structures structures of the proteins, in canonical order
    * @param cutoff inclusion radius R0 in Å
-   * @param aggregation how anchor scores are combined
    */
-  public StructuralLddt(
-      ProteinStructures structures, float cutoff, LddtAggregation aggregation) {
+  public StructuralLddt(ProteinStructures structures, float cutoff) {
     this.structures = structures;
-    this.aggregation = aggregation;
     this.neighborhoods = new StructuralNeighborhood[structures.size()];
     this.distances = new float[structures.size()][][];
     for (int protein = 0; protein < structures.size(); protein++) {
@@ -92,7 +91,7 @@ public final class StructuralLddt implements Objective {
               columnScoreSum, columnScoreCount);
         }
       }
-      value = aggregate(msa, columnScoreSum, columnScoreCount);
+      value = aggregate(columnScoreSum, columnScoreCount);
     }
     return value;
   }
@@ -179,27 +178,10 @@ public final class StructuralLddt implements Objective {
     return score;
   }
 
-  private double aggregate(Msa msa, double[] columnScoreSum, int[] columnScoreCount) {
-    double value;
-    if (aggregation == LddtAggregation.PAIR_MEAN) {
-      double sum = Arrays.stream(columnScoreSum).sum();
-      long count = Arrays.stream(columnScoreCount).asLongStream().sum();
-      value = count == 0 ? 0.0 : sum / count;
-    } else {
-      double total = 0.0;
-      for (int column = 0; column < msa.length(); column++) {
-        double occupancy = msa.occupancy(column) / (double) msa.size();
-        double structuralScore =
-            columnScoreCount[column] == 0
-                ? 0.0
-                : columnScoreSum[column] / columnScoreCount[column];
-        if (occupancy > 0.0 && structuralScore > 0.0) {
-          total += 2.0 * structuralScore * occupancy / (structuralScore + occupancy);
-        }
-      }
-      value = total / msa.length();
-    }
-    return value;
+  private static double aggregate(double[] columnScoreSum, int[] columnScoreCount) {
+    double sum = Arrays.stream(columnScoreSum).sum();
+    long count = Arrays.stream(columnScoreCount).asLongStream().sum();
+    return count == 0 ? 0.0 : sum / count;
   }
 
   /** Structural row at every column, {@code -1} for gaps and unmapped residues. */

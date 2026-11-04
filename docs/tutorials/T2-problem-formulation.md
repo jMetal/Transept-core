@@ -137,11 +137,15 @@ reference-free, superposition-free version of the lDDT score (as in FoldMason):
    otherwise. Each neighbour is weighted by `1 − d / R0`, so close neighbours count more.
    Neighbours that the alignment does not map count in the weights only.
 3. The anchor score is the weighted mean of its neighbours.
-4. The anchor scores are combined into one value (`--lddt-aggregation`):
-   - `HARMONIC_OVER_LENGTH` (default, the published definition): for every column, the harmonic
-     mean of its mean anchor score and its occupancy (residues / N), summed over the columns and
-     divided by the length of the alignment. It rewards compact alignments.
-   - `PAIR_MEAN`: the mean of all anchor scores, independent of the length.
+4. The objective is the mean of all anchor scores. It does not depend on the length of the
+   alignment.
+
+The original implementation combined the anchor scores of every column with the column occupancy
+(their harmonic mean), summed over the columns and divided by the alignment length. That rewarded
+compact alignments: on the precomputed alignments of the benchmark it was *negatively* correlated
+with the agreement with the GPCRdb references in 4 of 5 datasets, and it scored the misaligned
+outputs of Caretta among the best. The mean of the anchor scores is positively correlated with
+the references in all of them, and gives better alignments when it guides the search.
 
 The value is between 0 and 1, and higher is better. Proteins without a usable structure (see the
 mapping status in `metadata.json`) do not contribute.
@@ -154,21 +158,21 @@ seed alignment:
     PQTLLVAVLGNKE
     P-TLLIAVLG-KE
     PQSTLVAILGN-E
-    SOPwTP 129.0   lDDT 0.9144   broken helices 0
+    SOPwTP 129.0   lDDT 0.9167   broken helices 0
 p2 shifted one column:
     PQTLLVAVLGNKE
     P--TLLIAVLGKE
     PQSTLVAILGN-E
-    SOPwTP 80.0   lDDT 0.8703   broken helices 0
+    SOPwTP 80.0   lDDT 0.8393   broken helices 0
 ```
 
 The objectives often disagree on real data: the sequence score prefers some alignments and the
 structures others. That is why the problem is solved as a multiobjective one, and the result is a
 set of compromises instead of a single alignment.
 
-> **Caution.** lDDT is almost blind to a helix aligned one or two positions out of register, and
-> the default aggregation favours short alignments. Do not judge alignments by the second
-> objective alone: compare them with a reference alignment as in
+> **Caution.** A superposition-free lDDT is almost blind to a helix aligned one or two positions
+> out of register: the distances along a helix repeat every turn. Do not judge alignments by the
+> second objective alone: compare them with a reference alignment as in
 > [T4](T4-choosing-and-evaluating.md).
 
 ## Step 5: evaluation and gap-only columns
@@ -252,7 +256,7 @@ single-point child, cut at column 1:
     PQTLLVAVLGNKE
     P--TLLIAVLGKE
     PQSTLVAILGNE-
-    SOPwTP 72.0   lDDT 0.8717   broken helices 0
+    SOPwTP 72.0   lDDT 0.8410   broken helices 0
 ```
 
 Columns 3 to 8 are not valid cuts: they would separate residues of the helices. Column 12 is not
@@ -279,41 +283,41 @@ parent:
     PQT-LLVAVLGNKE
     P-TLLIAVLG-KE-
     PQSTLVAILGN--E
-    SOPwTP 36.0   lDDT 0.7941   broken helices 0
+    SOPwTP 36.0   lDDT 0.7543   broken helices 0
 TM_SAFE_GAP_SHIFT, 4 children:
     PQT-LLVAVLGNKE
     PTLLIAVLG-KE--
     PQSTLVAILGN--E
-    SOPwTP -6.0   lDDT 0.7461   broken helices 0
+    SOPwTP -6.0   lDDT 0.7410   broken helices 0
     PQT-LLVAVLGNKE
     P--TLLIAVLGKE-
     PQSTLVAILGN--E
-    SOPwTP 52.0   lDDT 0.7719   broken helices 0
+    SOPwTP 52.0   lDDT 0.7357   broken helices 0
     PQT-LLVAVLGNKE
     P-TLLIAVLG-KE-
     PQSTLVAILGNE--
-    SOPwTP 36.0   lDDT 0.7517   broken helices 0
+    SOPwTP 36.0   lDDT 0.7482   broken helices 0
     PQT-LLVAVLGNKE
     P-TLLIAVLG--KE
     PQSTLVAILGN--E
-    SOPwTP 56.0   lDDT 0.7453   broken helices 0
+    SOPwTP 56.0   lDDT 0.7399   broken helices 0
 MERGE_GAP_RUNS, 4 children:
     PQT-LLVAVLGNKE
     P--TLLIAVLGKE-
     PQSTLVAILGN--E
-    SOPwTP 52.0   lDDT 0.7719   broken helices 0
+    SOPwTP 52.0   lDDT 0.7357   broken helices 0
     PQT-LLVAVLGNKE
     P-TLLIAVLG--KE
     PQSTLVAILGN--E
-    SOPwTP 56.0   lDDT 0.7453   broken helices 0
+    SOPwTP 56.0   lDDT 0.7399   broken helices 0
     PQT-LLVAVLGNKE
     P-TLLIAVLGKE--
     PQSTLVAILGN--E
-    SOPwTP 44.0   lDDT 0.7335   broken helices 0
+    SOPwTP 44.0   lDDT 0.7268   broken helices 0
     PQT-LLVAVLGNKE
     P-TLLIAVLG--KE
     PQSTLVAILGN--E
-    SOPwTP 56.0   lDDT 0.7453   broken helices 0
+    SOPwTP 56.0   lDDT 0.7399   broken helices 0
 ```
 
 **`TM_SAFE_GAP_SHIFT`** (default, class `TmSafeGapShiftMutation`) moves a run of gaps of one

@@ -18,7 +18,6 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.ExperimentRunner.RunSummary;
 import org.tmm2structalign.run.RunConfiguration;
@@ -98,7 +97,6 @@ class SyntheticEndToEndIT {
         3L,
         AlgorithmConfiguration.withDefaults(evaluations, POPULATION, 1),
         MappingPolicy.VERIFIED,
-        LddtAggregation.HARMONIC_OVER_LENGTH,
         15f,
         100);
   }

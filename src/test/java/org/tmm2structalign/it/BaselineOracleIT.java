@@ -1,7 +1,6 @@
 package org.tmm2structalign.it;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
@@ -13,32 +12,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.run.BaselineScorer;
 import org.tmm2structalign.run.BaselineScorer.BaselineScore;
 import org.tmm2structalign.structure.MappingPolicy;
 
 /**
- * Differential oracle: the objectives of the new core must reproduce the values that the
- * original implementation wrote to {@code precomputed/baselines.csv} (dataset v1.0.0, frozen in
- * {@code src/test/resources/oracle}), except where the verified structure mapping corrects the
- * original one (OXER1 and MCHR1).
+ * Differential oracle for the objectives on the precomputed alignments of dataset v1.0.0.
+ *
+ * <p>SOPwTP must reproduce the values that the original implementation wrote to {@code
+ * precomputed/baselines.csv} (frozen in {@code src/test/resources/oracle}). The lDDT objective no
+ * longer uses the original aggregation, so its values are compared with a regression snapshot
+ * computed by this version ({@code lddt-snapshot.csv}); regenerate it only when the objective
+ * changes on purpose, and explain why.
  *
  * <p>Needs the real dataset; set {@code GPCR_DATASET} to the {@code GPCRdb} directory.
  */
 @DisplayName("Integration tests: differential oracle against the original baselines.csv")
 class BaselineOracleIT {
 
-  /** Datasets whose lDDT changes under the VERIFIED policy (they contain OXER1 or MCHR1). */
-  private static final Set<String> REMAPPED_DATASETS =
-      Set.of("classA_002", "classA_004", "classA_004_19");
-
-  /** Precision of the oracle file, which stores 10 decimals. */
-  private static final double LDDT_TOLERANCE = 1e-9;
+  /** Precision of the snapshot, which stores 12 decimals. */
+  private static final double LDDT_TOLERANCE = 1e-11;
 
   private Path dataRoot;
   private List<String[]> expectedRows;
@@ -52,29 +48,41 @@ class BaselineOracleIT {
   }
 
   @Test
-  @DisplayName("given the verified mapping, when scoring baselines, then only remapped differ")
-  void givenVerifiedMapping_whenScoringBaselines_thenOnlyRemappedDatasetsDiffer()
-      throws IOException {
+  @DisplayName("given the baselines, when scoring, then SOPwTP matches the original everywhere")
+  void givenBaselines_whenScoring_thenSopwtpMatchesTheOriginalEverywhere() throws IOException {
     // Act
     Map<String, BaselineScore> scores = score(MappingPolicy.VERIFIED);
 
     // Assert
+    int compared = 0;
     for (String[] row : expectedRows) {
       BaselineScore score = scores.get(row[0] + "/" + row[1]);
-      String label = row[0] + " " + row[1];
-      assertEquals(Double.parseDouble(row[2]), score.values().get(0), label);
-      double difference = Math.abs(Double.parseDouble(row[3]) - score.values().get(1));
-      if (REMAPPED_DATASETS.contains(row[0])) {
-        assertTrue(difference > LDDT_TOLERANCE && difference < 0.02, label + ": " + difference);
-      } else {
-        assertTrue(difference <= LDDT_TOLERANCE, label + ": " + difference);
-      }
+      assertEquals(Double.parseDouble(row[2]), score.values().get(0), row[0] + " " + row[1]);
+      compared++;
+    }
+    assertEquals(162, compared);
+  }
+
+  @Test
+  @DisplayName("given the baselines, when scoring, then lDDT matches the regression snapshot")
+  void givenBaselines_whenScoring_thenLddtMatchesTheRegressionSnapshot() throws IOException {
+    // Arrange
+    Map<String, Double> snapshot = readSnapshot();
+
+    // Act
+    Map<String, BaselineScore> scores = score(MappingPolicy.VERIFIED);
+
+    // Assert
+    assertEquals(162, snapshot.size());
+    for (Map.Entry<String, Double> expected : snapshot.entrySet()) {
+      BaselineScore score = scores.get(expected.getKey());
+      assertEquals(expected.getValue(), score.values().get(1), LDDT_TOLERANCE, expected.getKey());
     }
   }
 
   private Map<String, BaselineScore> score(MappingPolicy policy) throws IOException {
     BaselineScorer scorer =
-        new BaselineScorer(dataRoot, policy, LddtAggregation.HARMONIC_OVER_LENGTH, 15f);
+        new BaselineScorer(dataRoot, policy, 15f);
     Map<String, BaselineScore> scores = new HashMap<>();
     for (String dataset : expectedRows.stream().map(row -> row[0]).distinct().toList()) {
       for (BaselineScore score : scorer.score(dataset)) {
@@ -101,5 +109,19 @@ class BaselineOracleIT {
       }
     }
     return rows;
+  }
+
+  /** Returns the snapshot lDDT of every precomputed alignment, keyed by dataset/method. */
+  private static Map<String, Double> readSnapshot() throws IOException {
+    Map<String, Double> snapshot = new HashMap<>();
+    try (InputStream input =
+        BaselineOracleIT.class.getResourceAsStream("/oracle/lddt-snapshot.csv")) {
+      String[] lines = new String(input.readAllBytes(), StandardCharsets.UTF_8).split("\n");
+      for (int line = 1; line < lines.length; line++) {
+        String[] fields = lines[line].split(",");
+        snapshot.put(fields[0] + "/" + fields[1], Double.parseDouble(fields[2]));
+      }
+    }
+    return snapshot;
   }
 }

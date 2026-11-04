@@ -12,7 +12,6 @@ import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
 import org.tmm2structalign.algorithm.InitializationType;
 import org.tmm2structalign.algorithm.MutationType;
-import org.tmm2structalign.objective.LddtAggregation;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.run.ExperimentRunner;
 import org.tmm2structalign.run.ExperimentRunner.RunSummary;
@@ -126,12 +125,6 @@ public final class RunCommand implements Callable<Integer> {
   MappingPolicy mappingPolicy;
 
   @Option(
-      names = "--lddt-aggregation",
-      defaultValue = "HARMONIC_OVER_LENGTH",
-      description = "lDDT aggregation: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}.")
-  LddtAggregation lddtAggregation;
-
-  @Option(
       names = "--progress-interval",
       defaultValue = "100",
       description = "Evaluations between progress records. Default: ${DEFAULT-VALUE}.")
@@ -160,7 +153,6 @@ public final class RunCommand implements Callable<Integer> {
                   initialization),
               algorithm,
               mappingPolicy,
-              lddtAggregation,
               StructuralLddt.DEFAULT_CUTOFF,
               progressInterval);
       RunSummary summary = new ExperimentRunner().run(configuration);
