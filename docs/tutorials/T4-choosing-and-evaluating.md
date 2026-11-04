@@ -140,7 +140,7 @@ On this dataset and with this budget, the search mostly recombines what the seed
 ## Step 6: draw conclusions carefully
 
 - **One run is one sample.** The search is stochastic: repeat it with several seeds and compare
-  distributions ([T3](T3-reproducing-the-paper.md), [T5](T5-comparing-algorithms-and-operators.md)).
+  distributions ([T3](T3-several-seeds.md), [T5](T5-comparing-algorithms-and-operators.md)).
 - **Choose the rule before looking at the reference.** Picking the alignment with the best pair F1
   uses the reference to choose and overstates what the method achieves. Report the knee, or the
   rule you decided in advance, and use the reference only to evaluate.

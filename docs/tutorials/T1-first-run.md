@@ -160,7 +160,7 @@ cmp results/ejecuciones/classF/first/FUN.csv results/ejecuciones/classF/first-ag
 
 This holds for the same version of the tool, whatever the number of `--threads`. A different
 `--seed` gives a different, equally valid result: the search is stochastic, and a study runs
-several seeds ([T3](T3-reproducing-the-paper.md)).
+several seeds ([T3](T3-several-seeds.md)).
 
 ## Step 7: a real run
 
