@@ -79,7 +79,7 @@ explains every step and file.
 | [T1. First run in five minutes](docs/tutorials/T1-first-run.md) | Build, run on the smallest dataset, read the results, repeat a run exactly |
 | [T2. Problem formulation, encoding and variation operators](docs/tutorials/T2-problem-formulation.md) | The objectives, the constraints, how alignments are encoded, and what every crossover and mutation does, with a runnable example |
 | T3. Reproducing the published experiments | *In preparation* |
-| T4. Choosing an alignment and evaluating it against GPCRdb | *In preparation* |
+| [T4. Choosing an alignment and evaluating it against GPCRdb](docs/tutorials/T4-choosing-and-evaluating.md) | Reading the non-dominated alignments, extremes and knee, and comparing them and the seeds with the GPCRdb reference alignments |
 | T5. Comparing algorithms and operators | *In preparation* |
 | [T6. Using your own dataset](docs/tutorials/T6-your-own-dataset.md) | The input files a dataset needs, how to compute the distance matrices, and how to check that structures and seeds are read correctly |
 | T7. Adding a variation operator | *In preparation* |
