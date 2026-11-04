@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.MappingPolicy;
@@ -90,6 +91,7 @@ class RunSupportTest {
       assertEquals(directory.resolve("precomputed/classF"), configuration.precomputedDirectory());
       assertEquals(List.of("mafft"), configuration.toMap().get("seedMethods"));
       assertEquals("\"VERIFIED\"", Json.write(configuration.toMap().get("mappingPolicy")));
+      assertEquals(ObjectiveSet.SOPWTP_LDDT, configuration.toMap().get("objectives"));
     }
 
     @Test
