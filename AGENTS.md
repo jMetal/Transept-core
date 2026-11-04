@@ -74,7 +74,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `io` | Readers for 3-line topology, aligned FASTA (tool-specific ids), `_D.csv`/`_idx.csv`, PDB chains; FASTA writer |
 | `structure` | `SequenceStructureMapper` (numbering checked by residue identity, alignment fallback), `StructureLoader`, `ProteinStructures`, `StructuralNeighborhood` |
 | `objective` | `TopologyAwareSumOfPairs`, `StructuralLddt` (+ `LddtAggregation`), `SubstitutionMatrix` |
-| `operator` | `TmSafeSinglePointCrossover`, `TmAwareGapShiftMutation` (original, default), `TmSafeGapShiftMutation` (never breaks a helix; `--mutation TM_SAFE_GAP_SHIFT`), `RandomSource` |
+| `operator` | `TmSafeSinglePointCrossover` (default), `TmSafeMultiPointCrossover` (`--crossover TWO_POINT`), `TmAwareGapShiftMutation` (original, default), TM-safe mutations (`TmSafeGapShiftMutation`, `TmSafeInsertGapMutation`, `TmSafeSplitResidueRunMutation`, `MergeAdjacentGapRunsMutation`, `RandomChoiceMutation`; see `docs/review/06-operators.md`), `TmBoundaries`, `RandomSource` |
 | `problem` | `StructuralMsaProblem` |
 | `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `TmStructAlign` (NSGA-II assembly), `AlgorithmType`, `AlgorithmFactory` (NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES, random search), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |

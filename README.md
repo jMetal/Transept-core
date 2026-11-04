@@ -104,7 +104,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--threads` | 1 | Parallel evaluation threads (results do not depend on it) |
 | `--algorithm` | `NSGA_II` | Search algorithm (see below) |
 | `--initialization` | `CROSSOVER` | Non-seed members: `CROSSOVER` (original), `CROSSOVER_DISTINCT` (no duplicates after removing gap-only columns) or `PERTURBED` (crossover child + 10 mutations) |
-| `--mutation` | `GAP_SHIFT` | `GAP_SHIFT` (original: discourages gaps inside TM helices) or `TM_SAFE_GAP_SHIFT` (never breaks a helix) |
+| `--crossover` | `SINGLE_POINT` | `SINGLE_POINT` (original) or `TWO_POINT`; both never cut a TM helix |
+| `--mutation` | `GAP_SHIFT` | `GAP_SHIFT` (original: discourages gaps inside TM helices). The rest never break a helix: `TM_SAFE_GAP_SHIFT`, `INSERT_GAP` (one gap per row, +1 column), `SPLIT_RESIDUE_RUN` (new one-gap run between residues of every row, +1 column), `MERGE_GAP_RUNS` (joins two consecutive runs of a row) and `RANDOM_CHOICE` (one of the four, uniformly) |
 | `--crossover-probability` / `--mutation-probability` | 0.8 / 0.2 (1.0 for PAES) | Operator probabilities |
 | `--mapping-policy` | `VERIFIED` | `VERIFIED`, `NUMBERED_ONLY` or `LEGACY` (original, unchecked mapping) |
 | `--lddt-aggregation` | `HARMONIC_OVER_LENGTH` | Original aggregation, or `PAIR_MEAN` |
