@@ -10,6 +10,8 @@ package org.tmm2structalign.algorithm;
  * @param mutationProbability probability of the gap-shift mutation
  * @param threads number of evaluation threads; 1 evaluates sequentially
  * @param mutationType mutation operator
+ * @param externalArchive whether the result is a bounded archive of the non-dominated solutions
+ *     found during the search instead of the final population (NSGA-II only)
  */
 public record AlgorithmConfiguration(
     int maxEvaluations,
@@ -18,7 +20,8 @@ public record AlgorithmConfiguration(
     double crossoverProbability,
     double mutationProbability,
     int threads,
-    MutationType mutationType) {
+    MutationType mutationType,
+    boolean externalArchive) {
 
   /** Crossover probability used in the published experiments. */
   public static final double DEFAULT_CROSSOVER_PROBABILITY = 0.8;
@@ -37,6 +40,36 @@ public record AlgorithmConfiguration(
     if (mutationType == null) {
       throw new IllegalArgumentException("mutationType is required");
     }
+  }
+
+  /**
+   * Creates a configuration whose result is the final population.
+   *
+   * @param maxEvaluations stopping criterion, number of evaluations
+   * @param populationSize population size
+   * @param offspringPopulationSize offspring created per generation
+   * @param crossoverProbability probability of the TM-safe crossover
+   * @param mutationProbability probability of the gap-shift mutation
+   * @param threads number of evaluation threads; 1 evaluates sequentially
+   * @param mutationType mutation operator
+   */
+  public AlgorithmConfiguration(
+      int maxEvaluations,
+      int populationSize,
+      int offspringPopulationSize,
+      double crossoverProbability,
+      double mutationProbability,
+      int threads,
+      MutationType mutationType) {
+    this(
+        maxEvaluations,
+        populationSize,
+        offspringPopulationSize,
+        crossoverProbability,
+        mutationProbability,
+        threads,
+        mutationType,
+        false);
   }
 
   /**

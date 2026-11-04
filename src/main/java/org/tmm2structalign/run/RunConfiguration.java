@@ -176,6 +176,7 @@ public record RunConfiguration(
     map.put("crossoverProbability", algorithm.crossoverProbability());
     map.put("mutationProbability", algorithm.mutationProbability());
     map.put("mutationType", algorithm.mutationType());
+    map.put("externalArchive", algorithm.externalArchive());
     map.put("threads", algorithm.threads());
     map.put("mappingPolicy", mappingPolicy);
     map.put("lddtCutoff", (double) lddtCutoff);

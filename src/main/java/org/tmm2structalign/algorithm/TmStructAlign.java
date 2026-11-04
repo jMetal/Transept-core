@@ -50,6 +50,31 @@ public final class TmStructAlign {
       AlgorithmConfiguration configuration,
       CrossoverOperator<MsaSolution> crossover,
       MutationOperator<MsaSolution> mutation) {
+    Evaluation<MsaSolution> evaluation =
+        configuration.threads() > 1
+            ? new MultiThreadedEvaluation<>(configuration.threads(), problem)
+            : new SequentialEvaluation<>(problem);
+    return create(problem, population, configuration, crossover, mutation, evaluation);
+  }
+
+  /**
+   * Creates the algorithm with a given evaluation, e.g. one that also fills an external archive.
+   *
+   * @param problem problem to solve
+   * @param population initial population
+   * @param configuration algorithm parameters
+   * @param crossover crossover operator
+   * @param mutation mutation operator
+   * @param evaluation evaluation of the solutions
+   * @return the algorithm, ready to run
+   */
+  public static EvolutionaryAlgorithm<MsaSolution> create(
+      StructuralMsaProblem problem,
+      SeededPopulationCreation population,
+      AlgorithmConfiguration configuration,
+      CrossoverOperator<MsaSolution> crossover,
+      MutationOperator<MsaSolution> mutation,
+      Evaluation<MsaSolution> evaluation) {
     var variation =
         new CrossoverAndMutationVariation<>(
             configuration.offspringPopulationSize(), crossover, mutation);
@@ -66,10 +91,6 @@ public final class TmStructAlign {
     var replacement =
         new RankingAndDensityEstimatorReplacement<>(
             ranking, density, RankingAndDensityEstimatorReplacement.RemovalPolicy.ONE_SHOT);
-    Evaluation<MsaSolution> evaluation =
-        configuration.threads() > 1
-            ? new MultiThreadedEvaluation<>(configuration.threads(), problem)
-            : new SequentialEvaluation<>(problem);
     return new EvolutionaryAlgorithm<>(
         NAME,
         population,

@@ -92,15 +92,16 @@ public final class AlgorithmFactory {
    */
   public SearchRun create(AlgorithmType type) {
     checkObjectives(type);
+    if (configuration.externalArchive() && type != AlgorithmType.NSGA_II) {
+      throw new IllegalArgumentException("The external archive is only available with NSGA_II");
+    }
     if (type.isSteadyState() && configuration.threads() > 1) {
       LOGGER.warning(
           type + " evaluates one solution per iteration; " + configuration.threads()
               + " threads will not speed it up");
     }
     return switch (type) {
-      case NSGA_II ->
-          SearchRun.of(
-              TmStructAlign.create(problem, population(), configuration, crossover(), mutation()));
+      case NSGA_II -> nsgaTwo();
       case NSGA_III -> SearchRun.of(nsgaThree());
       case AGE_MOEA -> SearchRun.of(ageMoea(new AGEMOEAEnvironmentalSelection<>(objectives())));
       case AGE_MOEA_II ->
@@ -134,6 +135,24 @@ public final class AlgorithmFactory {
                   evaluation(),
                   termination()));
     };
+  }
+
+  /** NSGA-II whose result is the final population or, if configured, a bounded archive. */
+  private SearchRun nsgaTwo() {
+    if (!configuration.externalArchive()) {
+      return SearchRun.of(
+          TmStructAlign.create(problem, population(), configuration, crossover(), mutation()));
+    }
+    var archive = new CrowdingDistanceArchive<MsaSolution>(configuration.populationSize());
+    var algorithm =
+        TmStructAlign.create(
+            problem,
+            population(),
+            configuration,
+            crossover(),
+            mutation(),
+            new ArchivingEvaluation(evaluation(), archive));
+    return SearchRun.of(algorithm, archive);
   }
 
   private void checkObjectives(AlgorithmType type) {

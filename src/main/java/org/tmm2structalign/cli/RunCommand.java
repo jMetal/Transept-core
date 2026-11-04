@@ -109,6 +109,14 @@ public final class RunCommand implements Callable<Integer> {
   AlgorithmType algorithm;
 
   @Option(
+      names = "--external-archive",
+      description =
+          "Return a bounded archive (population size, crowding distance) of the non-dominated"
+              + " solutions found during the search instead of the final population. NSGA_II"
+              + " only.")
+  boolean externalArchive;
+
+  @Option(
       names = "--objectives",
       defaultValue = "SOPWTP_LDDT",
       description =
@@ -148,7 +156,8 @@ public final class RunCommand implements Callable<Integer> {
                   crossoverProbability,
                   effectiveMutationProbability(),
                   threads,
-                  mutation),
+                  mutation,
+                  externalArchive),
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
