@@ -73,7 +73,7 @@ public final class TmSafeLocalGapInsertionMutation implements MutationOperator<M
       throw new IllegalArgumentException("Solution cannot be null");
     }
     int rows = solution.variables().size();
-    if (rows > 1 && random.nextDouble() < probability) {
+    if (random.nextDouble() < probability) {
       int length = solution.alignmentLength();
       int first = random.nextInt(0, length);
       int offset = random.nextInt(1, window);
