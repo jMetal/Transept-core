@@ -110,14 +110,14 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
   private GapIntervals shiftRun(MsaSolution solution, int sequence, GapIntervals row, int run) {
     int start = row.start(run);
     int size = row.runLength(run);
-    boolean[] reduced = removeColumns(row.toMask(), start, size);
+    boolean[] reduced = TmBoundaries.removeColumns(row.toMask(), start, size);
     ProteinSequence protein = solution.proteins().get(sequence);
-    int[] residuesBefore = residuesBefore(reduced);
+    int[] residuesBefore = TmBoundaries.residuesBefore(reduced);
     List<Integer> valid = validPositions(protein, residuesBefore, start);
     GapIntervals result = row;
     if (!valid.isEmpty()) {
       int position = choosePosition(protein, sequence, reduced, residuesBefore, valid);
-      result = GapIntervals.fromMask(insertGaps(reduced, position, size));
+      result = GapIntervals.fromMask(TmBoundaries.insertGaps(reduced, position, size));
     }
     return result;
   }
@@ -127,7 +127,8 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
       ProteinSequence protein, int[] residuesBefore, int originalStart) {
     List<Integer> valid = new ArrayList<>();
     for (int position = 0; position < residuesBefore.length; position++) {
-      if (position != originalStart && !splitsHelix(protein, residuesBefore[position])) {
+      if (position != originalStart
+          && !TmBoundaries.splitsHelix(protein, residuesBefore[position])) {
         valid.add(position);
       }
     }
@@ -169,26 +170,6 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
     return acceptance;
   }
 
-  /** True if a run placed after {@code residues} residues separates two transmembrane residues. */
-  private static boolean splitsHelix(ProteinSequence protein, int residues) {
-    return residues > 0
-        && residues < protein.length()
-        && protein.isTransmembrane(residues - 1)
-        && protein.isTransmembrane(residues);
-  }
-
-  /**
-   * Number of residues before every insertion position of a row, including the position after
-   * the last column.
-   */
-  private static int[] residuesBefore(boolean[] gaps) {
-    int[] counts = new int[gaps.length + 1];
-    for (int column = 0; column < gaps.length; column++) {
-      counts[column + 1] = counts[column] + (gaps[column] ? 0 : 1);
-    }
-    return counts;
-  }
-
   private static List<Integer> sequencesWithGaps(MsaSolution solution) {
     List<Integer> eligible = new ArrayList<>();
     for (int sequence = 0; sequence < solution.variables().size(); sequence++) {
@@ -197,22 +178,5 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
       }
     }
     return eligible;
-  }
-
-  private static boolean[] removeColumns(boolean[] mask, int start, int count) {
-    boolean[] result = new boolean[mask.length - count];
-    System.arraycopy(mask, 0, result, 0, start);
-    System.arraycopy(mask, start + count, result, start, mask.length - start - count);
-    return result;
-  }
-
-  private static boolean[] insertGaps(boolean[] mask, int position, int count) {
-    boolean[] result = new boolean[mask.length + count];
-    System.arraycopy(mask, 0, result, 0, position);
-    for (int index = position; index < position + count; index++) {
-      result[index] = true;
-    }
-    System.arraycopy(mask, position, result, position + count, mask.length - position);
-    return result;
   }
 }
