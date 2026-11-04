@@ -25,7 +25,8 @@ import org.tmm2structalign.structure.MappingPolicy;
 /**
  * Differential oracle: the objectives of the new core must reproduce the values that the
  * original implementation wrote to {@code precomputed/baselines.csv} (dataset v1.0.0, frozen in
- * {@code src/test/resources/oracle}).
+ * {@code src/test/resources/oracle}), except where the verified structure mapping corrects the
+ * original one (OXER1 and MCHR1).
  *
  * <p>Needs the real dataset; set {@code GPCR_DATASET} to the {@code GPCRdb} directory.
  */
@@ -48,24 +49,6 @@ class BaselineOracleIT {
     assumeTrue(dataset != null && Files.isDirectory(Path.of(dataset)), "GPCR_DATASET not set");
     dataRoot = Path.of(dataset);
     expectedRows = readOracle();
-  }
-
-  @Test
-  @DisplayName("given the legacy mapping, when scoring baselines, then every value matches")
-  void givenLegacyMapping_whenScoringBaselines_thenEveryValueMatches() throws IOException {
-    // Act
-    Map<String, BaselineScore> scores = score(MappingPolicy.LEGACY);
-
-    // Assert
-    int compared = 0;
-    for (String[] row : expectedRows) {
-      BaselineScore score = scores.get(row[0] + "/" + row[1]);
-      assertEquals(Double.parseDouble(row[2]), score.values().get(0), row[0] + " " + row[1]);
-      assertEquals(
-          Double.parseDouble(row[3]), score.values().get(1), LDDT_TOLERANCE, row[0] + " " + row[1]);
-      compared++;
-    }
-    assertEquals(162, compared);
   }
 
   @Test

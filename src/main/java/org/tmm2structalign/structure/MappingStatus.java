@@ -6,7 +6,7 @@ public enum MappingStatus {
   NUMBERED(true),
   /** Numbering disagreed; the mapping comes from aligning the PDB and input sequences. */
   ALIGNED(true),
-  /** Residue numbers used without checking residues (no PDB file, or legacy policy). */
+  /** Residue numbers used without checking residues (no PDB file to check them). */
   UNVERIFIED(true),
   /** Neither numbering nor alignment reached the identity threshold; structure not used. */
   LOW_IDENTITY(false),

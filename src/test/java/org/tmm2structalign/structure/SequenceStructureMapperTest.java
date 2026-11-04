@@ -151,25 +151,10 @@ class SequenceStructureMapperTest {
     }
 
     @Test
-    @DisplayName("given an extension and the legacy policy, when mapping, then it is mis-mapped")
-    void givenExtensionAndLegacyPolicy_whenMapping_thenOriginalMisMappingIsReproduced() {
+    @DisplayName("given numbers beyond the sequence and no PDB, then files are invalid")
+    void givenNumbersBeyondSequenceAndNoPdb_whenMapping_thenFilesAreInvalid() {
       // Arrange
-      SequenceStructureMapper mapper = new SequenceStructureMapper(MappingPolicy.LEGACY);
-      ProteinSequence protein = ProteinSequence.withoutTopology("p", "MSTPQ" + CORE);
-
-      // Act
-      StructureMapping mapping = mapper.map(protein, numbers(CORE.length()), Optional.of(CORE));
-
-      // Assert
-      assertEquals(MappingStatus.UNVERIFIED, mapping.status());
-      assertEquals(0, mapping.residueToStructure()[0]);
-    }
-
-    @Test
-    @DisplayName("given numbers beyond the sequence and the legacy policy, then files are invalid")
-    void givenNumbersBeyondSequenceAndLegacyPolicy_whenMapping_thenFilesAreInvalid() {
-      // Arrange
-      SequenceStructureMapper mapper = new SequenceStructureMapper(MappingPolicy.LEGACY);
+      SequenceStructureMapper mapper = new SequenceStructureMapper(MappingPolicy.VERIFIED);
       ProteinSequence protein = ProteinSequence.withoutTopology("p", "ACD");
 
       // Act
@@ -183,7 +168,7 @@ class SequenceStructureMapperTest {
     @DisplayName("given repeated residue numbers, when mapping, then the first row is kept")
     void givenRepeatedResidueNumbers_whenMapping_thenFirstRowIsKept() {
       // Arrange
-      SequenceStructureMapper mapper = new SequenceStructureMapper(MappingPolicy.LEGACY);
+      SequenceStructureMapper mapper = new SequenceStructureMapper(MappingPolicy.VERIFIED);
       ProteinSequence protein = ProteinSequence.withoutTopology("p", "ACD");
 
       // Act

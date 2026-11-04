@@ -8,10 +8,5 @@ public enum MappingPolicy {
    */
   VERIFIED,
   /** Use the PDB numbering only when the residues agree; never fall back to alignment. */
-  NUMBERED_ONLY,
-  /**
-   * Behaviour of the original implementation: trust the residue numbers without checking
-   * residues. Kept only to reproduce published values; it mis-maps OXER1 and MCHR1.
-   */
-  LEGACY
+  NUMBERED_ONLY
 }

@@ -67,7 +67,7 @@ public final class SequenceStructureMapper {
               + " residues but " + residueNumbers.length + " residue numbers");
     }
     StructureMapping mapping;
-    if (policy == MappingPolicy.LEGACY || structureSequence.isEmpty()) {
+    if (structureSequence.isEmpty()) {
       mapping = mapByNumbersUnchecked(protein, residueNumbers);
     } else {
       mapping = mapVerified(protein, residueNumbers, structureSequence.get());
