@@ -45,8 +45,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Libraries -->
-        <jmetal.version>7.11-SNAPSHOT</jmetal.version>
-        <evolver.version>3.0-SNAPSHOT</evolver.version>
+        <jmetal.version>7.11</jmetal.version>
+        <evolver.version>2.6</evolver.version>
         <biojava.version>7.3.0</biojava.version>
         <picocli.version>4.7.7</picocli.version>
 
