@@ -87,6 +87,33 @@ class CliTest {
     }
 
     @Test
+    @DisplayName("given internal and repaired seeds, when running, then the seeds are recorded")
+    void givenInternalAndRepairedSeeds_whenRunning_thenTheSeedsAreRecorded() throws IOException {
+      // Act: the synthetic seeds left and right are repaired too
+      int status =
+          TmStructAlignCli.execute(
+              "run",
+              "--data-root", dataRoot.toString(),
+              "--dataset", SyntheticDataset.NAME,
+              "--seeds", "internal,left",
+              "--repair-seeds",
+              "--output-root", outputRoot.toString(),
+              "--run-id", "internal",
+              "--seed", "3",
+              "--max-evaluations", "50",
+              "--population-size", "8");
+
+      // Assert
+      Path run = outputRoot.resolve("ejecuciones/synthetic/internal");
+      String metadata = Files.readString(run.resolve("metadata.json"));
+      assertEquals(0, status);
+      assertTrue(metadata.contains("\"method\":\"internal:biojava-g20x2\""), metadata);
+      assertTrue(metadata.contains("\"repairedGapRuns\":"), metadata);
+      assertTrue(Files.isRegularFile(run.resolve("seeds/biojava-g20x2.fasta")));
+      assertTrue(Files.readString(run.resolve("config.json")).contains("\"repairSeeds\":true"));
+    }
+
+    @Test
     @DisplayName("given a time limit, when running, then it stops by time and records it")
     void givenTimeLimit_whenRunning_thenItStopsByTimeAndRecordsIt() throws IOException {
       // Act
