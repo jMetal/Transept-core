@@ -1,0 +1,3 @@
+name	options
+ga	--algorithm GENETIC_ALGORITHM --objectives LDDT
+nsgaii	--algorithm NSGA_II
