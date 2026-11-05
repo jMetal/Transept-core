@@ -88,7 +88,7 @@ Reference:
 
 - [Command line](docs/reference/cli.md): every option of `run` and `baseline`, the algorithms and
   operators, and the comparison with reference alignments.
-- [Configuring NSGA-II](docs/reference/configuration.md): its parameter space and how to change it.
+- [Configuring the algorithms](docs/reference/configuration.md): the parameter spaces of NSGA-II, SPEA2 and the GA.
 - [Output files](docs/reference/outputs.md): the files of a run and their formats.
 - [Metrics](docs/reference/metrics.md): the objectives and the reference-based metrics.
 

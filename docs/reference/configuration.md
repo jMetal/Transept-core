@@ -1,11 +1,17 @@
-# Configuring NSGA-II
+# Configuring the algorithms
 
-NSGA-II is built with [Evolver](https://github.com/jMetal/Evolver) from a **parameter space**:
+NSGA-II, SPEA2 and the genetic algorithm are built with [Evolver](https://github.com/jMetal/Evolver)
+from a **parameter space**:
 a YAML file that lists the components of the algorithm and the values each one can take. A
-**configuration** chooses one value for every parameter. The parameter space is
-`src/main/resources/parameterSpaces/MSANSGAII.yaml` and the default configuration, the one used
-when nothing is given, is `src/main/resources/defaultConfigurations/MSANSGAIIDefault.txt`. Both are
-inside the JAR.
+**configuration** chooses one value for every parameter. The spaces are in
+`src/main/resources/parameterSpaces/` and the default configurations, used when nothing is given, in
+`src/main/resources/defaultConfigurations/`; both are inside the JAR.
+
+| `--algorithm` | Parameter space | Default configuration |
+| --- | --- | --- |
+| `NSGA_II` | `MSANSGAII.yaml` | `MSANSGAIIDefault.txt` (the published one) |
+| `SPEA2` | `MSASPEA2.yaml` | `MSASPEA2Default.txt` |
+| `GENETIC_ALGORITHM` | `MSAGA.yaml` | `MSAGADefault.txt` |
 
 ## Giving a configuration
 
@@ -25,7 +31,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 be repeated with `--configuration "<that string>"`. Unknown parameter names and values outside
 the space are errors.
 
-## The parameter space
+## The parameter space of NSGA-II
 
 | Parameter | Values | Default | Meaning |
 | --- | --- | --- | --- |
@@ -50,8 +56,33 @@ seed.
 The operator options of the command line (`--mutation`, `--crossover-probability`,
 `--mutation-probability`) set the same parameters; give each parameter in one place only.
 
+## SPEA2
+
+`MSASPEA2.yaml` is NSGA-II's space plus three parameters of Evolver's RDEMOEA, a generational
+algorithm with a configurable ranking and density estimator:
+
+| Parameter | Values | Default |
+| --- | --- | --- |
+| `ranking` | `strengthRanking`, `dominanceRanking` | `strengthRanking` |
+| `densityEstimator` | `knn` (with `knnNeighborhoodSize` 1–5 and `knnNormalizeObjectives`), `crowdingDistance` | `knn`, 1 neighbour, normalised objectives |
+| `replacement` | `rankingAndDensityEstimator` with `removalPolicy` `sequential` or `oneShot` | `sequential` |
+
+The default is SPEA2: strength ranking, the distance to the nearest neighbour as density and the
+worst solutions removed one by one. Unlike the original SPEA2, the population plays the role of
+its archive. With `dominanceRanking`, `crowdingDistance` and `oneShot` it behaves as NSGA-II.
+
+## The genetic algorithm
+
+`MSAGA.yaml` has the initial population, offspring size, variation and selection of NSGA-II (the
+tournament compares the single objective) and `gaReplacement`: `muPlusLambda` (default, parents and
+children compete) or `muCommaLambda` (only the children survive; it needs more offspring than the
+population size). It needs `--objectives LDDT`.
+
 ## Other algorithms
 
 The other algorithms of `--algorithm` are still built directly with jMetal and are configured with
-the operator options only. They will move to parameter spaces one by one, with the same
-approach.
+the operator options only. SMS-EMOA, MOEA/D and PAES will move to parameter spaces with the same
+approach, so that all the sequential base algorithms can be configured automatically later. The
+asynchronous algorithms (`ASYNC_NSGA_II`, `ASYNC_GENETIC_ALGORITHM`) are meant for production
+runs on many cores and use the operator options; automatic configuration runs the base
+algorithms sequentially and parallelises over configurations instead.

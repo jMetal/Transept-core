@@ -48,11 +48,11 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
-| `--configuration` | (none) | NSGA-II only: configuration from its parameter space, `--parameter value ...` ([configuration](configuration.md)). Unset parameters keep their default |
+| `--configuration` | (none) | NSGA-II, SPEA2 and the GA: configuration from their parameter space, `--parameter value ...` ([configuration](configuration.md)). Unset parameters keep their default |
 | `--configuration-file` | (none) | The same, read from the first non-blank line of a file |
 
 `--mutation`, `--crossover-probability` and `--mutation-probability` set the corresponding
-parameters of the configuration of NSGA-II; giving one of them and the same parameter in
+parameters of the configuration of the configurable algorithms; giving one of them and the same parameter in
 `--configuration` is an error.
 
 The initial population holds the distinct seeds and, for the rest, distinct crossover children
@@ -60,7 +60,9 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 
 | `--algorithm` | Algorithm | Notes |
 | --- | --- | --- |
-| `NSGA_II` | NSGA-II | Published configuration |
+| `NSGA_II` | NSGA-II | Published configuration; configurable ([configuration](configuration.md)) |
+| `ASYNC_NSGA_II` | Asynchronous NSGA-II | Every evaluated solution enters the population at once, so all `--threads` stay busy; with more than one thread, runs do not repeat exactly |
+| `SPEA2` | SPEA2-style (RDEMOEA with strength ranking and k-nearest-neighbour density) | The population plays the role of SPEA2's archive; configurable |
 | `NSGA_III` | NSGA-III | The population size must be a multiple of 4 |
 | `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
 | `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
@@ -68,7 +70,8 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 | `PAES` | PAES, (1+1) with a crowding-distance archive | Mutation only; starts from the first seed |
 | `RANDOM_SEARCH` | Random search, gaps at random | Sanity check (weak baseline); ignores the seeds and the operators |
 | `RANDOM_SEEDED` | Random search, seeds + 10 random mutations | Sanity check (strong baseline) |
-| `GENETIC_ALGORITHM` | Generational GA, binary tournament, (μ+λ) replacement | Single objective only (`--objectives LDDT`); same seeded population and operators as NSGA-II |
+| `GENETIC_ALGORITHM` | Generational GA, binary tournament, (μ+λ) replacement | Single objective only (`--objectives LDDT`); same seeded population and operators as NSGA-II; configurable |
+| `ASYNC_GENETIC_ALGORITHM` | Asynchronous steady-state GA | Single objective only; like `ASYNC_NSGA_II`, does not repeat exactly with more than one thread |
 
 The multiobjective algorithms need at least two objectives; the random searches accept any
 number.
