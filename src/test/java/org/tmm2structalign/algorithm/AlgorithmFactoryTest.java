@@ -20,10 +20,12 @@ import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
+import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
 import org.tmm2structalign.testing.Alignments;
 import org.tmm2structalign.testing.SeededRandom;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 @DisplayName("Unit tests for classes AlgorithmFactory, SearchRun and AlgorithmType")
 class AlgorithmFactoryTest {
@@ -298,6 +300,89 @@ class AlgorithmFactoryTest {
               .min()
               .orElseThrow();
       assertTrue(best <= bestSeed, best + " > " + bestSeed);
+    }
+  }
+
+  @Nested
+  @DisplayName("When configuring NSGA-II from its parameter space")
+  class Configuration {
+
+    private AlgorithmFactory configured(String text) {
+      return new AlgorithmFactory(
+          problem,
+          seeds,
+          new AlgorithmConfiguration(
+              EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 0.2, 1,
+              MutationType.TM_SAFE_GAP_SHIFT, false, null, text),
+          structures,
+          new SeededRandom(5));
+    }
+
+    @Test
+    @DisplayName("given the default options, when built, then it is the current NSGA-II exactly")
+    void givenDefaultOptions_whenBuilt_thenItIsTheCurrentNsgaTwoExactly() {
+      // Arrange: the hand-built NSGA-II that the Evolver one replaces
+      var random = new SeededRandom(5);
+      var configuration =
+          new AlgorithmConfiguration(
+              EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 0.2, 1);
+      var reference =
+          TmStructAlign.createDefault(
+              problem,
+              new SeededPopulationCreation(
+                  problem,
+                  seeds,
+                  POPULATION_SIZE,
+                  random,
+                  new TmSafeGapShiftMutation(
+                      1.0, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random)),
+              configuration,
+              new TmSafeGapShiftMutation(
+                  0.2, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random),
+              random);
+      SearchRun run = configured("").create(AlgorithmType.NSGA_II);
+
+      // Act: jMetal's selection draws from the global generator, so both start from one seed
+      JMetalRandom.getInstance().setSeed(11);
+      reference.run();
+      JMetalRandom.getInstance().setSeed(11);
+      run.run();
+
+      // Assert
+      assertEquals(
+          reference.result().stream().map(MsaSolution::variables).toList(),
+          run.front().stream().map(MsaSolution::variables).toList());
+      assertTrue(run.configuration().contains("--mutation tmSafeGapShift"), run.configuration());
+    }
+
+    @Test
+    @DisplayName("given a configuration string, when built, then it overrides the defaults")
+    void givenConfigurationString_whenBuilt_thenItOverridesTheDefaults() {
+      // Act
+      SearchRun run =
+          configured("--selection random --mutation mergeGapRuns").create(AlgorithmType.NSGA_II);
+      run.run();
+
+      // Assert
+      assertTrue(run.configuration().contains("--selection random"), run.configuration());
+      assertTrue(run.configuration().contains("--mutation mergeGapRuns"), run.configuration());
+      assertTrue(run.configuration().contains("--crossoverProbability 0.8"), run.configuration());
+      assertFalse(run.front().isEmpty());
+    }
+
+    @Test
+    @DisplayName("given invalid configurations, when built, then an exception is thrown")
+    void givenInvalidConfigurations_whenBuilt_thenExceptionIsThrown() {
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> configured("--selectoin random").create(AlgorithmType.NSGA_II));
+      assertThrows(
+          RuntimeException.class,
+          () -> configured("--selection roulette").create(AlgorithmType.NSGA_II));
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> configured("--selection random").create(AlgorithmType.SMS_EMOA));
     }
   }
 

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.tmm2structalign.algorithm.AlgorithmType;
+import org.tmm2structalign.algorithm.MutationType;
 import org.tmm2structalign.run.BaselineScorer.BaselineScore;
 import org.tmm2structalign.testing.SyntheticDataset;
 
@@ -130,6 +131,43 @@ class CliTest {
       assertThrows(IllegalArgumentException.class, command::maxRunTime);
       command.maxTime = null;
       assertNull(command.maxRunTime());
+    }
+
+    @Test
+    @DisplayName("given a configuration, when running NSGA-II, then metadata records it")
+    void givenConfiguration_whenRunningNsgaTwo_thenMetadataRecordsIt() throws IOException {
+      // Arrange
+      Path file = directory.resolve("configuration.txt");
+      Files.writeString(file, "\n--selection random --mutationProbability 0.5\n");
+      String[] arguments = runArguments("configured", "left,right");
+      String[] withFile = Arrays.copyOf(arguments, arguments.length + 2);
+      withFile[arguments.length] = "--configuration-file";
+      withFile[arguments.length + 1] = file.toString();
+
+      // Act
+      int status = TmStructAlignCli.execute(withFile);
+
+      // Assert
+      String metadata =
+          Files.readString(outputRoot.resolve("ejecuciones/synthetic/configured/metadata.json"));
+      assertEquals(0, status);
+      assertTrue(metadata.contains("--selection random"), metadata);
+      assertTrue(metadata.contains("--mutationProbability 0.5"), metadata);
+    }
+
+    @Test
+    @DisplayName("given an option and a configuration setting the same parameter, then it fails")
+    void givenOptionAndConfigurationSettingSameParameter_whenResolving_thenItFails() {
+      // Arrange
+      RunCommand command = new RunCommand();
+      command.mutation = MutationType.MERGE_GAP_RUNS;
+      command.configuration = "--mutation randomChoice";
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, command::configurationText);
+      command.mutation = null;
+      command.configurationFile = directory.resolve("x.txt");
+      assertThrows(IllegalArgumentException.class, command::configurationText);
     }
 
     private String[] runArguments(String runId, String seeds) {
