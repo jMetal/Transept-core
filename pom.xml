@@ -14,6 +14,7 @@
 
         <!-- Libraries -->
         <jmetal.version>7.11-SNAPSHOT</jmetal.version>
+        <evolver.version>3.0-SNAPSHOT</evolver.version>
         <biojava.version>7.0.0</biojava.version>
         <picocli.version>4.7.7</picocli.version>
 
@@ -44,6 +45,22 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Evolver is built on another jMetal version: use ours for every module -->
+            <dependency>
+                <groupId>org.uma.jmetal</groupId>
+                <artifactId>jmetal-algorithm</artifactId>
+                <version>${jmetal.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.uma.jmetal</groupId>
+                <artifactId>jmetal-problem</artifactId>
+                <version>${jmetal.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.uma.jmetal</groupId>
+                <artifactId>jmetal-parallel</artifactId>
+                <version>${jmetal.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -63,6 +80,20 @@
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-auto</artifactId>
             <version>${jmetal.version}</version>
+        </dependency>
+
+        <!-- Configurable algorithms (parameter spaces in YAML) -->
+        <dependency>
+            <groupId>org.uma.jmetal</groupId>
+            <artifactId>Evolver</artifactId>
+            <version>${evolver.version}</version>
+            <exclusions>
+                <!-- Experimentation and plotting, not used by the base-level algorithms -->
+                <exclusion>
+                    <groupId>org.uma.jmetal</groupId>
+                    <artifactId>jmetal-lab</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Bioinformatics -->
