@@ -5,11 +5,7 @@ import org.uma.evolver.algorithm.BaseLevelAlgorithm;
 import org.uma.evolver.algorithm.nsgaii.BaseNSGAII;
 import org.uma.evolver.parameter.ParameterSpace;
 import org.uma.jmetal.component.catalogue.common.evaluation.Evaluation;
-import org.uma.jmetal.component.catalogue.common.evaluation.impl.MultiThreadedEvaluation;
-import org.uma.jmetal.component.catalogue.common.evaluation.impl.SequentialEvaluation;
-import org.uma.jmetal.component.catalogue.common.evaluation.impl.SequentialEvaluationWithArchive;
 import org.uma.jmetal.component.catalogue.common.termination.Termination;
-import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByComputingTime;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.util.archive.Archive;
 
@@ -70,35 +66,16 @@ public class MsaNsga2 extends BaseNSGAII<MsaSolution> {
 
   @Override
   protected void setNonConfigurableParameters() {
-    var crossover = parameterSpace.get("crossover");
-    crossover.addNonConfigurableSubParameter("random", context.random());
-    var mutation = (MsaMutationParameter) parameterSpace.get("mutation");
-    mutation.addNonConfigurableSubParameter("structures", context.structures());
-    mutation.addNonConfigurableSubParameter("random", context.random());
-    parameterSpace
-        .get("createInitialSolutions")
-        .addNonConfigurableSubParameter("seeds", context.seeds())
-        .addNonConfigurableSubParameter("random", context.random())
-        .addNonConfigurableSubParameter("copyMutation", mutation.mutation(1.0));
+    MsaComponents.setNonConfigurableParameters(parameterSpace, context);
   }
 
   @Override
   protected Evaluation<MsaSolution> createEvaluation(Archive<MsaSolution> archive) {
-    int threads = context.threads();
-    if (archive != null) {
-      return threads > 1
-          ? new ParallelEvaluationWithArchive(threads, problem, archive)
-          : new SequentialEvaluationWithArchive<>(problem, archive);
-    }
-    return threads > 1
-        ? new MultiThreadedEvaluation<>(threads, problem)
-        : new SequentialEvaluation<>(problem);
+    return MsaComponents.evaluation(problem, archive, context);
   }
 
   @Override
   protected Termination createTermination() {
-    return context.maxTime() == null
-        ? super.createTermination()
-        : new TerminationByComputingTime(context.maxTime().toMillis());
+    return MsaComponents.termination(context, super.createTermination());
   }
 }

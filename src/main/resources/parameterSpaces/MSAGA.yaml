@@ -1,0 +1,52 @@
+# Parameter space of the generational genetic algorithm for the single-objective formulation of
+# multiple sequence alignment (TM-M2StructAlign: --objectives LDDT). Every operator keeps
+# transmembrane helices intact. The population size is given with --population-size.
+# muCommaLambda needs more offspring than the population size.
+createInitialSolutions:
+  type: categorical
+  values:
+    seededDistinct:
+#
+offspringPopulationSize:
+  type: integer
+  range: [1, 1000]
+#
+variation:
+  type: categorical
+  values:
+    crossoverAndMutationVariation:
+      conditionalParameters:
+        crossover:
+          type: categorical
+          globalSubParameters:
+            crossoverProbability:
+              type: double
+              range: [0.0, 1.0]
+          values:
+            tmSafeSinglePoint:
+        mutation:
+          type: categorical
+          globalSubParameters:
+            mutationProbability:
+              type: double
+              range: [0.0, 1.0]
+          values:
+            tmSafeGapShift:
+            mergeGapRuns:
+            randomChoice:
+#
+selection:
+  type: categorical
+  values:
+    tournament:
+      conditionalParameters:
+        selectionTournamentSize:
+          type: integer
+          range: [2, 10]
+    random:
+#
+gaReplacement:
+  type: categorical
+  values:
+    muPlusLambda:
+    muCommaLambda:
