@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -183,6 +186,40 @@ class CliTest {
         "--population-size", "6",
         "--progress-interval", "20"
       };
+    }
+  }
+
+  @Nested
+  @DisplayName("When using the algorithms command")
+  class Algorithms {
+
+    @Test
+    @DisplayName("given the command, when run, then it lists every algorithm with its objectives")
+    void givenCommand_whenRun_thenItListsEveryAlgorithmWithItsObjectives() {
+      // Arrange
+      PrintStream original = System.out;
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+
+      // Act
+      int status;
+      try {
+        status = TmStructAlignCli.execute("algorithms");
+      } finally {
+        System.setOut(original);
+      }
+
+      // Assert
+      String json = output.toString(StandardCharsets.UTF_8);
+      assertEquals(0, status);
+      for (AlgorithmType type : AlgorithmType.values()) {
+        assertTrue(json.contains("\"name\":\"" + type + "\""), type.toString());
+      }
+      assertTrue(
+          json.contains(
+              "\"name\":\"GENETIC_ALGORITHM\",\"minObjectives\":1,\"maxObjectives\":1"),
+          json);
+      assertTrue(json.contains("\"parameterSpace\":\"MSASPEA2.yaml\""), json);
     }
   }
 

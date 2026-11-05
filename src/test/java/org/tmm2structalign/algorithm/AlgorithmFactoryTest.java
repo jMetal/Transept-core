@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.evolver.MsaGeneticAlgorithm;
 import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.objective.AlignedPairCoverage;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
 import org.tmm2structalign.problem.StructuralMsaProblem;
@@ -364,6 +366,53 @@ class AlgorithmFactoryTest {
       assertThrows(
           IllegalArgumentException.class,
           () -> configured("--selection random").create(AlgorithmType.SMS_EMOA));
+    }
+  }
+
+  @Nested
+  @DisplayName("When optimising three objectives")
+  class ThreeObjectives {
+
+    @ParameterizedTest
+    @EnumSource(AlgorithmType.class)
+    @DisplayName("given an algorithm that accepts three objectives, when run, then it completes")
+    void givenAlgorithmAcceptingThreeObjectives_whenRun_thenItCompletes(AlgorithmType type) {
+      // Arrange: MOEA/D needs a population size with weight vectors (W3D_100.dat)
+      assumeTrue(type.maxObjectives() == 3, type + " accepts fewer objectives");
+      StructuralMsaProblem three =
+          new StructuralMsaProblem(
+              "test",
+              proteins,
+              List.of(
+                  TopologyAwareSumOfPairs.withDefaultParameters(),
+                  new StructuralLddt(structures, 15f),
+                  new AlignedPairCoverage(proteins)));
+      SearchRun run = factory(three, 100, 1.0).create(type);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertFalse(run.front().isEmpty());
+      run.front().forEach(solution -> assertEquals(3, solution.objectives().length));
+    }
+
+    @Test
+    @DisplayName("given MOEA/D, three objectives and no weights for the size, then it fails")
+    void givenMoeadThreeObjectivesAndNoWeights_whenBuilding_thenItFails() {
+      // Arrange
+      StructuralMsaProblem three =
+          new StructuralMsaProblem(
+              "test",
+              proteins,
+              List.of(
+                  TopologyAwareSumOfPairs.withDefaultParameters(),
+                  new StructuralLddt(structures, 15f),
+                  new AlignedPairCoverage(proteins)));
+      AlgorithmFactory factory = factory(three, 50, 1.0);
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.MOEA_D));
     }
   }
 
