@@ -8,7 +8,7 @@
 | **Prerequisites** | [T1. First run in five minutes](T1-first-run.md), Python 3 with NumPy and Biopython |
 | **Checked with** | A copy of `classF` built with the steps below; the script of Step 3 reproduces the benchmark matrices to 0.0001 Å |
 
-TM-M2StructAlign reads its inputs from a directory with the layout of the benchmark
+Transept reads its inputs from a directory with the layout of the benchmark
 ([Dataset_Structural_GPCRs](https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs)).
 This tutorial explains which files a dataset needs, how to produce them for your own proteins,
 and how to check that the tool reads them as intended.
@@ -132,7 +132,7 @@ their crossover children (unless the population is not larger than the number of
 Run a short search first:
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
   --data-root MyRoot --dataset mydata --seeds mafft,clustalo \
   --output-root results --run-id check --seed 1 \
   --max-evaluations 200 --population-size 20

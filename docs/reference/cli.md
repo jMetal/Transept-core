@@ -3,7 +3,7 @@
 The JAR built by `mvn clean package` runs the command line:
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar <command> [options]
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar <command> [options]
 ```
 
 | Command | Purpose |
@@ -17,7 +17,7 @@ file, one per line, and passed as `@file.args`.
 ## `run`
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
@@ -99,7 +99,7 @@ the same `--output-root` read them instead of computing them (a few seconds for 
 minutes for the largest datasets).
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar seeds \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar seeds \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --datasets classF --output-root results
 ```
 
@@ -123,7 +123,7 @@ whether it is steady state, asynchronous and uses the crossover. The studio read
 keeping its own copy.
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar algorithms
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar algorithms
 ```
 
 ## `baseline`
@@ -131,7 +131,7 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar algorithms
 Scores every precomputed alignment of the given datasets with the two objectives.
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar baseline \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --datasets classF,classT2_19 \
   --output baselines.csv
@@ -150,8 +150,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar baseline \
 (see [metrics](metrics.md)). It is not a subcommand of the JAR's command line yet:
 
 ```bash
-java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
-  org.tmm2structalign.evaluation.EvaluationMain \
+java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
+  org.transept.evaluation.EvaluationMain \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root results/ejecuciones/classF \

@@ -19,7 +19,7 @@ On Linux or macOS:
 
 ```bash
 for seed in 0 21 42 63 84 105 126 147 168 189; do
-  java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+  java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
     --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
     --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
     --output-root results --run-id seed_$(printf %03d $seed) --seed $seed \
@@ -31,7 +31,7 @@ On Windows, `scripts/run_10_seeds_windows.ps1` does the same with the same seeds
 `run_01` ... `run_10`), and checks that every run wrote its files:
 
 ```powershell
-.\scripts\run_10_seeds_windows.ps1 -JarPath target\TM-MSAStructAligner-1.0-jar-with-dependencies.jar `
+.\scripts\run_10_seeds_windows.ps1 -JarPath target\transept-core-0.1.0-jar-with-dependencies.jar `
   -DataDirectory ..\Dataset_Structural_GPCRs\GPCRdb -ProblemName classF -OutputRoot results `
   -SeedMethods clustalw,kalign,mafft,muscle5,tcoffee,tmaligner -MaxEvaluations 2500
 ```
@@ -122,8 +122,8 @@ compromise towards the best-SOPwTP end of the front.
 Evaluate them against the GPCRdb reference as in [T4](T4-choosing-and-evaluating.md):
 
 ```bash
-java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
-  org.tmm2structalign.evaluation.EvaluationMain \
+java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
+  org.transept.evaluation.EvaluationMain \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root results/analysis_classF/selected_alignments --glob '*.fasta' \
@@ -167,4 +167,4 @@ This version does not reproduce the published experiments: it corrects the struc
 OXER1 and MCHR1, removes gap-only columns, defines the structural objective as the mean of the
 anchor scores, uses a mutation that never breaks a helix and fills the initial population without
 duplicates. To reproduce the published results,
-use the code at tag `legacy-v1.0`.
+use the original TM-M2StructAlign at tag `legacy-v1.0`.

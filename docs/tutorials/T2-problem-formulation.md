@@ -6,16 +6,16 @@
 | **Version** | 1.0 (2026-11-04) |
 | **Time** | about 45 minutes |
 | **Prerequisites** | [T1. First run in five minutes](T1-first-run.md) |
-| **Companion** | `org.tmm2structalign.example.FormulationTour` |
+| **Companion** | `org.transept.example.FormulationTour` |
 
-This tutorial describes what TM-M2StructAlign optimises and how it does it: the inputs, the two
+This tutorial describes what Transept optimises and how it does it: the inputs, the two
 objectives, the constraints, how an alignment is encoded, how the initial population is built,
 and what every crossover and mutation does. A small example with three proteins runs through it.
 Its output is printed by a class of the project, so you can run it and change it:
 
 ```bash
-java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
-  org.tmm2structalign.example.FormulationTour
+java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
+  org.transept.example.FormulationTour
 ```
 
 The output shown below is the one of this version; a test checks that the class still prints it.

@@ -8,7 +8,7 @@
 | **Timings measured on** | Apple M5 Pro (18 cores), 64 GB of RAM, macOS 26.6.2, Java 21.0.12 (Oracle JDK), Maven 3.9.16 |
 | **Prerequisites** | Java 21, Maven 3.9+, git |
 
-This tutorial builds TM-M2StructAlign, runs it on the smallest dataset of the benchmark, and walks
+This tutorial builds Transept, runs it on the smallest dataset of the benchmark, and walks
 through the files it writes. At the end you will know how to launch a run, where its results are,
 how to read them, and how to repeat a run exactly.
 
@@ -19,30 +19,27 @@ published version of the dataset:
 
 ```bash
 mkdir MSA && cd MSA
-git clone https://github.com/TM-M2StructAlign/TM-M2StructAlign.git
+git clone https://github.com/jMetal/Transept-core.git
 git clone https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs.git
 git -C Dataset_Structural_GPCRs checkout v1.0.0
 ```
 
-The commands of all tutorials are run from `MSA/TM-M2StructAlign` and refer to the data as
+The commands of all tutorials are run from `MSA/Transept-core` and refer to the data as
 `../Dataset_Structural_GPCRs/GPCRdb`.
 
 ## Step 2: build
 
 ```bash
-cd TM-M2StructAlign
+cd Transept-core
 mvn clean package -DskipTests
 ```
 
-The result is `target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar`, a single file with every
+The result is `target/transept-core-0.1.0-jar-with-dependencies.jar`, a single file with every
 dependency. `mvn clean verify` also runs the tests (a few minutes).
 
-> **jMetal 7.11.** This version needs jMetal 7.11, which lets SMS-EMOA, MOEA/D and PAES start
-> from the seed alignments. Until it is published on Maven Central, install a `7.11-SNAPSHOT`
-> built from the [jMetal](https://github.com/jMetal/jMetal) sources that include those builders
-> (`mvn install -DskipTests` in the jMetal directory). NSGA-II is built with
-> [Evolver](https://github.com/jMetal/Evolver) 3.0: until it is published, install it the same way
-> from its `develop` branch.
+Maven downloads every dependency from Maven Central the first time, including
+[jMetal](https://github.com/jMetal/jMetal) 7.11 and [Evolver](https://github.com/jMetal/Evolver)
+2.6, so the first build takes longer.
 
 ## Step 3: the dataset
 
@@ -56,7 +53,7 @@ kinds of files from `GPCRdb`:
 | `distances/classF/<protein>_D.csv`, `<protein>_idx.csv` | Cα distance matrix of the AlphaFold2 model and the PDB residue numbers of its rows |
 | `precomputed/classF/<tool>_classF.fasta` | Alignments produced by other tools, used as seeds of the search |
 
-TM-M2StructAlign does not align from scratch: it starts from the alignments of other tools (the
+Transept does not align from scratch: it starts from the alignments of other tools (the
 *seeds*) and searches for alignments that improve two objectives at the same time, a
 topology-aware sum of pairs (**SOPwTP**) and a structural score (**lDDT**). Both are explained in
 [T2](T2-problem-formulation.md).
@@ -64,7 +61,7 @@ topology-aware sum of pairs (**SOPwTP**) and a structural score (**lDDT**). Both
 ## Step 4: run
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
@@ -153,7 +150,7 @@ The [output reference](../reference/outputs.md) describes every field.
 The same options and the same seed give the same result, bit for bit:
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id first-again --seed 1 \
@@ -174,7 +171,7 @@ line (10 000 evaluations, populations of 100) and four evaluation threads it tak
 30 seconds on `classF`:
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id seed_000 --seed 0 \

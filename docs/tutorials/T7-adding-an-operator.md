@@ -7,7 +7,7 @@
 | **Time** | about 30 minutes to read; implementing and evaluating an operator takes longer |
 | **Prerequisites** | [T2. Problem formulation](T2-problem-formulation.md), Java 21, the coding guidelines of the project (`JAVA_CODING_GUIDELINES.md`) |
 
-This tutorial explains how to add a mutation or a crossover to TM-M2StructAlign: the interfaces
+This tutorial explains how to add a mutation or a crossover to Transept: the interfaces
 it implements, the rules every operator must follow, the tests it needs, how to make it available
 in the command line, and how to decide whether it is worth keeping. The worked example is
 `MergeAdjacentGapRunsMutation`, a short operator of the project.
@@ -93,9 +93,9 @@ breaks one, that is the run it moves.
 
 ## Step 4: the tests
 
-Each operator has a unit test class in `src/test/java/org/tmm2structalign/operator/`, following
+Each operator has a unit test class in `src/test/java/org/transept/operator/`, following
 the conventions of the project (JUnit Jupiter, `given_when_then` names, `@DisplayName`,
-Arrange/Act/Assert). The utilities in `org.tmm2structalign.testing` help:
+Arrange/Act/Assert). The utilities in `org.transept.testing` help:
 
 | Utility | Use |
 | --- | --- |

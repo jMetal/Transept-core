@@ -16,7 +16,7 @@ mean over the aligned residues and ignores how many there are.
 
 ## Comparison with a reference alignment
 
-`org.tmm2structalign.evaluation` compares an alignment with the GPCRdb reference alignment of the
+`org.transept.evaluation` compares an alignment with the GPCRdb reference alignment of the
 dataset ([how to run it](cli.md#comparison-with-the-reference-alignments)).
 
 ### Pair precision, recall and F1

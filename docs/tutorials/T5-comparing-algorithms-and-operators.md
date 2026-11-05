@@ -8,7 +8,7 @@
 | **Timings measured on** | Apple M5 Pro (18 cores), 64 GB of RAM, macOS 26.6.2, Java 21.0.12 (Oracle JDK), Python 3.9 with NumPy and Matplotlib 3.9 |
 | **Prerequisites** | [T3. A study with several seeds](T3-several-seeds.md) |
 
-TM-M2StructAlign can run several multiobjective algorithms and operators on the same problem. This
+Transept can run several multiobjective algorithms and operators on the same problem. This
 tutorial compares five configurations on `classF` with a reduced budget: how to run them so that
 the comparison is fair, how to measure them, and how to tell a real difference from noise.
 
@@ -46,7 +46,7 @@ for seed in 1 2 3 4 5 6; do
                 "moead:--algorithm MOEA_D" \
                 "randomseeded:--algorithm RANDOM_SEEDED"; do
     name=${config%%:*}; options=${config#*:}
-    java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+    java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
       --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
       --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
       --output-root comparison --run-id ${name}_seed_$seed --seed $seed \

@@ -15,7 +15,7 @@ reference alignments of GPCRdb, which the search never sees.
 ## Step 1: a run
 
 ```bash
-java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id seed_042 --seed 42 \
@@ -64,8 +64,8 @@ GPCRdb provides structure-based reference alignments of the benchmark datasets. 
 compares every alignment of a run with the reference ([metrics](../reference/metrics.md)):
 
 ```bash
-java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
-  org.tmm2structalign.evaluation.EvaluationMain \
+java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
+  org.transept.evaluation.EvaluationMain \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root results/ejecuciones/classF/seed_042 \
@@ -116,8 +116,8 @@ seed alignments with the same command. Use `--glob` to select them, and always w
 outside the dataset directory:
 
 ```bash
-java -cp target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar \
-  org.tmm2structalign.evaluation.EvaluationMain \
+java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
+  org.transept.evaluation.EvaluationMain \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root ../Dataset_Structural_GPCRs/GPCRdb/precomputed/classF \
