@@ -97,7 +97,10 @@ class AlgorithmFactoryTest {
       "PAES, PAES",
       "RANDOM_SEARCH, RandomSearch",
       "RANDOM_SEEDED, RandomSeededSearch",
-      "GENETIC_ALGORITHM, GeneticAlgorithm"
+      "GENETIC_ALGORITHM, GeneticAlgorithm",
+      "SPEA2, RDEMOEA",
+      "ASYNC_NSGA_II, AsyncNSGAII",
+      "ASYNC_GENETIC_ALGORITHM, AsyncGeneticAlgorithm"
     })
     @DisplayName("given an algorithm type, when built, then jMetal reports the expected name")
     void givenAlgorithmType_whenBuilt_thenJmetalReportsExpectedName(
