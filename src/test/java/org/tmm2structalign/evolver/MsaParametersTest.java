@@ -1,0 +1,89 @@
+package org.tmm2structalign.evolver;
+
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
+import org.tmm2structalign.operator.RandomChoiceMutation;
+import org.tmm2structalign.operator.TmSafeGapShiftMutation;
+import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
+import org.tmm2structalign.testing.Alignments;
+import org.tmm2structalign.testing.SeededRandom;
+import org.uma.evolver.parameter.type.CategoricalParameter;
+
+@DisplayName("Unit tests for the operators and parameters of the MSA parameter spaces")
+class MsaParametersTest {
+
+  @ParameterizedTest
+  @CsvSource({"tmSafeGapShift, true", "mergeGapRuns, false", "randomChoice, false"})
+  @DisplayName("given a mutation name, when built, then the operator of that name is returned")
+  void givenMutationName_whenBuilt_thenOperatorOfThatNameIsReturned(String name, boolean shift) {
+    // Arrange
+    ProteinSet proteins = Alignments.proteins("ACDEF:OOMMM", "ACDE:OOMM");
+
+    // Act
+    var mutation =
+        MsaOperators.mutation(name, 0.5, Alignments.unstructured(proteins), new SeededRandom(1));
+
+    // Assert
+    Class<?> expected =
+        shift
+            ? TmSafeGapShiftMutation.class
+            : name.equals("mergeGapRuns")
+                ? MergeAdjacentGapRunsMutation.class
+                : RandomChoiceMutation.class;
+    assertInstanceOf(expected, mutation);
+  }
+
+  @Test
+  @DisplayName("given the crossover name, when built, then the TM-safe crossover is returned")
+  void givenCrossoverName_whenBuilt_thenTmSafeCrossoverIsReturned() {
+    // Act & Assert
+    assertInstanceOf(
+        TmSafeSinglePointCrossover.class,
+        MsaOperators.crossover("tmSafeSinglePoint", 0.9, new SeededRandom(1)));
+  }
+
+  @Test
+  @DisplayName("given unknown operator names, when built, then an exception is thrown")
+  void givenUnknownOperatorNames_whenBuilt_thenIllegalArgumentExceptionIsThrown() {
+    // Arrange
+    ProteinSet proteins = Alignments.proteins("ACDEF:OOMMM", "ACDE:OOMM");
+
+    // Act & Assert
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> MsaOperators.crossover("PMX", 0.9, new SeededRandom(1)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> MsaOperators.mutation("swap", 0.1, Alignments.unstructured(proteins), null));
+  }
+
+  @Test
+  @DisplayName("given unknown values in a space, when creating the parameters, then they fail")
+  void givenUnknownValuesInSpace_whenCreatingParameters_thenIllegalArgumentExceptionIsThrown() {
+    // Arrange
+    var factory = new MsaParameterFactory();
+
+    // Act & Assert
+    assertThrows(
+        IllegalArgumentException.class, () -> factory.createParameter("crossover", List.of("PMX")));
+    assertThrows(
+        IllegalArgumentException.class, () -> factory.createParameter("mutation", List.of("swap")));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> factory.createParameter("variation", List.of("differentialEvolution")));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> factory.createParameter("createInitialSolutions", List.of("random")));
+    assertThrows(IllegalArgumentException.class, () -> factory.createParameter("x", List.of()));
+    assertInstanceOf(
+        CategoricalParameter.class, factory.createParameter("algorithmResult", List.of("a")));
+  }
+}
