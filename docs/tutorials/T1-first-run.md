@@ -40,7 +40,9 @@ dependency. `mvn clean verify` also runs the tests (a few minutes).
 > **jMetal 7.11.** This version needs jMetal 7.11, which lets SMS-EMOA, MOEA/D and PAES start
 > from the seed alignments. Until it is published on Maven Central, install a `7.11-SNAPSHOT`
 > built from the [jMetal](https://github.com/jMetal/jMetal) sources that include those builders
-> (`mvn install -DskipTests` in the jMetal directory).
+> (`mvn install -DskipTests` in the jMetal directory). NSGA-II is built with
+> [Evolver](https://github.com/jMetal/Evolver) 3.0: until it is published, install it the same way
+> from its `develop` branch.
 
 ## Step 3: the dataset
 

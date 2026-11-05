@@ -24,7 +24,7 @@ the solutions store them negated internally, but the file does not.
 
 The solutions are the result returned by the algorithm: the final population (NSGA-II, NSGA-III,
 AGE-MOEA, SMS-EMOA, MOEA/D, the genetic algorithm, random search) or the archive (PAES, and
-NSGA-II with `--external-archive`). The result is not filtered, so
+NSGA-II configured with `--algorithmResult externalArchive`). The result is not filtered, so
 it can contain dominated solutions and repeated ones (two lines with the same values, usually the
 same alignment); `scripts/pareto_analysis.py` keeps the non-dominated ones (repeated lines included). Example:
 
@@ -36,7 +36,9 @@ same alignment); `scripts/pareto_analysis.py` keeps the non-dominated ones (repe
 ### `config.json`
 
 Every option of the run, with defaults resolved, for example
-`"mutationType":"TM_SAFE_GAP_SHIFT"`, `"mutationProbability":0.2` and `"lddtCutoff":15.0`. Together with
+`"mutationType":"TM_SAFE_GAP_SHIFT"`, `"mutationProbability":0.2` and `"lddtCutoff":15.0`.
+`configuration` is the configuration string given by the user (empty if none), and the stopping
+condition is `maxEvaluations` or `maxTimeSeconds` (the other one is `null`). Together with
 the dataset version and the git commit of `metadata.json`, it is enough to repeat the run.
 
 ### `metadata.json`
@@ -44,6 +46,7 @@ the dataset version and the git commit of `metadata.json`, it is enough to repea
 | Key | Content |
 | --- | --- |
 | `tool`, `algorithmType`, `algorithmName` | What ran |
+| `configuration` | For algorithms built from a parameter space (NSGA-II), the complete configuration used, `--parameter value ...`; empty for the others |
 | `build` | Git commit and branch, whether the working tree had uncommitted changes, Java version |
 | `startedAt`, `finishedAt`, `runtimeMs`, `evaluations`, `frontSize` | Timing and size of the result |
 | `objectives` | Objective names, in the order of `FUN.csv` |

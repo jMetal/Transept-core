@@ -41,13 +41,19 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `--algorithm` | `NSGA_II` | Search algorithm (see below) |
-| `--max-evaluations` | 10000 | Stopping criterion |
-| `--population-size` | 100 | Population size; also the offspring size and, for PAES, the archive size |
+| `--max-evaluations` | 10000 | Stop after this many evaluations |
+| `--max-time` | (none) | Stop after this many seconds instead; exclusive with `--max-evaluations`. Runs that stop by time are not reproducible exactly |
+| `--population-size` | 100 | Population size; also the offspring size (unless the configuration sets it) and, for PAES, the archive size |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
 | `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
-| `--external-archive` | off | Return a bounded archive (population size, crowding distance) of the non-dominated solutions found during the search instead of the final population. NSGA-II only |
+| `--configuration` | (none) | NSGA-II only: configuration from its parameter space, `--parameter value ...` ([configuration](configuration.md)). Unset parameters keep their default |
+| `--configuration-file` | (none) | The same, read from the first non-blank line of a file |
+
+`--mutation`, `--crossover-probability` and `--mutation-probability` set the corresponding
+parameters of the configuration of NSGA-II; giving one of them and the same parameter in
+`--configuration` is an error.
 
 The initial population holds the distinct seeds and, for the rest, distinct crossover children
 ([T2, Step 7](../tutorials/T2-problem-formulation.md#step-7-the-initial-population)).

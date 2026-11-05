@@ -19,7 +19,7 @@ the comparison is fair, how to measure them, and how to tell a real difference f
 | `--algorithm` | `NSGA_II` (default), `NSGA_III`, `AGE_MOEA`, `AGE_MOEA_II`, `SMS_EMOA`, `MOEA_D`, `PAES`, and the random searches `RANDOM_SEARCH` and `RANDOM_SEEDED` |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` (default), `MERGE_GAP_RUNS`, `RANDOM_CHOICE` |
 | `--objectives` | `SOPWTP_LDDT` (default), `LDDT` (with `--algorithm GENETIC_ALGORITHM`), `SOPWTP_LDDT_COVERAGE` |
-| `--external-archive` | Off (default) or on (NSGA-II only) |
+| `--configuration` | NSGA-II only: any configuration of its parameter space, e.g. `--selection random` ([configuration](../reference/configuration.md)) |
 
 All algorithms start from the same seed alignments, use the same operators and stop after the same
 number of evaluations, so that only the option under study changes. Some need care:
