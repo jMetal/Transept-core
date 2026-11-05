@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
+import org.tmm2structalign.evolver.MsaGeneticAlgorithm;
 import org.tmm2structalign.model.ProteinSet;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
@@ -63,7 +64,7 @@ class AlgorithmFactoryTest {
   private AlgorithmFactory factory(
       AlgorithmType type, int populationSize, double mutationProbability) {
     StructuralMsaProblem suited =
-        type == AlgorithmType.GENETIC_ALGORITHM
+        type.isSingleObjective()
             ? new StructuralMsaProblem(
                 "test", proteins, List.of(new StructuralLddt(structures, 15f)))
             : problem;
@@ -291,7 +292,7 @@ class AlgorithmFactoryTest {
       run.run();
 
       // Assert: objectives are stored minimised
-      assertEquals(AlgorithmFactory.GENETIC_ALGORITHM_NAME, run.name());
+      assertEquals(MsaGeneticAlgorithm.NAME, run.name());
       double best =
           run.front().stream()
               .mapToDouble(solution -> solution.objectives()[0])

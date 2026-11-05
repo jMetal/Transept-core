@@ -2,10 +2,13 @@ package org.tmm2structalign.algorithm;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.IntConsumer;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.algorithm.RandomSearchAlgorithm;
+import org.uma.jmetal.parallel.asynchronous.algorithm.impl.AsynchronousMultiThreadedGeneticAlgorithm;
 import org.uma.jmetal.util.observable.Observable;
 import org.uma.jmetal.util.observer.Observer;
 
@@ -75,6 +78,54 @@ public interface SearchRun {
       @Override
       public String name() {
         return algorithm.name();
+      }
+
+      @Override
+      public void onProgress(IntConsumer listener) {
+        algorithm.observable().register(progressObserver(listener));
+      }
+    };
+  }
+
+  /**
+   * Adapts an asynchronous algorithm of jMetal. Its workers keep evaluating the pending tasks
+   * after the run, so the number of evaluations is that of the solutions it processed.
+   *
+   * @param algorithm the algorithm
+   * @param name name to report
+   * @return the run
+   */
+  static SearchRun of(
+      AsynchronousMultiThreadedGeneticAlgorithm<MsaSolution> algorithm, String name) {
+    AtomicInteger evaluations = new AtomicInteger();
+    AtomicLong runtime = new AtomicLong();
+    algorithm.observable().register(progressObserver(evaluations::set));
+    return new SearchRun() {
+      @Override
+      public void run() {
+        long start = System.currentTimeMillis();
+        algorithm.run();
+        runtime.set(System.currentTimeMillis() - start);
+      }
+
+      @Override
+      public List<MsaSolution> front() {
+        return List.copyOf(algorithm.result());
+      }
+
+      @Override
+      public int evaluations() {
+        return evaluations.get();
+      }
+
+      @Override
+      public long runtimeMillis() {
+        return runtime.get();
+      }
+
+      @Override
+      public String name() {
+        return name;
       }
 
       @Override

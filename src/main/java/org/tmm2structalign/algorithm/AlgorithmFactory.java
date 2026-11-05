@@ -3,13 +3,16 @@ package org.tmm2structalign.algorithm;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.evolver.MsaConfigurations;
+import org.tmm2structalign.evolver.MsaGeneticAlgorithm;
 import org.tmm2structalign.evolver.MsaNsga2;
 import org.tmm2structalign.evolver.MsaOperators;
 import org.tmm2structalign.evolver.MsaRunContext;
+import org.tmm2structalign.evolver.MsaSpea2;
 import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
 import org.tmm2structalign.operator.RandomChoiceMutation;
 import org.tmm2structalign.operator.RandomSource;
@@ -17,6 +20,7 @@ import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
+import org.uma.evolver.algorithm.BaseLevelAlgorithm;
 import org.uma.evolver.parameter.ParameterSpace;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.algorithm.RandomSearchAlgorithm;
@@ -35,10 +39,11 @@ import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByE
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.MuPlusLambdaReplacement;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEA2EnvironmentalSelection;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEAEnvironmentalSelection;
-import org.uma.jmetal.component.catalogue.ea.selection.impl.NaryTournamentSelection;
-import org.uma.jmetal.component.catalogue.ea.variation.impl.CrossoverAndMutationVariation;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
+import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection;
+import org.uma.jmetal.parallel.asynchronous.algorithm.impl.AsynchronousMultiThreadedGeneticAlgorithm;
+import org.uma.jmetal.parallel.asynchronous.algorithm.impl.AsynchronousMultiThreadedNSGAII;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
@@ -53,8 +58,11 @@ import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
  */
 public final class AlgorithmFactory {
 
-  /** Name reported by jMetal for the genetic algorithm. */
-  public static final String GENETIC_ALGORITHM_NAME = "GeneticAlgorithm";
+  /** Name of the asynchronous NSGA-II in the outputs. */
+  public static final String ASYNC_NSGA_II_NAME = "AsyncNSGAII";
+
+  /** Name of the asynchronous genetic algorithm in the outputs. */
+  public static final String ASYNC_GENETIC_ALGORITHM_NAME = "AsyncGeneticAlgorithm";
 
   /** Neighbourhood size of MOEA/D (capped by the population size). */
   public static final int MOEAD_NEIGHBORHOOD_SIZE = 20;
@@ -100,9 +108,10 @@ public final class AlgorithmFactory {
    */
   public SearchRun create(AlgorithmType type) {
     checkObjectives(type);
-    if (!configuration.configuration().isBlank() && type != AlgorithmType.NSGA_II) {
+    if (!configuration.configuration().isBlank() && !type.isConfigurable()) {
       throw new IllegalArgumentException(
-          "A configuration string is only available for NSGA_II, not for " + type);
+          "A configuration string is only available for the configurable algorithms, not for "
+              + type);
     }
     if (type.isSteadyState() && configuration.threads() > 1) {
       LOGGER.warning(
@@ -110,7 +119,60 @@ public final class AlgorithmFactory {
               + " threads will not speed it up");
     }
     return switch (type) {
-      case NSGA_II -> nsgaTwo();
+      case NSGA_II ->
+          configured(
+              type,
+              space ->
+                  new MsaNsga2(
+                      problem,
+                      configuration.populationSize(),
+                      configuration.maxEvaluations(),
+                      space,
+                      context()));
+      case SPEA2 ->
+          configured(
+              type,
+              space ->
+                  new MsaSpea2(
+                      problem,
+                      configuration.populationSize(),
+                      configuration.maxEvaluations(),
+                      space,
+                      context()));
+      case GENETIC_ALGORITHM ->
+          configured(
+              type,
+              space ->
+                  new MsaGeneticAlgorithm(
+                      problem,
+                      configuration.populationSize(),
+                      configuration.maxEvaluations(),
+                      space,
+                      context()));
+      case ASYNC_NSGA_II ->
+          asynchronous(
+              ASYNC_NSGA_II_NAME,
+              new AsynchronousMultiThreadedNSGAII<>(
+                  configuration.threads(),
+                  problem,
+                  configuration.populationSize(),
+                  crossover(),
+                  mutation(),
+                  termination()));
+      case ASYNC_GENETIC_ALGORITHM -> {
+        ObjectiveComparator<MsaSolution> fitness = new ObjectiveComparator<>(0);
+        yield asynchronous(
+            ASYNC_GENETIC_ALGORITHM_NAME,
+            new AsynchronousMultiThreadedGeneticAlgorithm<>(
+                configuration.threads(),
+                problem,
+                configuration.populationSize(),
+                crossover(),
+                mutation(),
+                new BinaryTournamentSelection<>(fitness),
+                new MuPlusLambdaReplacement<>(fitness),
+                termination()));
+      }
       case NSGA_III -> SearchRun.of(nsgaThree());
       case AGE_MOEA -> SearchRun.of(ageMoea(new AGEMOEAEnvironmentalSelection<>(objectives())));
       case AGE_MOEA_II ->
@@ -118,7 +180,6 @@ public final class AlgorithmFactory {
       case SMS_EMOA -> SearchRun.of(smsEmoa());
       case MOEA_D -> SearchRun.of(moead());
       case PAES -> SearchRun.of(paes());
-      case GENETIC_ALGORITHM -> SearchRun.of(geneticAlgorithm());
       case RANDOM_SEARCH ->
           SearchRun.of(
               new RandomSearchAlgorithm<>(
@@ -147,36 +208,39 @@ public final class AlgorithmFactory {
   }
 
   /**
-   * NSGA-II built with Evolver from the parameter space {@code MSANSGAII.yaml}. The configuration
-   * is resolved in layers: the default configuration, the operator settings of the
-   * {@link AlgorithmConfiguration} and, last, its configuration string.
+   * An algorithm built with Evolver from its parameter space. The configuration is resolved in
+   * layers: the default configuration, the operator settings of the {@link
+   * AlgorithmConfiguration} and, last, its configuration string.
    */
   @SuppressWarnings("unchecked")
-  private SearchRun nsgaTwo() {
+  private SearchRun configured(
+      AlgorithmType type, Function<ParameterSpace, BaseLevelAlgorithm<MsaSolution>> algorithm) {
     Map<String, String> values =
-        new LinkedHashMap<>(MsaConfigurations.defaults(MsaNsga2.PARAMETER_SPACE));
+        new LinkedHashMap<>(MsaConfigurations.defaults(type.parameterSpace()));
     values.put(
         "offspringPopulationSize", Integer.toString(configuration.offspringPopulationSize()));
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
     values.put("mutation", mutationName(configuration.mutationType()));
     values.put("mutationProbability", Double.toString(configuration.mutationProbability()));
     values.putAll(MsaConfigurations.parse(configuration.configuration()));
-    ParameterSpace space = MsaConfigurations.parameterSpace(MsaNsga2.PARAMETER_SPACE);
+    ParameterSpace space = MsaConfigurations.parameterSpace(type.parameterSpace());
     MsaConfigurations.requireKnownNames(values, space);
-    var context =
-        new MsaRunContext(
-            seeds, structures, random, configuration.threads(), configuration.maxTime());
-    var algorithm =
+    var built =
         (EvolutionaryAlgorithm<MsaSolution>)
-            new MsaNsga2(
-                    problem,
-                    configuration.populationSize(),
-                    configuration.maxEvaluations(),
-                    space,
-                    context)
-                .parse(MsaConfigurations.arguments(values))
-                .build();
-    return SearchRun.withConfiguration(SearchRun.of(algorithm), MsaConfigurations.format(values));
+            algorithm.apply(space).parse(MsaConfigurations.arguments(values)).build();
+    return SearchRun.withConfiguration(SearchRun.of(built), MsaConfigurations.format(values));
+  }
+
+  private MsaRunContext context() {
+    return new MsaRunContext(
+        seeds, structures, random, configuration.threads(), configuration.maxTime());
+  }
+
+  /** An asynchronous algorithm of jMetal that starts from the seeded population. */
+  private SearchRun asynchronous(
+      String name, AsynchronousMultiThreadedGeneticAlgorithm<MsaSolution> algorithm) {
+    algorithm.setInitialSolutionsCreation(population());
+    return SearchRun.of(algorithm, name);
   }
 
   private static String mutationName(MutationType type) {
@@ -190,34 +254,15 @@ public final class AlgorithmFactory {
   private void checkObjectives(AlgorithmType type) {
     boolean randomSearch =
         type == AlgorithmType.RANDOM_SEARCH || type == AlgorithmType.RANDOM_SEEDED;
-    if (type == AlgorithmType.GENETIC_ALGORITHM && objectives() != 1) {
+    if (type.isSingleObjective() && objectives() != 1) {
       throw new IllegalArgumentException(
-          "GENETIC_ALGORITHM optimises a single objective, got " + objectives()
+          type + " optimises a single objective, got " + objectives()
               + "; use --objectives LDDT");
     }
-    if (type != AlgorithmType.GENETIC_ALGORITHM && !randomSearch && objectives() < 2) {
+    if (!type.isSingleObjective() && !randomSearch && objectives() < 2) {
       throw new IllegalArgumentException(
           type + " needs at least two objectives; use GENETIC_ALGORITHM for one");
     }
-  }
-
-  /**
-   * Generational genetic algorithm: binary tournament on the single objective, the same
-   * variation as NSGA-II and (mu + lambda) replacement, which keeps the best solutions.
-   */
-  private EvolutionaryAlgorithm<MsaSolution> geneticAlgorithm() {
-    var variation =
-        new CrossoverAndMutationVariation<>(
-            configuration.offspringPopulationSize(), crossover(), mutation());
-    ObjectiveComparator<MsaSolution> fitness = new ObjectiveComparator<>(0);
-    return new EvolutionaryAlgorithm<>(
-        GENETIC_ALGORITHM_NAME,
-        population(),
-        evaluation(),
-        termination(),
-        new NaryTournamentSelection<>(2, variation.matingPoolSize(), fitness),
-        variation,
-        new MuPlusLambdaReplacement<>(fitness));
   }
 
   private EvolutionaryAlgorithm<MsaSolution> nsgaThree() {

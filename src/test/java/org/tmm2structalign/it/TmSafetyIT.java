@@ -64,7 +64,7 @@ class TmSafetyIT {
             MappingPolicy.VERIFIED,
             15f,
             100,
-            type == AlgorithmType.GENETIC_ALGORITHM
+            type.isSingleObjective()
                 ? ObjectiveSet.LDDT
                 : ObjectiveSet.SOPWTP_LDDT);
 

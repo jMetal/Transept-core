@@ -81,6 +81,11 @@
             <artifactId>jmetal-auto</artifactId>
             <version>${jmetal.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.uma.jmetal</groupId>
+            <artifactId>jmetal-parallel</artifactId>
+            <version>${jmetal.version}</version>
+        </dependency>
 
         <!-- Configurable algorithms (parameter spaces in YAML) -->
         <dependency>

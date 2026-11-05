@@ -165,6 +165,6 @@ class AlgorithmsSyntheticIT {
 
   /** Formulation that suits the algorithm: the genetic algorithm optimises the lDDT alone. */
   private static ObjectiveSet objectives(AlgorithmType type) {
-    return type == AlgorithmType.GENETIC_ALGORITHM ? ObjectiveSet.LDDT : ObjectiveSet.SOPWTP_LDDT;
+    return type.isSingleObjective() ? ObjectiveSet.LDDT : ObjectiveSet.SOPWTP_LDDT;
   }
 }

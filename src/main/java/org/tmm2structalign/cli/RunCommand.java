@@ -112,14 +112,16 @@ public final class RunCommand implements Callable<Integer> {
       description =
           "Search algorithm: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}. NSGA_III needs a"
               + " population size multiple of 4; PAES uses the first seed and ignores the"
-              + " crossover; RANDOM_SEARCH ignores the seeds and both operators.")
+              + " crossover; RANDOM_SEARCH ignores the seeds and both operators. The ASYNC_"
+              + " algorithms keep all --threads busy but do not repeat exactly.")
   AlgorithmType algorithm;
 
   @Option(
       names = "--configuration",
       description =
-          "Configuration of NSGA_II from its parameter space, as '--parameter value ...' (see"
-              + " docs/reference/configuration.md). Unset parameters keep their default value.")
+          "Configuration of NSGA_II, SPEA2 or GENETIC_ALGORITHM from its parameter space, as"
+              + " '--parameter value ...' (see docs/reference/configuration.md). Unset"
+              + " parameters keep their default value.")
   String configuration;
 
   @Option(
@@ -132,7 +134,8 @@ public final class RunCommand implements Callable<Integer> {
       defaultValue = "SOPWTP_LDDT",
       description =
           "Objectives to optimise: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}"
-              + " (published). LDDT needs GENETIC_ALGORITHM, and GENETIC_ALGORITHM needs LDDT.")
+              + " (published). LDDT needs a single-objective algorithm (GENETIC_ALGORITHM,"
+              + " ASYNC_GENETIC_ALGORITHM), and they need LDDT.")
   ObjectiveSet objectives;
 
   @Option(
