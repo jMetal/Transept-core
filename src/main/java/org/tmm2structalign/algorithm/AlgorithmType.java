@@ -39,6 +39,9 @@ public enum AlgorithmType {
   /** Random search over seeds perturbed with random mutations (strong baseline). */
   RANDOM_SEEDED(false, false, false, null);
 
+  /** Largest number of objectives of the formulations of the tool. */
+  public static final int MAX_OBJECTIVES = 3;
+
   private final boolean steadyState;
   private final boolean usesCrossover;
   private final boolean singleObjective;
@@ -65,6 +68,26 @@ public enum AlgorithmType {
   /** Returns true if the algorithm optimises a single objective. */
   public boolean isSingleObjective() {
     return singleObjective;
+  }
+
+  /** Returns true if the algorithm evaluates asynchronously, so its runs do not repeat exactly. */
+  public boolean isAsynchronous() {
+    return name().startsWith("ASYNC_");
+  }
+
+  /** Returns the smallest number of objectives the algorithm accepts. */
+  public int minObjectives() {
+    return singleObjective || isRandomSearch() ? 1 : 2;
+  }
+
+  /** Returns the largest number of objectives the algorithm accepts. */
+  public int maxObjectives() {
+    return singleObjective ? 1 : MAX_OBJECTIVES;
+  }
+
+  /** Returns true for the random searches, which accept any number of objectives. */
+  public boolean isRandomSearch() {
+    return this == RANDOM_SEARCH || this == RANDOM_SEEDED;
   }
 
   /** Returns true if the algorithm is built from a parameter space and accepts a configuration. */

@@ -64,6 +64,12 @@ public final class AlgorithmFactory {
   /** Name of the asynchronous genetic algorithm in the outputs. */
   public static final String ASYNC_GENETIC_ALGORITHM_NAME = "AsyncGeneticAlgorithm";
 
+  /**
+   * Classpath directory of the weight vectors of MOEA/D for more than two objectives (files
+   * {@code W<objectives>D_<population size>.dat}, taken from Evolver's resources).
+   */
+  public static final String MOEAD_WEIGHT_VECTORS = "/weightVectors";
+
   /** Neighbourhood size of MOEA/D (capped by the population size). */
   public static final int MOEAD_NEIGHBORHOOD_SIZE = 20;
 
@@ -252,16 +258,13 @@ public final class AlgorithmFactory {
   }
 
   private void checkObjectives(AlgorithmType type) {
-    boolean randomSearch =
-        type == AlgorithmType.RANDOM_SEARCH || type == AlgorithmType.RANDOM_SEEDED;
-    if (type.isSingleObjective() && objectives() != 1) {
+    if (objectives() < type.minObjectives() || objectives() > type.maxObjectives()) {
       throw new IllegalArgumentException(
-          type + " optimises a single objective, got " + objectives()
-              + "; use --objectives LDDT");
-    }
-    if (!type.isSingleObjective() && !randomSearch && objectives() < 2) {
-      throw new IllegalArgumentException(
-          type + " needs at least two objectives; use GENETIC_ALGORITHM for one");
+          type + " accepts " + type.minObjectives() + " to " + type.maxObjectives()
+              + " objectives, got " + objectives()
+              + (type.isSingleObjective()
+                  ? "; use --objectives LDDT"
+                  : "; use GENETIC_ALGORITHM for one objective"));
     }
   }
 
@@ -303,12 +306,21 @@ public final class AlgorithmFactory {
 
   private EvolutionaryAlgorithm<MsaSolution> moead() {
     int size = configuration.populationSize();
+    if (objectives() > 2) {
+      String file = MOEAD_WEIGHT_VECTORS + "/W" + objectives() + "D_" + size + ".dat";
+      if (AlgorithmFactory.class.getResource(file) == null) {
+        throw new IllegalArgumentException(
+            "MOEA_D with " + objectives() + " objectives needs a population size with weight"
+                + " vectors (" + file + " is missing); with 3 objectives: 91, 100, 136, 300, 500,"
+                + " 600, 800, 1000 or 1200");
+      }
+    }
     return new MOEADBuilder<>(
             problem,
             size,
             crossover(),
             mutation(),
-            "",
+            MOEAD_WEIGHT_VECTORS,
             new CyclicIntegerSequence(size),
             true)
         .setNeighborhoodSize(Math.min(MOEAD_NEIGHBORHOOD_SIZE, size))
