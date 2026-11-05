@@ -65,6 +65,12 @@ Run outputs (`<output-root>/ejecuciones/<dataset>/<run-id>/`): `FUN.csv` (no hea
 and `error.json` on failure. Existing run directories are never overwritten. Tabular outputs are
 CSV; `scripts/pareto_analysis.py` also reads `FUN.tsv`/`runtime.txt` of the original runner.
 
+Campaigns on a Slurm cluster: `scripts/slurm/prepare_campaign.sh <template> <output>` builds a
+self-contained package (jar, provenance, data subset, scripts) from a template such as
+`scripts/slurm/formulations/` (`cells.tsv`, `configurations.tsv`, `campaign.env`, `README.md`);
+its `submit.sh`, `check.sh` and `analyse.sh` run it unattended and resumably. Keep the packages
+outside the repository (e.g. `../campaigns/`).
+
 For quick experiments use `classF` (11 sequences) with ~500 evaluations and a population of 20:
 it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDataset`).
 
