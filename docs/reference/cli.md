@@ -66,15 +66,15 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 | `NSGA_III` | NSGA-III | The population size must be a multiple of 4 |
 | `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
 | `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
-| `MOEA_D` | MOEA/D | Normalised PBI aggregation, neighbourhood of 20, seeds spread over the subproblems; steady state |
+| `MOEA_D` | MOEA/D | Normalised PBI aggregation, neighbourhood of 20, seeds spread over the subproblems; steady state. With three objectives the population size must be one with weight vectors: 91, 100, 136, 300, 500, 600, 800, 1000 or 1200 |
 | `PAES` | PAES, (1+1) with a crowding-distance archive | Mutation only; starts from the first seed |
 | `RANDOM_SEARCH` | Random search, gaps at random | Sanity check (weak baseline); ignores the seeds and the operators |
 | `RANDOM_SEEDED` | Random search, seeds + 10 random mutations | Sanity check (strong baseline) |
 | `GENETIC_ALGORITHM` | Generational GA, binary tournament, (μ+λ) replacement | Single objective only (`--objectives LDDT`); same seeded population and operators as NSGA-II; configurable |
 | `ASYNC_GENETIC_ALGORITHM` | Asynchronous steady-state GA | Single objective only; like `ASYNC_NSGA_II`, does not repeat exactly with more than one thread |
 
-The multiobjective algorithms need at least two objectives; the random searches accept any
-number.
+The multiobjective algorithms accept two or three objectives and the genetic algorithms one;
+the random searches accept any number.
 
 | `--mutation` | Never breaks a helix | Effect |
 | --- | --- | --- |
@@ -90,6 +90,17 @@ The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes eve
 | --- | --- | --- |
 | `--objectives` | `SOPWTP_LDDT` | Objectives to optimise, in the order of `FUN.csv`: `LDDT` (lDDT alone, for `GENETIC_ALGORITHM`), `SOPWTP_LDDT` (published formulation) or `SOPWTP_LDDT_COVERAGE` (adds the aligned-pair coverage, [metrics](metrics.md)) |
 | `--mapping-policy` | `VERIFIED` | How AlphaFold residues are mapped to the sequence: `VERIFIED` (numbering checked by residue identity, sequence alignment otherwise) or `NUMBERED_ONLY` (numbering only, structure dropped if residues disagree) |
+
+## `algorithms`
+
+Prints, as JSON, every algorithm of `run --algorithm` with the numbers of objectives it accepts
+(`minObjectives`, `maxObjectives`), its parameter space (`null` if it is not configurable) and
+whether it is steady state, asynchronous and uses the crossover. The studio reads it instead of
+keeping its own copy.
+
+```bash
+java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar algorithms
+```
 
 ## `baseline`
 
