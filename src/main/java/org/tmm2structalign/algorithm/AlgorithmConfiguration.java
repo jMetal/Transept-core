@@ -1,9 +1,12 @@
 package org.tmm2structalign.algorithm;
 
+import java.time.Duration;
+
 /**
  * Parameters of the evolutionary algorithm.
  *
- * @param maxEvaluations stopping criterion, number of evaluations
+ * @param maxEvaluations stopping criterion, number of evaluations (ignored if {@code maxTime}
+ *     is set)
  * @param populationSize population size
  * @param offspringPopulationSize offspring created per generation
  * @param crossoverProbability probability of the TM-safe crossover
@@ -12,6 +15,7 @@ package org.tmm2structalign.algorithm;
  * @param mutationType mutation operator
  * @param externalArchive whether the result is a bounded archive of the non-dominated solutions
  *     found during the search instead of the final population (NSGA-II only)
+ * @param maxTime stopping criterion by computing time, or {@code null} to stop by evaluations
  */
 public record AlgorithmConfiguration(
     int maxEvaluations,
@@ -21,7 +25,8 @@ public record AlgorithmConfiguration(
     double mutationProbability,
     int threads,
     MutationType mutationType,
-    boolean externalArchive) {
+    boolean externalArchive,
+    Duration maxTime) {
 
   /** Crossover probability used in the published experiments. */
   public static final double DEFAULT_CROSSOVER_PROBABILITY = 0.8;
@@ -40,6 +45,42 @@ public record AlgorithmConfiguration(
     if (mutationType == null) {
       throw new IllegalArgumentException("mutationType is required");
     }
+    if (maxTime != null && (maxTime.isZero() || maxTime.isNegative())) {
+      throw new IllegalArgumentException("maxTime must be positive: " + maxTime);
+    }
+  }
+
+  /**
+   * Creates a configuration that stops by evaluations.
+   *
+   * @param maxEvaluations stopping criterion, number of evaluations
+   * @param populationSize population size
+   * @param offspringPopulationSize offspring created per generation
+   * @param crossoverProbability probability of the TM-safe crossover
+   * @param mutationProbability probability of the gap-shift mutation
+   * @param threads number of evaluation threads; 1 evaluates sequentially
+   * @param mutationType mutation operator
+   * @param externalArchive whether the result is a bounded archive (NSGA-II only)
+   */
+  public AlgorithmConfiguration(
+      int maxEvaluations,
+      int populationSize,
+      int offspringPopulationSize,
+      double crossoverProbability,
+      double mutationProbability,
+      int threads,
+      MutationType mutationType,
+      boolean externalArchive) {
+    this(
+        maxEvaluations,
+        populationSize,
+        offspringPopulationSize,
+        crossoverProbability,
+        mutationProbability,
+        threads,
+        mutationType,
+        externalArchive,
+        null);
   }
 
   /**

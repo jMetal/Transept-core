@@ -170,7 +170,10 @@ public record RunConfiguration(
     map.put("randomSeed", randomSeed);
     map.put("algorithmType", algorithmType);
     map.put("objectives", objectives);
-    map.put("maxEvaluations", algorithm.maxEvaluations());
+    map.put("maxEvaluations", algorithm.maxTime() == null ? algorithm.maxEvaluations() : null);
+    map.put(
+        "maxTimeSeconds",
+        algorithm.maxTime() == null ? null : algorithm.maxTime().toMillis() / 1000.0);
     map.put("populationSize", algorithm.populationSize());
     map.put("offspringPopulationSize", algorithm.offspringPopulationSize());
     map.put("crossoverProbability", algorithm.crossoverProbability());

@@ -10,6 +10,7 @@ import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.catalogue.common.evaluation.Evaluation;
 import org.uma.jmetal.component.catalogue.common.evaluation.impl.MultiThreadedEvaluation;
 import org.uma.jmetal.component.catalogue.common.evaluation.impl.SequentialEvaluation;
+import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByComputingTime;
 import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.RankingAndDensityEstimatorReplacement;
 import org.uma.jmetal.component.catalogue.ea.selection.impl.NaryTournamentSelection;
@@ -95,7 +96,9 @@ public final class TmStructAlign {
         NAME,
         population,
         evaluation,
-        new TerminationByEvaluations(configuration.maxEvaluations()),
+        configuration.maxTime() == null
+            ? new TerminationByEvaluations(configuration.maxEvaluations())
+            : new TerminationByComputingTime(configuration.maxTime().toMillis()),
         selection,
         variation,
         replacement);

@@ -23,6 +23,7 @@ import org.uma.jmetal.component.catalogue.common.evaluation.impl.MultiThreadedEv
 import org.uma.jmetal.component.catalogue.common.evaluation.impl.SequentialEvaluation;
 import org.uma.jmetal.component.catalogue.common.solutionscreation.SolutionsCreation;
 import org.uma.jmetal.component.catalogue.common.termination.Termination;
+import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByComputingTime;
 import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.MuPlusLambdaReplacement;
 import org.uma.jmetal.component.catalogue.ea.replacement.impl.agemoea.AGEMOEA2EnvironmentalSelection;
@@ -297,7 +298,9 @@ public final class AlgorithmFactory {
   }
 
   private Termination termination() {
-    return new TerminationByEvaluations(configuration.maxEvaluations());
+    return configuration.maxTime() == null
+        ? new TerminationByEvaluations(configuration.maxEvaluations())
+        : new TerminationByComputingTime(configuration.maxTime().toMillis());
   }
 
   private Evaluation<MsaSolution> evaluation() {

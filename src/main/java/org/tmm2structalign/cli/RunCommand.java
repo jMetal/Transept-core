@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,11 +62,20 @@ public final class RunCommand implements Callable<Integer> {
   @Option(names = "--seed", required = true, description = "Seed of the random generator.")
   long seed;
 
+  /** Evaluations of a run when no stopping condition is given. */
+  public static final int DEFAULT_MAX_EVALUATIONS = 10_000;
+
   @Option(
       names = "--max-evaluations",
-      defaultValue = "10000",
-      description = "Default: ${DEFAULT-VALUE}.")
-  int maxEvaluations;
+      description = "Stop after this many evaluations. Default: 10000, unless --max-time is given.")
+  Integer maxEvaluations;
+
+  @Option(
+      names = "--max-time",
+      description =
+          "Stop after this many seconds of search instead of a number of evaluations. Runs that"
+              + " stop by time are not reproducible exactly.")
+  Double maxTime;
 
   @Option(
       names = "--population-size",
@@ -150,14 +160,15 @@ public final class RunCommand implements Callable<Integer> {
               runDirectory,
               seed,
               new AlgorithmConfiguration(
-                  maxEvaluations,
+                  maxEvaluations == null ? DEFAULT_MAX_EVALUATIONS : maxEvaluations,
                   populationSize,
                   populationSize,
                   crossoverProbability,
                   effectiveMutationProbability(),
                   threads,
                   mutation,
-                  externalArchive),
+                  externalArchive,
+                  maxRunTime()),
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
@@ -175,6 +186,25 @@ public final class RunCommand implements Callable<Integer> {
       status = 1;
     }
     return status;
+  }
+
+  /**
+   * Time limit given with {@code --max-time}, or {@code null} to stop by evaluations.
+   *
+   * @throws IllegalArgumentException if both stopping conditions are given or the time is not
+   *     positive
+   */
+  Duration maxRunTime() {
+    if (maxTime == null) {
+      return null;
+    }
+    if (maxEvaluations != null) {
+      throw new IllegalArgumentException("Give --max-evaluations or --max-time, not both");
+    }
+    if (!(maxTime > 0)) {
+      throw new IllegalArgumentException("--max-time must be positive: " + maxTime);
+    }
+    return Duration.ofMillis(Math.round(maxTime * 1000));
   }
 
   /** Mutation probability given by the user, or the default of the chosen algorithm. */
