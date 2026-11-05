@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
@@ -123,7 +122,7 @@ public class StandardTMMSAProblem extends AbstractGenericTM_MSAProblem<TM_MSASol
 
     List<AAArray> sequenceList = new ArrayList<AAArray>();
 
-    LinkedHashMap<String, ProteinSequence> sequences =
+    Map<String, ProteinSequence> sequences =
         FastaReaderHelper.readFastaProteinSequence(new File(dataFile));
 
     for (Map.Entry<String, ProteinSequence> entry : sequences.entrySet()) {
@@ -143,7 +142,7 @@ public class StandardTMMSAProblem extends AbstractGenericTM_MSAProblem<TM_MSASol
 
     List<StringBuilder> SeqNameList = new ArrayList<StringBuilder>();
 
-    LinkedHashMap<String, ProteinSequence> sequences =
+    Map<String, ProteinSequence> sequences =
         FastaReaderHelper.readFastaProteinSequence(new File(dataFile));
 
     for (Map.Entry<String, ProteinSequence> entry : sequences.entrySet()) {

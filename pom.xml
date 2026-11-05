@@ -15,7 +15,7 @@
         <!-- Libraries -->
         <jmetal.version>7.11-SNAPSHOT</jmetal.version>
         <evolver.version>3.0-SNAPSHOT</evolver.version>
-        <biojava.version>7.0.0</biojava.version>
+        <biojava.version>7.3.0</biojava.version>
         <picocli.version>4.7.7</picocli.version>
 
         <!-- Testing -->
