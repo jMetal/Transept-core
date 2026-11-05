@@ -114,6 +114,47 @@ class CliTest {
     }
 
     @Test
+    @DisplayName("given seeds computed in advance, when running, then the run reads them")
+    void givenSeedsComputedInAdvance_whenRunning_thenTheRunReadsThem() throws IOException {
+      // Arrange
+      int prepared =
+          TmStructAlignCli.execute(
+              "seeds",
+              "--data-root", dataRoot.toString(),
+              "--datasets", SyntheticDataset.NAME,
+              "--output-root", outputRoot.toString(),
+              "--count", "3");
+
+      // Act: the synthetic proteins are so short that every setting gives the same alignment, so
+      // a seed of the dataset is added to fill the population
+      int status =
+          TmStructAlignCli.execute(
+              "run",
+              "--data-root", dataRoot.toString(),
+              "--dataset", SyntheticDataset.NAME,
+              "--output-root", outputRoot.toString(),
+              "--seeds", "internal,left",
+              "--run-id", "precomputed",
+              "--seed", "3",
+              "--max-evaluations", "50",
+              "--population-size", "8");
+
+      // Assert
+      assertEquals(0, prepared);
+      assertEquals(0, status);
+      assertTrue(
+          Files.isRegularFile(outputRoot.resolve("internal_seeds/synthetic/manifest.tsv")));
+      Path run = outputRoot.resolve("ejecuciones/synthetic/precomputed");
+      String metadata = Files.readString(run.resolve("metadata.json"));
+      assertTrue(metadata.contains("\"origin\":\"precomputed\""), metadata);
+      assertTrue(!metadata.contains("\"origin\":\"computed\""), metadata);
+      assertEquals(
+          1, TmStructAlignCli.execute(
+              "seeds", "--data-root", dataRoot.toString(), "--datasets", "missing",
+              "--output-root", outputRoot.toString()));
+    }
+
+    @Test
     @DisplayName("given a time limit, when running, then it stops by time and records it")
     void givenTimeLimit_whenRunning_thenItStopsByTimeAndRecordsIt() throws IOException {
       // Act
