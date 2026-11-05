@@ -15,6 +15,7 @@ the planned graphical interface.
 | `progress.jsonl` | One JSON object per line, every `--progress-interval` evaluations |
 | `runtime.csv` | Header `runtime_ms,runtime_seconds,evaluations` and one row |
 | `seed.txt` | Random seed |
+| `seeds/` | The internal seeds computed by the run, if it computed them (not when it read them from `internal_seeds/`) |
 | `error.json` | Only if the run failed: exception type and message |
 
 ### `FUN.csv`
@@ -50,7 +51,7 @@ the dataset version and the git commit of `metadata.json`, it is enough to repea
 | `build` | Git commit and branch, whether the working tree had uncommitted changes, Java version |
 | `startedAt`, `finishedAt`, `runtimeMs`, `evaluations`, `frontSize` | Timing and size of the result |
 | `objectives` | Objective names, in the order of `FUN.csv` |
-| `seeds` | For every seed method: file, SHA-256 and `duplicateOf` if it is identical to an earlier seed |
+| `seeds` | For every seed: `method` (`internal:biojava-g<open>x<extension>` for internal seeds), file, SHA-256, `duplicateOf` if it is identical to an earlier seed, `repairedGapRuns` (gap runs moved out of helices by `--repair-seeds`) and `origin` (`file`, `precomputed` or `computed`) |
 | `structures` | For every protein: mapping `status`, sequence `identity` and `coverage` of the mapping, and a `detail` message |
 | `proteinsWithoutStructure` | Proteins whose structure is not used by the lDDT |
 

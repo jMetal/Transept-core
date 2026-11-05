@@ -30,7 +30,8 @@ java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar run \
 | --- | --- | --- |
 | `--data-root` | (required) | `GPCRdb` directory of the [dataset repository](https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs) |
 | `--dataset` | (required) | Dataset name, e.g. `classF` or `classA_001_19` |
-| `--seeds` | (required) | Tools whose `precomputed/<dataset>/<tool>_<dataset>.fasta` seed the initial population, comma-separated |
+| `--seeds` | `internal` | Seed alignments of the initial population, comma-separated: `internal` (up to 10 alignments computed by the tool with BioJava's progressive aligner, see the `seeds` command) and/or tools whose `precomputed/<dataset>/<tool>_<dataset>.fasta` exist |
+| `--repair-seeds` | off | Move the gaps that split a transmembrane helix out of every seed before the search (the operators never create such gaps, but keep those of the seeds) |
 | `--output-root` | (required) | Root of the results tree |
 | `--run-id` | (required) | Run identifier; the run writes to `<output-root>/ejecuciones/<dataset>/<run-id>/`, which must not exist |
 | `--seed` | (required) | Seed of the random generator; the same seed and options reproduce the run exactly |
@@ -90,6 +91,29 @@ The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes eve
 | --- | --- | --- |
 | `--objectives` | `SOPWTP_LDDT` | Objectives to optimise, in the order of `FUN.csv`: `LDDT` (lDDT alone, for `GENETIC_ALGORITHM`), `SOPWTP_LDDT` (published formulation) or `SOPWTP_LDDT_COVERAGE` (adds the aligned-pair coverage, [metrics](metrics.md)) |
 | `--mapping-policy` | `VERIFIED` | How AlphaFold residues are mapped to the sequence: `VERIFIED` (numbering checked by residue identity, sequence alignment otherwise) or `NUMBERED_ONLY` (numbering only, structure dropped if residues disagree) |
+
+## `seeds`
+
+Computes the internal seeds of datasets in advance, so that the runs with `--seeds internal` and
+the same `--output-root` read them instead of computing them (a few seconds for 11–19 proteins,
+minutes for the largest datasets).
+
+```bash
+java -jar target/TM-MSAStructAligner-1.0-jar-with-dependencies.jar seeds \
+  --data-root ../Dataset_Structural_GPCRs/GPCRdb --datasets classF --output-root results
+```
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--data-root`, `--datasets`, `--output-root` | (required) | As in `run`; the seeds go to `<output-root>/internal_seeds/<dataset>/` |
+| `--count` | 10 | Distinct seeds per dataset, at most 10 |
+
+The directory holds the alignments and `manifest.tsv`, with the fingerprint of the proteins
+(identifiers, residues, topology) and the SHA-256 of every file. A run uses the stored seeds only
+if they match its proteins and files; otherwise it computes them again and says why in its log.
+The internal seeds are deterministic, so both ways give the same alignments. With very short or
+almost identical sequences all the settings may give a single alignment; then add a seed of
+another tool, because the population needs at least two distinct seeds.
 
 ## `algorithms`
 
