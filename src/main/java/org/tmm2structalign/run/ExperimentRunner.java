@@ -139,6 +139,7 @@ public final class ExperimentRunner {
     metadata.put("tool", TmStructAlign.NAME);
     metadata.put("algorithmType", configuration.algorithmType());
     metadata.put("algorithmName", search.name());
+    metadata.put("configuration", search.configuration());
     metadata.put("build", BuildInfo.describe());
     metadata.put("startedAt", start.toString());
     metadata.put("finishedAt", Instant.now().toString());

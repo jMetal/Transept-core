@@ -35,6 +35,14 @@ public interface SearchRun {
   String name();
 
   /**
+   * Returns the configuration of the algorithm ({@code --parameter value ...}) if it was built
+   * from a parameter space, or an empty string.
+   */
+  default String configuration() {
+    return "";
+  }
+
+  /**
    * Registers a listener called with the number of evaluations every time the algorithm reports
    * progress.
    *
@@ -148,6 +156,52 @@ public interface SearchRun {
       @Override
       public void onProgress(IntConsumer listener) {
         algorithm.getObservable().register(progressObserver(listener));
+      }
+    };
+  }
+
+  /**
+   * Attaches the configuration that built an algorithm to its run.
+   *
+   * @param run the run
+   * @param configuration configuration string of the algorithm
+   * @return the same run, reporting the configuration
+   */
+  static SearchRun withConfiguration(SearchRun run, String configuration) {
+    return new SearchRun() {
+      @Override
+      public void run() {
+        run.run();
+      }
+
+      @Override
+      public List<MsaSolution> front() {
+        return run.front();
+      }
+
+      @Override
+      public int evaluations() {
+        return run.evaluations();
+      }
+
+      @Override
+      public long runtimeMillis() {
+        return run.runtimeMillis();
+      }
+
+      @Override
+      public String name() {
+        return run.name();
+      }
+
+      @Override
+      public String configuration() {
+        return configuration;
+      }
+
+      @Override
+      public void onProgress(IntConsumer listener) {
+        run.onProgress(listener);
       }
     };
   }

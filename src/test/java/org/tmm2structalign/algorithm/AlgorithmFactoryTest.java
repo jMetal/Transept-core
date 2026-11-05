@@ -87,7 +87,7 @@ class AlgorithmFactoryTest {
 
     @ParameterizedTest
     @CsvSource({
-      "NSGA_II, TM-M2StructAlign",
+      "NSGA_II, NSGAII",
       "NSGA_III, NSGAIII",
       "AGE_MOEA, AGE-MOEA",
       "AGE_MOEA_II, AGE-MOEA-II",

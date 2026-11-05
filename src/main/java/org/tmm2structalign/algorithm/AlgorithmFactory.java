@@ -1,9 +1,15 @@
 package org.tmm2structalign.algorithm;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.alignment.MsaSolution;
+import org.tmm2structalign.evolver.MsaConfigurations;
+import org.tmm2structalign.evolver.MsaNsga2;
+import org.tmm2structalign.evolver.MsaOperators;
+import org.tmm2structalign.evolver.MsaRunContext;
 import org.tmm2structalign.operator.MergeAdjacentGapRunsMutation;
 import org.tmm2structalign.operator.RandomChoiceMutation;
 import org.tmm2structalign.operator.RandomSource;
@@ -11,6 +17,7 @@ import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.operator.TmSafeSinglePointCrossover;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
+import org.uma.evolver.parameter.ParameterSpace;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.algorithm.RandomSearchAlgorithm;
 import org.uma.jmetal.component.algorithm.multiobjective.AGEMOEABuilder;
@@ -93,6 +100,10 @@ public final class AlgorithmFactory {
    */
   public SearchRun create(AlgorithmType type) {
     checkObjectives(type);
+    if (!configuration.configuration().isBlank() && type != AlgorithmType.NSGA_II) {
+      throw new IllegalArgumentException(
+          "A configuration string is only available for NSGA_II, not for " + type);
+    }
     if (configuration.externalArchive() && type != AlgorithmType.NSGA_II) {
       throw new IllegalArgumentException("The external archive is only available with NSGA_II");
     }
@@ -138,22 +149,50 @@ public final class AlgorithmFactory {
     };
   }
 
-  /** NSGA-II whose result is the final population or, if configured, a bounded archive. */
+  /**
+   * NSGA-II built with Evolver from the parameter space {@code MSANSGAII.yaml}. The configuration
+   * is resolved in layers: the default configuration, the operator settings of the
+   * {@link AlgorithmConfiguration} and, last, its configuration string.
+   */
+  @SuppressWarnings("unchecked")
   private SearchRun nsgaTwo() {
-    if (!configuration.externalArchive()) {
-      return SearchRun.of(
-          TmStructAlign.create(problem, population(), configuration, crossover(), mutation()));
+    Map<String, String> values =
+        new LinkedHashMap<>(MsaConfigurations.defaults(MsaNsga2.PARAMETER_SPACE));
+    values.put(
+        "offspringPopulationSize", Integer.toString(configuration.offspringPopulationSize()));
+    values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
+    values.put("mutation", mutationName(configuration.mutationType()));
+    values.put("mutationProbability", Double.toString(configuration.mutationProbability()));
+    if (configuration.externalArchive()) {
+      values.put("algorithmResult", "externalArchive");
+      values.put("populationSizeWithArchive", Integer.toString(configuration.populationSize()));
+      values.put("archiveType", "crowdingDistanceArchive");
     }
-    var archive = new CrowdingDistanceArchive<MsaSolution>(configuration.populationSize());
+    values.putAll(MsaConfigurations.parse(configuration.configuration()));
+    ParameterSpace space = MsaConfigurations.parameterSpace(MsaNsga2.PARAMETER_SPACE);
+    MsaConfigurations.requireKnownNames(values, space);
+    var context =
+        new MsaRunContext(
+            seeds, structures, random, configuration.threads(), configuration.maxTime());
     var algorithm =
-        TmStructAlign.create(
-            problem,
-            population(),
-            configuration,
-            crossover(),
-            mutation(),
-            new ArchivingEvaluation(evaluation(), archive));
-    return SearchRun.of(algorithm, archive);
+        (EvolutionaryAlgorithm<MsaSolution>)
+            new MsaNsga2(
+                    problem,
+                    configuration.populationSize(),
+                    configuration.maxEvaluations(),
+                    space,
+                    context)
+                .parse(MsaConfigurations.arguments(values))
+                .build();
+    return SearchRun.withConfiguration(SearchRun.of(algorithm), MsaConfigurations.format(values));
+  }
+
+  private static String mutationName(MutationType type) {
+    return switch (type) {
+      case TM_SAFE_GAP_SHIFT -> MsaOperators.TM_SAFE_GAP_SHIFT;
+      case MERGE_GAP_RUNS -> MsaOperators.MERGE_GAP_RUNS;
+      case RANDOM_CHOICE -> MsaOperators.RANDOM_CHOICE;
+    };
   }
 
   private void checkObjectives(AlgorithmType type) {

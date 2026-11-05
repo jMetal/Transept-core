@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import org.tmm2structalign.algorithm.AlgorithmConfiguration;
 import org.tmm2structalign.algorithm.AlgorithmType;
 import org.tmm2structalign.algorithm.MutationType;
+import org.tmm2structalign.evolver.MsaConfigurations;
 import org.tmm2structalign.objective.ObjectiveSet;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.run.ExperimentRunner;
@@ -89,11 +90,8 @@ public final class RunCommand implements Callable<Integer> {
       description = "Evaluation threads. Default: ${DEFAULT-VALUE}.")
   int threads;
 
-  @Option(
-      names = "--crossover-probability",
-      defaultValue = "0.8",
-      description = "Default: ${DEFAULT-VALUE}.")
-  double crossoverProbability;
+  @Option(names = "--crossover-probability", description = "Default: 0.8.")
+  Double crossoverProbability;
 
   @Option(
       names = "--mutation-probability",
@@ -102,9 +100,8 @@ public final class RunCommand implements Callable<Integer> {
 
   @Option(
       names = "--mutation",
-      defaultValue = "TM_SAFE_GAP_SHIFT",
       description =
-          "Mutation operator: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}. None of them"
+          "Mutation operator: ${COMPLETION-CANDIDATES}. Default: TM_SAFE_GAP_SHIFT. None of them"
               + " breaks a transmembrane helix. RANDOM_CHOICE picks TM_SAFE_GAP_SHIFT or"
               + " MERGE_GAP_RUNS each time.")
   MutationType mutation;
@@ -117,6 +114,18 @@ public final class RunCommand implements Callable<Integer> {
               + " population size multiple of 4; PAES uses the first seed and ignores the"
               + " crossover; RANDOM_SEARCH ignores the seeds and both operators.")
   AlgorithmType algorithm;
+
+  @Option(
+      names = "--configuration",
+      description =
+          "Configuration of NSGA_II from its parameter space, as '--parameter value ...' (see"
+              + " docs/reference/configuration.md). Unset parameters keep their default value.")
+  String configuration;
+
+  @Option(
+      names = "--configuration-file",
+      description = "File whose first non-blank line is a configuration (see --configuration).")
+  Path configurationFile;
 
   @Option(
       names = "--external-archive",
@@ -163,12 +172,15 @@ public final class RunCommand implements Callable<Integer> {
                   maxEvaluations == null ? DEFAULT_MAX_EVALUATIONS : maxEvaluations,
                   populationSize,
                   populationSize,
-                  crossoverProbability,
+                  crossoverProbability == null
+                      ? AlgorithmConfiguration.DEFAULT_CROSSOVER_PROBABILITY
+                      : crossoverProbability,
                   effectiveMutationProbability(),
                   threads,
-                  mutation,
+                  mutation == null ? MutationType.TM_SAFE_GAP_SHIFT : mutation,
                   externalArchive,
-                  maxRunTime()),
+                  maxRunTime(),
+                  configurationText()),
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
@@ -186,6 +198,44 @@ public final class RunCommand implements Callable<Integer> {
       status = 1;
     }
     return status;
+  }
+
+  /**
+   * Configuration given with {@code --configuration} or {@code --configuration-file}, or an empty
+   * string.
+   *
+   * @throws IllegalArgumentException if both are given, or if an operator option sets a parameter
+   *     that the configuration also sets
+   * @throws IOException if the file cannot be read
+   */
+  String configurationText() throws IOException {
+    if (configuration != null && configurationFile != null) {
+      throw new IllegalArgumentException(
+          "Give --configuration or --configuration-file, not both");
+    }
+    String text = configuration == null ? "" : configuration;
+    if (configurationFile != null) {
+      text =
+          Files.readAllLines(configurationFile, StandardCharsets.UTF_8).stream()
+              .filter(line -> !line.isBlank())
+              .findFirst()
+              .orElse("");
+    }
+    Map<String, String> values = MsaConfigurations.parse(text);
+    requireNotBoth(crossoverProbability != null, values, "crossoverProbability",
+        "--crossover-probability");
+    requireNotBoth(mutationProbability != null, values, "mutationProbability",
+        "--mutation-probability");
+    requireNotBoth(mutation != null, values, "mutation", "--mutation");
+    return text;
+  }
+
+  private static void requireNotBoth(
+      boolean optionGiven, Map<String, String> values, String parameter, String option) {
+    if (optionGiven && values.containsKey(parameter)) {
+      throw new IllegalArgumentException(
+          option + " and --" + parameter + " in the configuration set the same parameter");
+    }
   }
 
   /**
