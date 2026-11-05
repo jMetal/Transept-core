@@ -1,11 +1,14 @@
 package org.tmm2structalign.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,6 +80,56 @@ class CliTest {
       // Act & Assert
       assertEquals(2, TmStructAlignCli.execute("run", "--dataset", "x"));
       assertEquals(0, TmStructAlignCli.execute("--version"));
+    }
+
+    @Test
+    @DisplayName("given a time limit, when running, then it stops by time and records it")
+    void givenTimeLimit_whenRunning_thenItStopsByTimeAndRecordsIt() throws IOException {
+      // Act
+      int status =
+          TmStructAlignCli.execute(
+              "run",
+              "--data-root", dataRoot.toString(),
+              "--dataset", SyntheticDataset.NAME,
+              "--seeds", "left,right",
+              "--output-root", outputRoot.toString(),
+              "--run-id", "timed",
+              "--seed", "3",
+              "--max-time", "0.5",
+              "--population-size", "6");
+
+      // Assert
+      Path run = outputRoot.resolve("ejecuciones/synthetic/timed");
+      String config = Files.readString(run.resolve("config.json"));
+      assertEquals(0, status);
+      assertTrue(config.contains("\"maxTimeSeconds\":0.5"), config);
+      assertTrue(config.contains("\"maxEvaluations\":null"), config);
+    }
+
+    @Test
+    @DisplayName("given both stopping conditions, when running, then it fails with status 1")
+    void givenBothStoppingConditions_whenRunning_thenStatusIsOne() {
+      // Arrange
+      String[] arguments = runArguments("both", "left,right");
+      String[] withTime = Arrays.copyOf(arguments, arguments.length + 2);
+      withTime[arguments.length] = "--max-time";
+      withTime[arguments.length + 1] = "5";
+
+      // Act & Assert
+      assertEquals(1, TmStructAlignCli.execute(withTime));
+    }
+
+    @Test
+    @DisplayName("given a non-positive time, when resolving the limit, then it fails")
+    void givenNonPositiveTime_whenResolvingLimit_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      RunCommand command = new RunCommand();
+      command.maxTime = 0.0;
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, command::maxRunTime);
+      command.maxTime = null;
+      assertNull(command.maxRunTime());
     }
 
     private String[] runArguments(String runId, String seeds) {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -297,6 +298,49 @@ class AlgorithmFactoryTest {
               .min()
               .orElseThrow();
       assertTrue(best <= bestSeed, best + " > " + bestSeed);
+    }
+  }
+
+  @Nested
+  @DisplayName("When stopping by time")
+  class StoppingByTime {
+
+    @ParameterizedTest
+    @EnumSource(
+        value = AlgorithmType.class,
+        names = {"NSGA_II", "SMS_EMOA", "RANDOM_SEEDED"})
+    @DisplayName("given a time limit, when run, then it runs past the evaluations until the time")
+    void givenTimeLimit_whenRun_thenItRunsUntilTheTime(AlgorithmType type) {
+      // Arrange
+      SearchRun run =
+          new AlgorithmFactory(
+                  problem,
+                  seeds,
+                  new AlgorithmConfiguration(
+                      EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 1.0, 1,
+                      MutationType.TM_SAFE_GAP_SHIFT, false, Duration.ofMillis(300)),
+                  structures,
+                  new SeededRandom(5))
+              .create(type);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertTrue(run.runtimeMillis() >= 300, type + ": " + run.runtimeMillis());
+      assertTrue(run.evaluations() > EVALUATIONS, type + ": " + run.evaluations());
+    }
+
+    @Test
+    @DisplayName("given a non-positive time, when configuring, then an exception is thrown")
+    void givenNonPositiveTime_whenConfiguring_thenIllegalArgumentExceptionIsThrown() {
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              new AlgorithmConfiguration(
+                  EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 1.0, 1,
+                  MutationType.TM_SAFE_GAP_SHIFT, false, Duration.ZERO));
     }
   }
 
