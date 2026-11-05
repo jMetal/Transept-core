@@ -20,9 +20,8 @@ import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.testing.Alignments;
 import org.tmm2structalign.testing.SeededRandom;
-import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 
-@DisplayName("Unit tests for SeededPopulationCreation, AlgorithmConfiguration and TmStructAlign")
+@DisplayName("Unit tests for SeededPopulationCreation and AlgorithmConfiguration")
 class AlgorithmTest {
 
   private ProteinSet proteins;
@@ -146,40 +145,6 @@ class AlgorithmTest {
       assertThrows(
           IllegalArgumentException.class,
           () -> new AlgorithmConfiguration(evaluations, population, offspring, pc, pm, threads));
-    }
-  }
-
-  @Nested
-  @DisplayName("When running the algorithm")
-  class Running {
-
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2})
-    @DisplayName("given a small budget, when running, then the population is evaluated and kept")
-    void givenSmallBudget_whenRunning_thenPopulationIsEvaluatedAndKept(int threads) {
-      // Arrange
-      AlgorithmConfiguration configuration = AlgorithmConfiguration.withDefaults(60, 6, threads);
-      SeededPopulationCreation population =
-          new SeededPopulationCreation(problem, seeds, 6, new SeededRandom(3), mutation());
-      EvolutionaryAlgorithm<MsaSolution> algorithm =
-          TmStructAlign.createDefault(
-              problem,
-              population,
-              configuration,
-              new TmSafeGapShiftMutation(
-                  0.2, Alignments.unstructured(proteins), 60, new SeededRandom(4)),
-              new SeededRandom(5));
-
-      // Act
-      algorithm.run();
-
-      // Assert
-      assertEquals(TmStructAlign.NAME, algorithm.name());
-      assertEquals(6, algorithm.result().size());
-      assertTrue(algorithm.numberOfEvaluations() >= 60);
-      for (MsaSolution solution : algorithm.result()) {
-        assertTrue(solution.objectives()[0] < 0.0, "SOPwTP is positive, stored negated");
-      }
     }
   }
 }

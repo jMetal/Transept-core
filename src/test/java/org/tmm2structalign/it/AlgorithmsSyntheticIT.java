@@ -112,7 +112,7 @@ class AlgorithmsSyntheticIT {
     assertEquals(fun, Files.readAllLines(second.resolve("FUN.csv")));
     String config = Files.readString(first.resolve("config.json"));
     assertTrue(config.contains("\"objectives\":\"" + objectives + "\""), config);
-    assertTrue(config.contains("\"externalArchive\":" + archive), config);
+    assertEquals(archive, config.contains("--algorithmResult externalArchive"), config);
   }
 
   private RunSummary formulation(
@@ -128,7 +128,11 @@ class AlgorithmsSyntheticIT {
                 21L,
                 new AlgorithmConfiguration(
                     EVALUATIONS, POPULATION, POPULATION, 0.8, 0.2, 1,
-                    MutationType.TM_SAFE_GAP_SHIFT, archive),
+                    MutationType.TM_SAFE_GAP_SHIFT, null,
+                    archive
+                        ? "--algorithmResult externalArchive --populationSizeWithArchive "
+                            + POPULATION + " --archiveType crowdingDistanceArchive"
+                        : ""),
                 type,
                 MappingPolicy.VERIFIED,
                 15f,

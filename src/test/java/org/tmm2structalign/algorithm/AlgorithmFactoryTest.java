@@ -20,12 +20,10 @@ import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.model.ProteinSet;
 import org.tmm2structalign.objective.StructuralLddt;
 import org.tmm2structalign.objective.TopologyAwareSumOfPairs;
-import org.tmm2structalign.operator.TmSafeGapShiftMutation;
 import org.tmm2structalign.problem.StructuralMsaProblem;
 import org.tmm2structalign.structure.ProteinStructures;
 import org.tmm2structalign.testing.Alignments;
 import org.tmm2structalign.testing.SeededRandom;
-import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 @DisplayName("Unit tests for classes AlgorithmFactory, SearchRun and AlgorithmType")
 class AlgorithmFactoryTest {
@@ -313,46 +311,25 @@ class AlgorithmFactoryTest {
           seeds,
           new AlgorithmConfiguration(
               EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 0.2, 1,
-              MutationType.TM_SAFE_GAP_SHIFT, false, null, text),
+              MutationType.TM_SAFE_GAP_SHIFT, null, text),
           structures,
           new SeededRandom(5));
     }
 
     @Test
-    @DisplayName("given the default options, when built, then it is the current NSGA-II exactly")
-    void givenDefaultOptions_whenBuilt_thenItIsTheCurrentNsgaTwoExactly() {
-      // Arrange: the hand-built NSGA-II that the Evolver one replaces
-      var random = new SeededRandom(5);
-      var configuration =
-          new AlgorithmConfiguration(
-              EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 0.2, 1);
-      var reference =
-          TmStructAlign.createDefault(
-              problem,
-              new SeededPopulationCreation(
-                  problem,
-                  seeds,
-                  POPULATION_SIZE,
-                  random,
-                  new TmSafeGapShiftMutation(
-                      1.0, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random)),
-              configuration,
-              new TmSafeGapShiftMutation(
-                  0.2, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random),
-              random);
+    @DisplayName("given the default options, when built, then the default configuration is used")
+    void givenDefaultOptions_whenBuilt_thenTheDefaultConfigurationIsUsed() {
+      // Act
       SearchRun run = configured("").create(AlgorithmType.NSGA_II);
 
-      // Act: jMetal's selection draws from the global generator, so both start from one seed
-      JMetalRandom.getInstance().setSeed(11);
-      reference.run();
-      JMetalRandom.getInstance().setSeed(11);
-      run.run();
-
-      // Assert
+      // Assert: the offspring size follows the population size
       assertEquals(
-          reference.result().stream().map(MsaSolution::variables).toList(),
-          run.front().stream().map(MsaSolution::variables).toList());
-      assertTrue(run.configuration().contains("--mutation tmSafeGapShift"), run.configuration());
+          "--algorithmResult population --createInitialSolutions seededDistinct"
+              + " --offspringPopulationSize " + POPULATION_SIZE
+              + " --variation crossoverAndMutationVariation --crossover tmSafeSinglePoint"
+              + " --crossoverProbability 0.8 --mutation tmSafeGapShift"
+              + " --mutationProbability 0.2 --selection tournament --selectionTournamentSize 2",
+          run.configuration());
     }
 
     @Test
@@ -403,7 +380,7 @@ class AlgorithmFactoryTest {
                   seeds,
                   new AlgorithmConfiguration(
                       EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 1.0, 1,
-                      MutationType.TM_SAFE_GAP_SHIFT, false, Duration.ofMillis(300)),
+                      MutationType.TM_SAFE_GAP_SHIFT, Duration.ofMillis(300), ""),
                   structures,
                   new SeededRandom(5))
               .create(type);
@@ -425,7 +402,7 @@ class AlgorithmFactoryTest {
           () ->
               new AlgorithmConfiguration(
                   EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 0.8, 1.0, 1,
-                  MutationType.TM_SAFE_GAP_SHIFT, false, Duration.ZERO));
+                  MutationType.TM_SAFE_GAP_SHIFT, Duration.ZERO, ""));
     }
   }
 
@@ -439,7 +416,9 @@ class AlgorithmFactoryTest {
           seeds,
           new AlgorithmConfiguration(
               EVALUATIONS * 2, POPULATION_SIZE, POPULATION_SIZE, 0.8, 1.0, 1,
-              MutationType.TM_SAFE_GAP_SHIFT, true),
+              MutationType.TM_SAFE_GAP_SHIFT, null,
+              "--algorithmResult externalArchive --populationSizeWithArchive "
+                  + POPULATION_SIZE + " --archiveType crowdingDistanceArchive"),
           structures,
           new SeededRandom(5));
     }

@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import org.tmm2structalign.algorithm.AlgorithmFactory;
 import org.tmm2structalign.algorithm.SearchRun;
-import org.tmm2structalign.algorithm.TmStructAlign;
 import org.tmm2structalign.alignment.GapIntervals;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.tmm2structalign.io.FastaAlignmentWriter;
@@ -41,6 +40,9 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
  * </ul>
  */
 public final class ExperimentRunner {
+
+  /** Name of the tool in metadata.json. */
+  public static final String TOOL = "TM-M2StructAlign";
 
   /** Objective values of the final solutions. */
   public static final String FUN_FILE = "FUN.csv";
@@ -136,7 +138,7 @@ public final class ExperimentRunner {
       RunSummary summary,
       Instant start) {
     Map<String, Object> metadata = new LinkedHashMap<>();
-    metadata.put("tool", TmStructAlign.NAME);
+    metadata.put("tool", TOOL);
     metadata.put("algorithmType", configuration.algorithmType());
     metadata.put("algorithmName", search.name());
     metadata.put("configuration", search.configuration());

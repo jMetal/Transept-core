@@ -104,9 +104,6 @@ public final class AlgorithmFactory {
       throw new IllegalArgumentException(
           "A configuration string is only available for NSGA_II, not for " + type);
     }
-    if (configuration.externalArchive() && type != AlgorithmType.NSGA_II) {
-      throw new IllegalArgumentException("The external archive is only available with NSGA_II");
-    }
     if (type.isSteadyState() && configuration.threads() > 1) {
       LOGGER.warning(
           type + " evaluates one solution per iteration; " + configuration.threads()
@@ -163,11 +160,6 @@ public final class AlgorithmFactory {
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
     values.put("mutation", mutationName(configuration.mutationType()));
     values.put("mutationProbability", Double.toString(configuration.mutationProbability()));
-    if (configuration.externalArchive()) {
-      values.put("algorithmResult", "externalArchive");
-      values.put("populationSizeWithArchive", Integer.toString(configuration.populationSize()));
-      values.put("archiveType", "crowdingDistanceArchive");
-    }
     values.putAll(MsaConfigurations.parse(configuration.configuration()));
     ParameterSpace space = MsaConfigurations.parameterSpace(MsaNsga2.PARAMETER_SPACE);
     MsaConfigurations.requireKnownNames(values, space);

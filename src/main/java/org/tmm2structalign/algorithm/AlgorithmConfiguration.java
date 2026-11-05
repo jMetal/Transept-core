@@ -13,8 +13,6 @@ import java.time.Duration;
  * @param mutationProbability probability of the gap-shift mutation
  * @param threads number of evaluation threads; 1 evaluates sequentially
  * @param mutationType mutation operator
- * @param externalArchive whether the result is a bounded archive of the non-dominated solutions
- *     found during the search instead of the final population (NSGA-II only)
  * @param maxTime stopping criterion by computing time, or {@code null} to stop by evaluations
  * @param configuration configuration string ({@code --parameter value ...}) of the algorithms
  *     built from a parameter space; empty to use their default configuration
@@ -27,7 +25,6 @@ public record AlgorithmConfiguration(
     double mutationProbability,
     int threads,
     MutationType mutationType,
-    boolean externalArchive,
     Duration maxTime,
     String configuration) {
 
@@ -55,76 +52,7 @@ public record AlgorithmConfiguration(
   }
 
   /**
-   * Creates a configuration with the default configuration string.
-   *
-   * @param maxEvaluations stopping criterion, number of evaluations
-   * @param populationSize population size
-   * @param offspringPopulationSize offspring created per generation
-   * @param crossoverProbability probability of the TM-safe crossover
-   * @param mutationProbability probability of the gap-shift mutation
-   * @param threads number of evaluation threads; 1 evaluates sequentially
-   * @param mutationType mutation operator
-   * @param externalArchive whether the result is a bounded archive (NSGA-II only)
-   * @param maxTime stopping criterion by computing time, or {@code null}
-   */
-  public AlgorithmConfiguration(
-      int maxEvaluations,
-      int populationSize,
-      int offspringPopulationSize,
-      double crossoverProbability,
-      double mutationProbability,
-      int threads,
-      MutationType mutationType,
-      boolean externalArchive,
-      Duration maxTime) {
-    this(
-        maxEvaluations,
-        populationSize,
-        offspringPopulationSize,
-        crossoverProbability,
-        mutationProbability,
-        threads,
-        mutationType,
-        externalArchive,
-        maxTime,
-        "");
-  }
-
-  /**
-   * Creates a configuration that stops by evaluations.
-   *
-   * @param maxEvaluations stopping criterion, number of evaluations
-   * @param populationSize population size
-   * @param offspringPopulationSize offspring created per generation
-   * @param crossoverProbability probability of the TM-safe crossover
-   * @param mutationProbability probability of the gap-shift mutation
-   * @param threads number of evaluation threads; 1 evaluates sequentially
-   * @param mutationType mutation operator
-   * @param externalArchive whether the result is a bounded archive (NSGA-II only)
-   */
-  public AlgorithmConfiguration(
-      int maxEvaluations,
-      int populationSize,
-      int offspringPopulationSize,
-      double crossoverProbability,
-      double mutationProbability,
-      int threads,
-      MutationType mutationType,
-      boolean externalArchive) {
-    this(
-        maxEvaluations,
-        populationSize,
-        offspringPopulationSize,
-        crossoverProbability,
-        mutationProbability,
-        threads,
-        mutationType,
-        externalArchive,
-        null);
-  }
-
-  /**
-   * Creates a configuration whose result is the final population.
+   * Creates a configuration that stops by evaluations, with the default configuration string.
    *
    * @param maxEvaluations stopping criterion, number of evaluations
    * @param populationSize population size
@@ -150,7 +78,8 @@ public record AlgorithmConfiguration(
         mutationProbability,
         threads,
         mutationType,
-        false);
+        null,
+        "");
   }
 
   /**

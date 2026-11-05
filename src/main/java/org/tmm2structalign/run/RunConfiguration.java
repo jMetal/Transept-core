@@ -180,7 +180,6 @@ public record RunConfiguration(
     map.put("mutationProbability", algorithm.mutationProbability());
     map.put("mutationType", algorithm.mutationType());
     map.put("configuration", algorithm.configuration());
-    map.put("externalArchive", algorithm.externalArchive());
     map.put("threads", algorithm.threads());
     map.put("mappingPolicy", mappingPolicy);
     map.put("lddtCutoff", (double) lddtCutoff);

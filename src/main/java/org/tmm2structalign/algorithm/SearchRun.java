@@ -6,7 +6,6 @@ import java.util.function.IntConsumer;
 import org.tmm2structalign.alignment.MsaSolution;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.algorithm.RandomSearchAlgorithm;
-import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.observable.Observable;
 import org.uma.jmetal.util.observer.Observer;
 
@@ -81,46 +80,6 @@ public interface SearchRun {
       @Override
       public void onProgress(IntConsumer listener) {
         algorithm.observable().register(progressObserver(listener));
-      }
-    };
-  }
-
-  /**
-   * Adapts an evolutionary algorithm whose result is an external archive: {@link #front()}
-   * returns the solutions of the archive instead of the population.
-   */
-  static SearchRun of(
-      EvolutionaryAlgorithm<MsaSolution> algorithm, Archive<MsaSolution> archive) {
-    SearchRun run = of(algorithm);
-    return new SearchRun() {
-      @Override
-      public void run() {
-        run.run();
-      }
-
-      @Override
-      public List<MsaSolution> front() {
-        return List.copyOf(archive.solutions());
-      }
-
-      @Override
-      public int evaluations() {
-        return run.evaluations();
-      }
-
-      @Override
-      public long runtimeMillis() {
-        return run.runtimeMillis();
-      }
-
-      @Override
-      public String name() {
-        return run.name();
-      }
-
-      @Override
-      public void onProgress(IntConsumer listener) {
-        run.onProgress(listener);
       }
     };
   }

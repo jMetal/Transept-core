@@ -128,14 +128,6 @@ public final class RunCommand implements Callable<Integer> {
   Path configurationFile;
 
   @Option(
-      names = "--external-archive",
-      description =
-          "Return a bounded archive (population size, crowding distance) of the non-dominated"
-              + " solutions found during the search instead of the final population. NSGA_II"
-              + " only.")
-  boolean externalArchive;
-
-  @Option(
       names = "--objectives",
       defaultValue = "SOPWTP_LDDT",
       description =
@@ -178,7 +170,6 @@ public final class RunCommand implements Callable<Integer> {
                   effectiveMutationProbability(),
                   threads,
                   mutation == null ? MutationType.TM_SAFE_GAP_SHIFT : mutation,
-                  externalArchive,
                   maxRunTime(),
                   configurationText()),
               algorithm,
