@@ -1,0 +1,60 @@
+# Parameter space of NSGA-II for multiple sequence alignment (TM-M2StructAlign).
+# Every operator keeps transmembrane helices intact. The population size is not part of the
+# space: it is given with --population-size.
+algorithmResult:
+  type: categorical
+  values:
+    population:
+    externalArchive:
+      conditionalParameters:
+        populationSizeWithArchive:
+          type: integer
+          range: [10, 400]
+        archiveType:
+          type: categorical
+          values:
+            crowdingDistanceArchive:
+            unboundedArchive:
+#
+createInitialSolutions:
+  type: categorical
+  values:
+    seededDistinct:
+#
+offspringPopulationSize:
+  type: integer
+  range: [1, 1000]
+#
+variation:
+  type: categorical
+  values:
+    crossoverAndMutationVariation:
+      conditionalParameters:
+        crossover:
+          type: categorical
+          globalSubParameters:
+            crossoverProbability:
+              type: double
+              range: [0.0, 1.0]
+          values:
+            tmSafeSinglePoint:
+        mutation:
+          type: categorical
+          globalSubParameters:
+            mutationProbability:
+              type: double
+              range: [0.0, 1.0]
+          values:
+            tmSafeGapShift:
+            mergeGapRuns:
+            randomChoice:
+#
+selection:
+  type: categorical
+  values:
+    tournament:
+      conditionalParameters:
+        selectionTournamentSize:
+          type: integer
+          range: [2, 10]
+    random:
