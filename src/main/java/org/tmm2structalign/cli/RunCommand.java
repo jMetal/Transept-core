@@ -20,6 +20,7 @@ import org.tmm2structalign.run.ExperimentRunner.RunSummary;
 import org.tmm2structalign.run.Json;
 import org.tmm2structalign.run.RunConfiguration;
 import org.tmm2structalign.run.RunDirectoryExistsException;
+import org.tmm2structalign.seed.InternalSeeds;
 import org.tmm2structalign.structure.MappingPolicy;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -49,10 +50,20 @@ public final class RunCommand implements Callable<Integer> {
 
   @Option(
       names = "--seeds",
-      required = true,
       split = ",",
-      description = "Tools whose precomputed alignments seed the population, e.g. mafft,kalign.")
+      defaultValue = InternalSeeds.NAME,
+      description =
+          "Seed alignments of the population: tools whose precomputed alignments are in the"
+              + " dataset, e.g. mafft,kalign, and/or internal (up to 10 alignments computed by the"
+              + " tool with BioJava). Default: ${DEFAULT-VALUE}.")
   List<String> seeds;
+
+  @Option(
+      names = "--repair-seeds",
+      description =
+          "Move the gaps that split a transmembrane helix out of the seed alignments before the"
+              + " search (the operators never create such gaps, but keep those of the seeds).")
+  boolean repairSeeds;
 
   @Option(names = "--output-root", required = true, description = "Root of the results tree.")
   Path outputRoot;
@@ -179,7 +190,8 @@ public final class RunCommand implements Callable<Integer> {
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
               progressInterval,
-              objectives);
+              objectives,
+              repairSeeds);
       RunSummary summary = new ExperimentRunner().run(configuration);
       System.out.println(
           "Run finished: " + summary.evaluations() + " evaluations, " + summary.frontSize()

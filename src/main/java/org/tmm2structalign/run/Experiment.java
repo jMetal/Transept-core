@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import org.tmm2structalign.alignment.Msa;
 import org.tmm2structalign.io.FastaAlignmentReader;
+import org.tmm2structalign.io.FastaAlignmentWriter;
 import org.tmm2structalign.io.InvalidInputFileException;
 import org.tmm2structalign.io.ThreeLineTopologyReader;
 import org.tmm2structalign.model.ProteinSet;
+import org.tmm2structalign.operator.TmHelixRepair;
 import org.tmm2structalign.problem.StructuralMsaProblem;
+import org.tmm2structalign.seed.InternalSeeds;
 import org.tmm2structalign.structure.ProteinStructures;
 import org.tmm2structalign.structure.StructureLoader;
 
@@ -30,15 +33,21 @@ import org.tmm2structalign.structure.StructureLoader;
 public record Experiment(
     StructuralMsaProblem problem, ProteinStructures structures, List<SeedAlignment> seeds) {
 
+  /** Directory of the run where the internal seeds are written. */
+  public static final String INTERNAL_SEEDS_DIRECTORY = "seeds";
+
   /**
    * A seed alignment and its provenance.
    *
-   * @param method tool that produced the alignment
-   * @param file path of the FASTA file
+   * @param method tool that produced the alignment ({@code internal:<setting>} for the seeds
+   *     computed by the tool)
+   * @param file path of the FASTA file (for internal seeds, the copy written to the run directory)
    * @param sha256 hexadecimal SHA-256 of the file content
-   * @param alignment the alignment
+   * @param alignment the alignment, repaired if the configuration asks for it
+   * @param repairedGapRuns gap runs moved out of the helices by the repair
    */
-  public record SeedAlignment(String method, Path file, String sha256, Msa alignment) {}
+  public record SeedAlignment(
+      String method, Path file, String sha256, Msa alignment, int repairedGapRuns) {}
 
   /**
    * Loads every input of a run.
@@ -79,6 +88,10 @@ public record Experiment(
     FastaAlignmentReader reader = new FastaAlignmentReader();
     List<SeedAlignment> seeds = new ArrayList<>();
     for (String method : configuration.seedMethods()) {
+      if (InternalSeeds.NAME.equals(method)) {
+        seeds.addAll(internalSeeds(configuration, proteins));
+        continue;
+      }
       Path file =
           PrecomputedAlignments.find(
                   configuration.precomputedDirectory(), configuration.dataset(), method)
@@ -87,9 +100,35 @@ public record Experiment(
                       new InvalidInputFileException(
                           "No unique seed alignment of '" + method + "' in "
                               + configuration.precomputedDirectory()));
-      seeds.add(new SeedAlignment(method, file, sha256(file), reader.read(file, proteins)));
+      seeds.add(seed(configuration, method, file, reader.read(file, proteins)));
     }
     return List.copyOf(seeds);
+  }
+
+  /** Computes the internal seeds and writes them to {@code seeds/} of the run directory. */
+  private static List<SeedAlignment> internalSeeds(
+      RunConfiguration configuration, ProteinSet proteins) throws IOException {
+    Path directory = configuration.runDirectory().resolve(INTERNAL_SEEDS_DIRECTORY);
+    Files.createDirectories(directory);
+    List<SeedAlignment> seeds = new ArrayList<>();
+    for (InternalSeeds.Seed generated : InternalSeeds.generate(proteins, InternalSeeds.MAX_SEEDS)) {
+      Path file = directory.resolve(generated.method() + ".fasta");
+      new FastaAlignmentWriter().write(generated.alignment(), file);
+      seeds.add(
+          seed(configuration, InternalSeeds.NAME + ":" + generated.method(), file,
+              generated.alignment()));
+    }
+    return seeds;
+  }
+
+  private static SeedAlignment seed(
+      RunConfiguration configuration, String method, Path file, Msa alignment) throws IOException {
+    if (!configuration.repairSeeds()) {
+      return new SeedAlignment(method, file, sha256(file), alignment, 0);
+    }
+    TmHelixRepair.Result repaired = TmHelixRepair.repair(alignment);
+    return new SeedAlignment(
+        method, file, sha256(file), repaired.alignment(), repaired.movedRuns());
   }
 
   private static void requireFile(Path file, String description) {

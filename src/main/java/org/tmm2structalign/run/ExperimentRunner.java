@@ -167,6 +167,7 @@ public final class ExperimentRunner {
       entry.put("file", seed.file().toAbsolutePath().toString());
       entry.put("sha256", seed.sha256());
       entry.put("duplicateOf", original);
+      entry.put("repairedGapRuns", seed.repairedGapRuns());
       seeds.add(entry);
     }
     return seeds;
