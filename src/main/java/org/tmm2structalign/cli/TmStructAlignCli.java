@@ -14,7 +14,9 @@ import picocli.CommandLine.Command;
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider.class,
     description = "Structure-guided multiobjective alignment of transmembrane proteins.",
-    subcommands = {RunCommand.class, BaselineCommand.class, AlgorithmsCommand.class})
+    subcommands = {
+      RunCommand.class, BaselineCommand.class, AlgorithmsCommand.class, SeedsCommand.class
+    })
 public final class TmStructAlignCli {
 
   /**

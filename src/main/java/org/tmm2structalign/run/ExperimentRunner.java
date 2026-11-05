@@ -168,6 +168,7 @@ public final class ExperimentRunner {
       entry.put("sha256", seed.sha256());
       entry.put("duplicateOf", original);
       entry.put("repairedGapRuns", seed.repairedGapRuns());
+      entry.put("origin", seed.origin());
       seeds.add(entry);
     }
     return seeds;

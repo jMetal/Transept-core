@@ -20,6 +20,7 @@ import org.tmm2structalign.run.ExperimentRunner.RunSummary;
 import org.tmm2structalign.run.Json;
 import org.tmm2structalign.run.RunConfiguration;
 import org.tmm2structalign.run.RunDirectoryExistsException;
+import org.tmm2structalign.seed.InternalSeedStore;
 import org.tmm2structalign.seed.InternalSeeds;
 import org.tmm2structalign.structure.MappingPolicy;
 import picocli.CommandLine.Command;
@@ -191,7 +192,8 @@ public final class RunCommand implements Callable<Integer> {
               StructuralLddt.DEFAULT_CUTOFF,
               progressInterval,
               objectives,
-              repairSeeds);
+              repairSeeds,
+              InternalSeedStore.directory(outputRoot, dataset));
       RunSummary summary = new ExperimentRunner().run(configuration);
       System.out.println(
           "Run finished: " + summary.evaluations() + " evaluations, " + summary.frontSize()

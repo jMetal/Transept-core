@@ -28,6 +28,8 @@ import org.tmm2structalign.structure.MappingPolicy;
  * @param objectives objectives that are optimised
  * @param repairSeeds whether the gaps that split a transmembrane helix are moved out of the
  *     seed alignments before the search
+ * @param internalSeedsDirectory directory of the precomputed internal seeds of the dataset ({@code
+ *     seeds} command), or {@code null} to compute them in the run
  */
 public record RunConfiguration(
     Path dataRoot,
@@ -41,7 +43,8 @@ public record RunConfiguration(
     float lddtCutoff,
     int progressInterval,
     ObjectiveSet objectives,
-    boolean repairSeeds) {
+    boolean repairSeeds,
+    Path internalSeedsDirectory) {
 
   /** Validates the configuration and freezes the seed list. */
   public RunConfiguration {
@@ -65,6 +68,52 @@ public record RunConfiguration(
       throw new IllegalArgumentException("progressInterval must be positive: " + progressInterval);
     }
     seedMethods = List.copyOf(seedMethods);
+  }
+
+  /**
+   * Creates a configuration that computes the internal seeds, if any, in the run.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population ({@code internal}
+   *     for seeds computed by the tool)
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param algorithmType search algorithm
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   * @param objectives objectives that are optimised
+   * @param repairSeeds whether the gaps inside helices are moved out of the seeds
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      AlgorithmType algorithmType,
+      MappingPolicy mappingPolicy,
+      float lddtCutoff,
+      int progressInterval,
+      ObjectiveSet objectives,
+      boolean repairSeeds) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        algorithmType,
+        mappingPolicy,
+        lddtCutoff,
+        progressInterval,
+        objectives,
+        repairSeeds,
+        null);
   }
 
   /**
@@ -107,7 +156,8 @@ public record RunConfiguration(
         lddtCutoff,
         progressInterval,
         objectives,
-        false);
+        false,
+        null);
   }
 
   /**
@@ -213,6 +263,9 @@ public record RunConfiguration(
     map.put("dataset", dataset);
     map.put("seedMethods", seedMethods);
     map.put("repairSeeds", repairSeeds);
+    map.put(
+        "internalSeedsDirectory",
+        internalSeedsDirectory == null ? null : internalSeedsDirectory.toAbsolutePath().toString());
     map.put("runDirectory", runDirectory.toAbsolutePath().toString());
     map.put("randomSeed", randomSeed);
     map.put("algorithmType", algorithmType);
