@@ -1,4 +1,4 @@
-# Parameter space of NSGA-II for multiple sequence alignment (TM-M2StructAlign).
+# Parameter space of NSGA-II for multiple sequence alignment (Transept).
 # Every operator keeps transmembrane helices intact. The population size is not part of the
 # space: it is given with --population-size.
 algorithmResult:

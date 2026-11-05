@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Reproducible two-objective analysis of TM-M2StructAlign runs.
+"""Reproducible two-objective analysis of Transept runs.
 
-Expected layout (created by the ``run`` command of TM-M2StructAlign):
+Expected layout (created by the ``run`` command of Transept):
 
     ROOT/ejecuciones/DATASET/RUN_ID/FUN.csv
     ROOT/ejecuciones/DATASET/RUN_ID/MSASol0.fasta

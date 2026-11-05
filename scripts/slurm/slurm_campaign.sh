@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# One cell of a TM-M2StructAlign campaign per array task: every configuration of
+# One cell of a Transept campaign per array task: every configuration of
 # configurations.tsv with every seed of campaign.env, on the dataset and budget of the cell
 # (line <task id> of cells.tsv). The runs of a task are launched at the same time
 # (PARALLEL_RUNS runs of THREADS_PER_RUN threads each) on the local scratch of the node.

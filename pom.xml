@@ -4,9 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>TM-MSAStructAligner</artifactId>
-    <version>1.0</version>
+    <groupId>org.uma.jmetal</groupId>
+    <artifactId>transept-core</artifactId>
+    <version>0.1.0</version>
+    <name>Transept core</name>
+    <description>Multiobjective, structure-guided alignment of transmembrane proteins: the engine of Transept.</description>
+    <url>https://github.com/jMetal/Transept-core</url>
 
     <properties>
         <java.version>21</java.version>
@@ -32,7 +35,7 @@
         <git.commit.plugin.version>10.0.1</git.commit.plugin.version>
 
         <!-- Quality gates apply only to the rewritten core -->
-        <quality.package>org/tmm2structalign/**</quality.package>
+        <quality.package>org/transept/**</quality.package>
         <jacoco.minimum.line.coverage>0.80</jacoco.minimum.line.coverage>
     </properties>
 
@@ -286,7 +289,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.tmm2structalign.cli.TmStructAlignCli</mainClass>
+                            <mainClass>org.transept.cli.TranseptCli</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

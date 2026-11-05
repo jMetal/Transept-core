@@ -1,0 +1,289 @@
+package org.transept.run;
+
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.transept.algorithm.AlgorithmConfiguration;
+import org.transept.algorithm.AlgorithmType;
+import org.transept.objective.ObjectiveSet;
+import org.transept.structure.MappingPolicy;
+
+/**
+ * Everything needed to reproduce one run.
+ *
+ * <p>Input paths follow the layout of the {@code Dataset_Structural_GPCRs} repository under
+ * {@code dataRoot} (the {@code GPCRdb} directory).
+ *
+ * @param dataRoot root of the dataset ({@code .../GPCRdb})
+ * @param dataset dataset name, e.g. {@code classF}
+ * @param seedMethods tools whose precomputed alignments seed the population, in order
+ * @param runDirectory output directory of the run; must not exist
+ * @param randomSeed seed of the global jMetal generator
+ * @param algorithm algorithm parameters
+ * @param algorithmType search algorithm
+ * @param mappingPolicy policy for mapping sequences onto structures
+ * @param lddtCutoff inclusion radius of the structural objective, in Å
+ * @param progressInterval evaluations between progress records
+ * @param objectives objectives that are optimised
+ * @param repairSeeds whether the gaps that split a transmembrane helix are moved out of the
+ *     seed alignments before the search
+ * @param internalSeedsDirectory directory of the precomputed internal seeds of the dataset ({@code
+ *     seeds} command), or {@code null} to compute them in the run
+ */
+public record RunConfiguration(
+    Path dataRoot,
+    String dataset,
+    List<String> seedMethods,
+    Path runDirectory,
+    long randomSeed,
+    AlgorithmConfiguration algorithm,
+    AlgorithmType algorithmType,
+    MappingPolicy mappingPolicy,
+    float lddtCutoff,
+    int progressInterval,
+    ObjectiveSet objectives,
+    boolean repairSeeds,
+    Path internalSeedsDirectory) {
+
+  /** Validates the configuration and freezes the seed list. */
+  public RunConfiguration {
+    if (dataRoot == null || runDirectory == null || algorithm == null) {
+      throw new IllegalArgumentException("dataRoot, runDirectory and algorithm are required");
+    }
+    if (dataset == null || dataset.isBlank()) {
+      throw new IllegalArgumentException("Dataset name cannot be blank");
+    }
+    if (seedMethods == null || seedMethods.isEmpty()) {
+      throw new IllegalArgumentException("At least one seed method is required");
+    }
+    if (algorithmType == null || mappingPolicy == null || objectives == null) {
+      throw new IllegalArgumentException(
+          "algorithmType, mappingPolicy and objectives are required");
+    }
+    if (!Float.isFinite(lddtCutoff) || lddtCutoff <= 0f) {
+      throw new IllegalArgumentException("lddtCutoff must be positive: " + lddtCutoff);
+    }
+    if (progressInterval <= 0) {
+      throw new IllegalArgumentException("progressInterval must be positive: " + progressInterval);
+    }
+    seedMethods = List.copyOf(seedMethods);
+  }
+
+  /**
+   * Creates a configuration that computes the internal seeds, if any, in the run.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population ({@code internal}
+   *     for seeds computed by the tool)
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param algorithmType search algorithm
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   * @param objectives objectives that are optimised
+   * @param repairSeeds whether the gaps inside helices are moved out of the seeds
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      AlgorithmType algorithmType,
+      MappingPolicy mappingPolicy,
+      float lddtCutoff,
+      int progressInterval,
+      ObjectiveSet objectives,
+      boolean repairSeeds) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        algorithmType,
+        mappingPolicy,
+        lddtCutoff,
+        progressInterval,
+        objectives,
+        repairSeeds,
+        null);
+  }
+
+  /**
+   * Creates a configuration whose seed alignments are used as they are.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population ({@code internal}
+   *     for seeds computed by the tool)
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param algorithmType search algorithm
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   * @param objectives objectives that are optimised
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      AlgorithmType algorithmType,
+      MappingPolicy mappingPolicy,
+      float lddtCutoff,
+      int progressInterval,
+      ObjectiveSet objectives) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        algorithmType,
+        mappingPolicy,
+        lddtCutoff,
+        progressInterval,
+        objectives,
+        false,
+        null);
+  }
+
+  /**
+   * Creates a configuration with the published objectives, SOPwTP and lDDT.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param algorithmType search algorithm
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      AlgorithmType algorithmType,
+      MappingPolicy mappingPolicy,
+      float lddtCutoff,
+      int progressInterval) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        algorithmType,
+        mappingPolicy,
+        lddtCutoff,
+        progressInterval,
+        ObjectiveSet.SOPWTP_LDDT);
+  }
+
+  /**
+   * Creates a configuration that uses NSGA-II, the published algorithm.
+   *
+   * @param dataRoot root of the dataset
+   * @param dataset dataset name
+   * @param seedMethods tools whose precomputed alignments seed the population
+   * @param runDirectory output directory of the run; must not exist
+   * @param randomSeed seed of the global jMetal generator
+   * @param algorithm algorithm parameters
+   * @param mappingPolicy policy for mapping sequences onto structures
+   * @param lddtCutoff inclusion radius of the structural objective, in Å
+   * @param progressInterval evaluations between progress records
+   */
+  public RunConfiguration(
+      Path dataRoot,
+      String dataset,
+      List<String> seedMethods,
+      Path runDirectory,
+      long randomSeed,
+      AlgorithmConfiguration algorithm,
+      MappingPolicy mappingPolicy,
+      float lddtCutoff,
+      int progressInterval) {
+    this(
+        dataRoot,
+        dataset,
+        seedMethods,
+        runDirectory,
+        randomSeed,
+        algorithm,
+        AlgorithmType.NSGA_II,
+        mappingPolicy,
+        lddtCutoff,
+        progressInterval);
+  }
+
+  /** Returns the 3-line topology file of the dataset. */
+  public Path topologyFile() {
+    return dataRoot.resolve("sequences").resolve("tmregions")
+        .resolve(dataset + "_predicted_topologies.3line");
+  }
+
+  /** Returns the directory with the distance matrices of the dataset. */
+  public Path distanceDirectory() {
+    return dataRoot.resolve("distances").resolve(dataset);
+  }
+
+  /** Returns the directory with the AlphaFold PDB files of the dataset. */
+  public Path pdbDirectory() {
+    return dataRoot.resolve("alphafold_pdb").resolve(dataset);
+  }
+
+  /** Returns the directory with the precomputed alignments of the dataset. */
+  public Path precomputedDirectory() {
+    return dataRoot.resolve("precomputed").resolve(dataset);
+  }
+
+  /** Returns the configuration as an ordered map for JSON output. */
+  public Map<String, Object> toMap() {
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("dataRoot", dataRoot.toAbsolutePath().toString());
+    map.put("dataset", dataset);
+    map.put("seedMethods", seedMethods);
+    map.put("repairSeeds", repairSeeds);
+    map.put(
+        "internalSeedsDirectory",
+        internalSeedsDirectory == null ? null : internalSeedsDirectory.toAbsolutePath().toString());
+    map.put("runDirectory", runDirectory.toAbsolutePath().toString());
+    map.put("randomSeed", randomSeed);
+    map.put("algorithmType", algorithmType);
+    map.put("objectives", objectives);
+    map.put("maxEvaluations", algorithm.maxTime() == null ? algorithm.maxEvaluations() : null);
+    map.put(
+        "maxTimeSeconds",
+        algorithm.maxTime() == null ? null : algorithm.maxTime().toMillis() / 1000.0);
+    map.put("populationSize", algorithm.populationSize());
+    map.put("offspringPopulationSize", algorithm.offspringPopulationSize());
+    map.put("crossoverProbability", algorithm.crossoverProbability());
+    map.put("mutationProbability", algorithm.mutationProbability());
+    map.put("mutationType", algorithm.mutationType());
+    map.put("configuration", algorithm.configuration());
+    map.put("threads", algorithm.threads());
+    map.put("mappingPolicy", mappingPolicy);
+    map.put("lddtCutoff", (double) lddtCutoff);
+    map.put("progressInterval", progressInterval);
+    return map;
+  }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Builds the directory (and a zip of it) of a TM-M2StructAlign campaign to run on a Slurm
+# Builds the directory (and a zip of it) of a Transept campaign to run on a Slurm
 # cluster, with only what it needs (clusters have disk quotas):
 #
 #   the jar with dependencies, and the commits of the tool, jMetal and Evolver it was built from
@@ -49,12 +49,14 @@ done
 mkdir -p "$OUTPUT/source" "$OUTPUT/scripts"
 cp "$TOOL/target/$JAR" "$OUTPUT/"
 git -C "$TOOL" rev-parse HEAD > "$OUTPUT/TOOL_COMMIT"
-git -C "$JMETAL_REPOSITORY" rev-parse HEAD > "$OUTPUT/JMETAL_COMMIT"
-git -C "$EVOLVER_REPOSITORY" rev-parse HEAD > "$OUTPUT/EVOLVER_COMMIT"
+git -C "$JMETAL_REPOSITORY" rev-parse HEAD > "$OUTPUT/JMETAL_COMMIT" 2> /dev/null \
+  || echo unknown > "$OUTPUT/JMETAL_COMMIT"
+git -C "$EVOLVER_REPOSITORY" rev-parse HEAD > "$OUTPUT/EVOLVER_COMMIT" 2> /dev/null \
+  || echo unknown > "$OUTPUT/EVOLVER_COMMIT"
 git -C "$DATASET_REPOSITORY" describe --tags --always --dirty > "$OUTPUT/DATASET_VERSION"
 COMMIT=$(cut -c1-9 "$OUTPUT/TOOL_COMMIT")
-git -C "$TOOL" archive --format=tar.gz --prefix="TM-M2StructAlign-$COMMIT/" \
-  -o "$OUTPUT/source/TM-M2StructAlign-$COMMIT.tar.gz" HEAD
+git -C "$TOOL" archive --format=tar.gz --prefix="Transept-$COMMIT/" \
+  -o "$OUTPUT/source/Transept-core-$COMMIT.tar.gz" HEAD
 
 cp "$TEMPLATE"/cells.tsv "$TEMPLATE"/configurations.tsv "$TEMPLATE"/campaign.env \
   "$TEMPLATE"/README.md "$OUTPUT/"

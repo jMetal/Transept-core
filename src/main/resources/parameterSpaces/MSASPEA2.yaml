@@ -1,4 +1,4 @@
-# Parameter space of a SPEA2-style algorithm for multiple sequence alignment (TM-M2StructAlign):
+# Parameter space of a SPEA2-style algorithm for multiple sequence alignment (Transept):
 # Evolver's RDEMOEA with configurable ranking and density estimator. The default configuration is
 # SPEA2 (strength ranking, k-nearest-neighbour density, sequential truncation). Every operator
 # keeps transmembrane helices intact. The population size is given with --population-size.

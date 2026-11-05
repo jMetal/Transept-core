@@ -1,5 +1,5 @@
 # Parameter space of the generational genetic algorithm for the single-objective formulation of
-# multiple sequence alignment (TM-M2StructAlign: --objectives LDDT). Every operator keeps
+# multiple sequence alignment (Transept: --objectives LDDT). Every operator keeps
 # transmembrane helices intact. The population size is given with --population-size.
 # muCommaLambda needs more offspring than the population size.
 createInitialSolutions:
