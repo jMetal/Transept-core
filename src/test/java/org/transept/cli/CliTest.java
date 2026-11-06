@@ -40,6 +40,81 @@ class CliTest {
   }
 
   @Nested
+  @DisplayName("When using the score command")
+  class Score {
+
+    private Path write(String name, String content) throws IOException {
+      Path path = directory.resolve(name);
+      Files.createDirectories(path.getParent());
+      Files.writeString(path, content);
+      return path;
+    }
+
+    @Test
+    @DisplayName("given alignments and a reference, when scoring, then a report is written")
+    void givenAlignments_whenScoring_thenReportIsWritten() throws IOException {
+      // Arrange
+      Path reference = write("reference.fasta", ">a\nACD\n>b\nACD\n");
+      Path topology = write("topology.3line", ">a\nACD\nMMO\n>b\nACD\nMMO\n");
+      write("alignments/mafft_x.fasta", ">a\nACD\n>b\nACD\n");
+      Path report = directory.resolve("report.csv");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "score",
+              "--reference", reference.toString(),
+              "--topology", topology.toString(),
+              "--msa-root", directory.resolve("alignments").toString(),
+              "--glob", "*.fasta",
+              "--output", report.toString());
+
+      // Assert
+      assertEquals(0, status);
+      assertTrue(Files.readString(report).contains("mafft_x.fasta"));
+    }
+
+    @Test
+    @DisplayName("given no alignment can be compared, when scoring, then the status is one")
+    void givenOnlyWrongAlignments_whenScoring_thenStatusIsOne() throws IOException {
+      // Arrange
+      Path reference = write("reference.fasta", ">a\nACD\n>b\nACD\n");
+      Path topology = write("topology.3line", ">a\nACD\nMMO\n>b\nACD\nMMO\n");
+      write("alignments/MSA0.fasta", ">a\nACD\n>other\nACD\n");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "score",
+              "--reference", reference.toString(),
+              "--topology", topology.toString(),
+              "--msa-root", directory.resolve("alignments").toString(),
+              "--output", directory.resolve("report.csv").toString());
+
+      // Assert
+      assertEquals(1, status);
+    }
+
+    @Test
+    @DisplayName("given a missing reference, when scoring, then a usage error is reported")
+    void givenMissingReference_whenScoring_thenUsageErrorIsReported() throws IOException {
+      // Arrange
+      Path topology = write("topology.3line", ">a\nACD\nMMO\n");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "score",
+              "--reference", directory.resolve("gone.fasta").toString(),
+              "--topology", topology.toString(),
+              "--msa-root", directory.toString());
+
+      // Assert
+      assertEquals(2, status);
+    }
+  }
+
+  @Nested
   @DisplayName("When using the run command")
   class Run {
 
