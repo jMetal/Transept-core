@@ -159,7 +159,7 @@ commands and their expected output.
 - Modify files in `Dataset_Structural_GPCRs` that belong to the published v1.0.0 snapshot without
   an explicit request. Data changes go to a new version (v1.1.0).
 - Commit large data or run outputs to this repository.
-- Push, merge to `main`, or open PRs unless asked.
+- Push, merge `develop` into `main`, or open PRs unless asked (the working branch is `develop`).
 - Change objective definitions, operator behavior, or default hyperparameters silently: they
   determine published results. Propose the change first.
 ## 9. Graphical user interface

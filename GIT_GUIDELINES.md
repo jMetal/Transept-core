@@ -2,6 +2,16 @@
 
 This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
+## Branches
+
+| Branch | Role |
+|------------|------------------------------------------------------|
+| `develop`  | Default working branch. Development branches start here and are merged back into it |
+| `main`     | Published state. It only receives `develop`, on request |
+
+- Work on `develop` or on a development branch started from it; never commit directly to `main`.
+- Synchronise `develop` with `main`, and push both, only when explicitly requested.
+
 ## Message format
 
 ```
