@@ -6,7 +6,7 @@ Usage:
                          [--jar target/transept-core-0.1.0-jar-with-dependencies.jar]
 
 For every run under <output-root>/ejecuciones/<dataset>/, the script evaluates its alignments
-against the GPCRdb reference with EvaluationMain (once; the reports are kept next to the output
+against the GPCRdb reference with the `score` command (once; the reports are kept next to the output
 file) and applies two rules that do not look at the reference:
 
 - R1: the alignment with the best lDDT (ties: best SOPwTP, if optimised, then the first row);
@@ -88,7 +88,7 @@ def evaluate(run: Path, report: Path, jar: str, data_root: Path, dataset: str) -
     if not report.is_file():
         subprocess.run(
             [
-                "java", "-cp", jar, "org.transept.evaluation.EvaluationMain",
+                "java", "-jar", jar, "score",
                 "--reference", str(data_root / "reference_alignments" / f"{dataset}.fasta"),
                 "--topology",
                 str(data_root / "sequences" / "tmregions"

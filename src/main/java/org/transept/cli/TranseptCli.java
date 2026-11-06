@@ -15,7 +15,11 @@ import picocli.CommandLine.Command;
     versionProvider = VersionProvider.class,
     description = "Structure-guided multiobjective alignment of transmembrane proteins.",
     subcommands = {
-      RunCommand.class, BaselineCommand.class, AlgorithmsCommand.class, SeedsCommand.class
+      RunCommand.class,
+      BaselineCommand.class,
+      AlgorithmsCommand.class,
+      SeedsCommand.class,
+      ScoreCommand.class
     })
 public final class TranseptCli {
 

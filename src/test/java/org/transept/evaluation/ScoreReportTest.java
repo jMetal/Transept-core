@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class EvaluationMainTest {
+class ScoreReportTest {
   @TempDir
   Path tempDirectory;
 
@@ -20,7 +20,7 @@ class EvaluationMainTest {
     Files.writeString(seed1.resolve("MSA1.fasta"), ">a\nA\n");
     Files.writeString(seed1.resolve("notes.txt"), "ignored");
 
-    List<Path> result = EvaluationMain.discoverAlignments(tempDirectory, "MSA*.fasta");
+    List<Path> result = ScoreReport.discoverAlignments(tempDirectory, "MSA*.fasta");
 
     assertEquals(List.of(
         seed1.resolve("MSA1.fasta"),
