@@ -9,7 +9,10 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar <command> [option
 | Command | Purpose |
 | --- | --- |
 | `run` | Align one dataset and write the final population |
+| `seeds` | Compute the internal seeds of datasets in advance |
+| `algorithms` | Print the algorithms available, as JSON |
 | `baseline` | Score the precomputed alignments of one or more datasets |
+| `score` | Compare the alignments of a directory with a reference alignment |
 
 `--help` prints the options of a command and `--version` the version. Options can be stored in a
 file, one per line, and passed as `@file.args`.
@@ -119,8 +122,7 @@ another tool, because the population needs at least two distinct seeds.
 
 Prints, as JSON, every algorithm of `run --algorithm` with the numbers of objectives it accepts
 (`minObjectives`, `maxObjectives`), its parameter space (`null` if it is not configurable) and
-whether it is steady state, asynchronous and uses the crossover. The studio reads it instead of
-keeping its own copy.
+whether it is steady state, asynchronous and uses the crossover.
 
 ```bash
 java -jar target/transept-core-0.1.0-jar-with-dependencies.jar algorithms
@@ -144,14 +146,15 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar baseline \
 | `--output` | standard output | CSV file to write (see [outputs](outputs.md)) |
 | `--mapping-policy` | as in `run` | |
 
-## Comparison with the reference alignments
+## `score`
 
-`EvaluationMain` compares every alignment of a results tree with a GPCRdb reference alignment
-(see [metrics](metrics.md)). It is not a subcommand of the JAR's command line yet:
+Compares every alignment of a results tree with a reference alignment, such as those of GPCRdb
+([metrics](metrics.md)). An alignment that cannot be compared does not stop the report: its row
+says why ([outputs](outputs.md#evaluation-output)). The status is 0 if at least one alignment was
+compared.
 
 ```bash
-java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
-  org.transept.evaluation.EvaluationMain \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar score \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root results/ejecuciones/classF \

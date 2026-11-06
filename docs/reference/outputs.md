@@ -77,7 +77,8 @@ the problem in `message`.
 
 ## Evaluation output
 
-`EvaluationMain` writes one row per alignment with the columns `relative_path`, `run_id`,
-`msa_file`, `sequence_count`, the precision, recall and F1 of all pairs and of TM pairs, the TM-gap
-rate, and the raw counts behind them (`reference_pairs`, `test_pairs`, `correct_pairs`, the same
-for TM pairs, `tm_gap_count`, `tm_gap_opportunities`). See [metrics](metrics.md).
+`score` writes one row per alignment with the columns `relative_path`, `run_id`, `msa_file`,
+`sequence_count`, the precision, recall and F1 of all pairs and of TM pairs, the TM-gap rate, the raw
+counts behind them (`reference_pairs`, `test_pairs`, `correct_pairs`, the same for TM pairs,
+`tm_gap_count`, `tm_gap_opportunities`), `status` and `message`. `status` is `ok` or `failed`; failed
+rows leave the metrics empty and explain the problem in `message`. See [metrics](metrics.md).

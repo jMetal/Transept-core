@@ -89,7 +89,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `evolver` | Algorithms built with Evolver from a parameter space (`src/main/resources/parameterSpaces/*.yaml`) and a default configuration (`defaultConfigurations/*Default.txt`): `MsaNsga2`, `MsaSpea2`, `MsaGeneticAlgorithm`, their parameters (`MsaParameterFactory`, `Msa*Parameter`), `MsaComponents`, `MsaOperators`, `MsaConfigurations`, `MsaRunContext` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
 | `cli` | `run` and `baseline` commands |
-| `evaluation` | Comparison with GPCRdb reference alignments (`EvaluationMain`) |
+| `evaluation` | Comparison with GPCRdb reference alignments (`ScoreReport`, command `score`) |
 
 ## 5. Conventions
 

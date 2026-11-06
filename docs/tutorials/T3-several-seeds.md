@@ -122,8 +122,7 @@ compromise towards the best-SOPwTP end of the front.
 Evaluate them against the GPCRdb reference as in [T4](T4-choosing-and-evaluating.md):
 
 ```bash
-java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
-  org.transept.evaluation.EvaluationMain \
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar score \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root results/analysis_classF/selected_alignments --glob '*.fasta' \
