@@ -8,6 +8,10 @@
 | **Prerequisites** | [T1. First run in five minutes](T1-first-run.md), Python 3 with NumPy and Biopython |
 | **Checked with** | A copy of `classF` built with the steps below; the script of Step 3 reproduces the benchmark matrices to 0.0001 Å |
 
+To add your proteins from the graphical interface, without preparing these files by hand, see the
+tutorial [Add your own proteins](https://github.com/jMetal/Transept/blob/main/docs/tutorials/add-your-own-proteins.md)
+of Transept.
+
 Transept reads its inputs from a directory with the layout of the benchmark
 ([Dataset_Structural_GPCRs](https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs)).
 This tutorial explains which files a dataset needs, how to produce them for your own proteins,
@@ -23,10 +27,11 @@ MyRoot/
 ├── distances/mydata/<id>_D.csv                             distance matrix of each protein
 ├── distances/mydata/<id>_idx.csv                           residue numbers of its rows
 ├── alphafold_pdb/mydata/<id>.pdb                           structure models (recommended)
-└── precomputed/mydata/<tool>_mydata.fasta                  seed alignments (at least one)
+└── precomputed/mydata/<tool>_mydata.fasta                  seed alignments (optional)
 ```
 
-Then `--data-root MyRoot --dataset mydata --seeds <tool>,...` runs on it. `<id>` is the identifier
+Then `--data-root MyRoot --dataset mydata` runs on it, with the internal seeds or with
+`--seeds <tool>,...`. `<id>` is the identifier
 of the protein in the topology file; it must be used verbatim in the structural file names.
 
 ## Step 2: sequences and topology
@@ -112,7 +117,9 @@ them with 100 % identity.
 
 ## Step 5: seed alignments
 
-Put one or more alignments of **all** the proteins of the topology file in
+The tool computes its own seeds with `--seeds internal` (the default), so this step is optional.
+To use the alignments of other tools, put one or more alignments of **all** the proteins of the
+topology file in
 `precomputed/mydata/<tool>_mydata.fasta`, in aligned FASTA. Any aligner works (MAFFT, Clustal
 Omega, MUSCLE, T-Coffee, ...). The headers are matched to the identifiers of the topology file
 after normalisation:
