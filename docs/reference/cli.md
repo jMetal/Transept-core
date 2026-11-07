@@ -87,6 +87,8 @@ the random searches accept any number.
 | `TM_SAFE_GAP_SHIFT` (default) | Yes | Moves a gap run of one row to a position that does not split a helix |
 | `MERGE_GAP_RUNS` | Yes | Joins two consecutive gap runs of one row |
 | `RANDOM_CHOICE` | Yes | `TM_SAFE_GAP_SHIFT` or `MERGE_GAP_RUNS`, chosen uniformly each time |
+| `TM_SAFE_BLOCK_SHIFT` | Yes | Moves a block of gaps shared by several rows one column (by default) left or right |
+| `TM_SAFE_WINDOW_REALIGN` | Yes | Realigns the residues of one row against the others inside a window of 50 columns (by default) |
 
 The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes every operator.
 

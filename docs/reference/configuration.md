@@ -44,9 +44,11 @@ the space are errors.
 | `crossover` | `tmSafeSinglePoint` | `tmSafeSinglePoint` | Single-point crossover that never cuts a transmembrane helix |
 | `crossoverProbability` | 0.0–1.0 | 0.8 | Probability of crossing two parents |
 | `cutCandidates` | integer, 1–64 | 1 | Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random |
-| `mutation` | `tmSafeGapShift`, `mergeGapRuns`, `randomChoice` | `tmSafeGapShift` | The mutations of `--mutation` ([cli](cli.md)) |
+| `mutation` | `tmSafeGapShift`, `mergeGapRuns`, `randomChoice`, `tmSafeBlockShift`, `tmSafeWindowRealign` | `tmSafeGapShift` | The mutations of `--mutation` ([cli](cli.md)) |
 | `mutationProbability` | 0.0–1.0 | 0.2 | Probability of mutating a child |
 | `maxShift` | integer, 0–200 | 0 | With `tmSafeGapShift` or `randomChoice`: largest number of columns a gap run can move; 0 is no limit |
+| `blockShift` | integer, 1–20 | 1 | With `tmSafeBlockShift`: largest number of columns a block of gaps can move |
+| `realignWindow` | integer, 10–500 | 50 | With `tmSafeWindowRealign`: number of columns of the window that is realigned |
 | `selection` | `tournament`, `random` | `tournament` | How parents are chosen |
 | `selectionTournamentSize` | integer, 2–10 | 2 | With `tournament`: solutions compared per choice (by rank, then crowding distance) |
 

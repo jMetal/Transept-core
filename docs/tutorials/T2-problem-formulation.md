@@ -351,6 +351,33 @@ the run of `p2` at column 10 moves to column 2.
 **`RANDOM_CHOICE`** (class `RandomChoiceMutation`) applies `TM_SAFE_GAP_SHIFT` or
 `MERGE_GAP_RUNS`, chosen uniformly at random each time the child is mutated.
 
+**`TM_SAFE_BLOCK_SHIFT`** (class `TmSafeBlockShiftMutation`) moves a vertical block of gaps in
+several proteins at once, based on the block shuffling of SAGA (Notredame and Higgins, 1996):
+
+1. Choose at random a protein that has gaps, and one of its gap runs; its columns define the block.
+2. The other proteins with gaps in all those columns move with it: all of them half of the time,
+   otherwise a random subset, so that a block can also be split.
+3. Move the block left or right by up to `blockShift` columns (1 by default). A protein where the
+   new position would separate two transmembrane residues stays where it is. The length of the
+   alignment does not change.
+
+Unlike `TM_SAFE_GAP_SHIFT`, the proteins that move keep their alignment with each other, so the
+change is small and local.
+
+**`TM_SAFE_WINDOW_REALIGN`** (class `TmSafeWindowRealignMutation`) realigns one protein inside a
+window of columns, in the spirit of the local realignment of iterative aligners:
+
+1. Choose at random a protein that has gaps, one of its gap runs, and a window of `realignWindow`
+   columns (50 by default) that contains the run.
+2. Place the residues of that protein inside the window again, by dynamic programming, against the
+   other proteins, keeping their order: the score is the substitution score (PHAT inside the membrane, BLOSUM62 outside)
+   and the gap penalties of SOPwTP. A placement that would separate two transmembrane residues is
+   not allowed. The structures are not used.
+3. The columns outside the window, the other proteins and the length of the alignment do not change.
+
+`blockShift` and `realignWindow` are set in a configuration ([configuration](../reference/configuration.md));
+with `--mutation`, the defaults are used. `RANDOM_CHOICE` does not include these two mutations.
+
 **How much a mutation changes an alignment** matters as much as what it does. Applied once to each
 seed alignment of `classF`:
 
