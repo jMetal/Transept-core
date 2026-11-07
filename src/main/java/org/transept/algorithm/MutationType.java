@@ -21,5 +21,10 @@ public enum MutationType {
    * Moves a block of gaps a few columns in several rows at once ({@code
    * TmSafeBlockShiftMutation}).
    */
-  TM_SAFE_BLOCK_SHIFT
+  TM_SAFE_BLOCK_SHIFT,
+  /**
+   * Realigns one row inside a window of columns against the others ({@code
+   * TmSafeWindowRealignMutation}).
+   */
+  TM_SAFE_WINDOW_REALIGN
 }

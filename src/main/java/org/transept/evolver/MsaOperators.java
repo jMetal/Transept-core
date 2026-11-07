@@ -8,6 +8,7 @@ import org.transept.operator.RandomSource;
 import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
+import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.structure.ProteinStructures;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
@@ -30,12 +31,20 @@ public final class MsaOperators {
   /** Moves a block of gaps a few columns in several rows at once. */
   public static final String TM_SAFE_BLOCK_SHIFT = "tmSafeBlockShift";
 
+  /** Realigns one row inside a window of columns against the others. */
+  public static final String TM_SAFE_WINDOW_REALIGN = "tmSafeWindowRealign";
+
   /** Crossover names, in the order of the parameter spaces. */
   public static final List<String> CROSSOVERS = List.of(TM_SAFE_SINGLE_POINT);
 
   /** Mutation names, in the order of the parameter spaces. */
   public static final List<String> MUTATIONS =
-      List.of(TM_SAFE_GAP_SHIFT, MERGE_GAP_RUNS, RANDOM_CHOICE, TM_SAFE_BLOCK_SHIFT);
+      List.of(
+          TM_SAFE_GAP_SHIFT,
+          MERGE_GAP_RUNS,
+          RANDOM_CHOICE,
+          TM_SAFE_BLOCK_SHIFT,
+          TM_SAFE_WINDOW_REALIGN);
 
   private MsaOperators() {}
 
@@ -77,7 +86,8 @@ public final class MsaOperators {
       ProteinStructures structures,
       RandomSource random) {
     int blockShift = TmSafeBlockShiftMutation.DEFAULT_MAX_SHIFT;
-    return mutation(name, probability, maxShift, blockShift, structures, random);
+    int window = TmSafeWindowRealignMutation.DEFAULT_WINDOW;
+    return mutation(name, probability, maxShift, blockShift, window, structures, random);
   }
 
   /**
@@ -88,6 +98,7 @@ public final class MsaOperators {
    * @param maxShift largest number of columns a gap run can move; {@link
    *     TmSafeGapShiftMutation#UNLIMITED_SHIFT} for no limit
    * @param blockShift largest number of columns a block of gaps can move
+   * @param realignWindow number of columns of the window of the realignment
    * @param structures structures used to recognise residues without structural data
    * @param random source of random numbers
    * @return the mutation
@@ -98,6 +109,7 @@ public final class MsaOperators {
       double probability,
       int maxShift,
       int blockShift,
+      int realignWindow,
       ProteinStructures structures,
       RandomSource random) {
     return switch (name) {
@@ -114,6 +126,8 @@ public final class MsaOperators {
               1,
               random);
       case TM_SAFE_BLOCK_SHIFT -> new TmSafeBlockShiftMutation(probability, blockShift, random);
+      case TM_SAFE_WINDOW_REALIGN ->
+          new TmSafeWindowRealignMutation(probability, realignWindow, random);
       default ->
           throw new IllegalArgumentException("Unknown mutation: " + name + "; valid: " + MUTATIONS);
     };

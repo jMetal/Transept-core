@@ -19,6 +19,7 @@ import org.transept.operator.RandomSource;
 import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
+import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.problem.StructuralMsaProblem;
 import org.transept.structure.ProteinStructures;
 import org.uma.evolver.algorithm.BaseLevelAlgorithm;
@@ -258,6 +259,7 @@ public final class AlgorithmFactory {
       case MERGE_GAP_RUNS -> MsaOperators.MERGE_GAP_RUNS;
       case RANDOM_CHOICE -> MsaOperators.RANDOM_CHOICE;
       case TM_SAFE_BLOCK_SHIFT -> MsaOperators.TM_SAFE_BLOCK_SHIFT;
+      case TM_SAFE_WINDOW_REALIGN -> MsaOperators.TM_SAFE_WINDOW_REALIGN;
     };
   }
 
@@ -391,6 +393,9 @@ public final class AlgorithmFactory {
       case TM_SAFE_BLOCK_SHIFT ->
           new TmSafeBlockShiftMutation(
               probability, TmSafeBlockShiftMutation.DEFAULT_MAX_SHIFT, random);
+      case TM_SAFE_WINDOW_REALIGN ->
+          new TmSafeWindowRealignMutation(
+              probability, TmSafeWindowRealignMutation.DEFAULT_WINDOW, random);
       case RANDOM_CHOICE ->
           new RandomChoiceMutation(
               probability,

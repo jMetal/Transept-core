@@ -50,6 +50,11 @@ variation:
                 blockShift:
                   type: integer
                   range: [1, 20]
+            tmSafeWindowRealign:
+              conditionalParameters:
+                realignWindow:
+                  type: integer
+                  range: [10, 500]
 #
 selection:
   type: categorical

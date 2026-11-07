@@ -5,6 +5,7 @@ import org.transept.alignment.MsaSolution;
 import org.transept.operator.RandomSource;
 import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
+import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.structure.ProteinStructures;
 import org.uma.evolver.parameter.ConditionalParameter;
 import org.uma.evolver.parameter.catalogue.mutationparameter.MutationParameter;
@@ -12,9 +13,9 @@ import org.uma.jmetal.operator.mutation.MutationOperator;
 
 /**
  * Mutation of a parameter space, with the global sub-parameter {@code mutationProbability} and, for
- * the mutations that have them, the conditional {@code maxShift} and {@code blockShift}. The
- * algorithm gives the structures and the source of random numbers as the non-configurable
- * sub-parameters {@code structures} and {@code random}.
+ * the mutations that have them, the conditional {@code maxShift}, {@code blockShift} and {@code
+ * realignWindow}. The algorithm gives the structures and the source of random numbers as the
+ * non-configurable sub-parameters {@code structures} and {@code random}.
  */
 public class MsaMutationParameter extends MutationParameter<MsaSolution> {
 
@@ -57,6 +58,7 @@ public class MsaMutationParameter extends MutationParameter<MsaSolution> {
         probability,
         conditionalValue("maxShift", TmSafeGapShiftMutation.UNLIMITED_SHIFT),
         conditionalValue("blockShift", TmSafeBlockShiftMutation.DEFAULT_MAX_SHIFT),
+        conditionalValue("realignWindow", TmSafeWindowRealignMutation.DEFAULT_WINDOW),
         (ProteinStructures) nonConfigurableSubParameters().get("structures"),
         (RandomSource) nonConfigurableSubParameters().get("random"));
   }

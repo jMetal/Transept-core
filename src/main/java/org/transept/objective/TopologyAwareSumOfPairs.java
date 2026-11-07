@@ -22,6 +22,12 @@ public final class TopologyAwareSumOfPairs implements Objective {
   private static final int GAP_IN_FIRST = 1;
   private static final int GAP_IN_SECOND = 2;
 
+  /** Gap penalties of the published experiments when the gap or its partner is transmembrane. */
+  public static final GapPenalties TRANSMEMBRANE_GAPS = new GapPenalties(8.0, 3.0);
+
+  /** Gap penalties of the published experiments otherwise. */
+  public static final GapPenalties GENERAL_GAPS = new GapPenalties(3.0, 1.0);
+
   private final SubstitutionMatrix transmembraneMatrix;
   private final SubstitutionMatrix generalMatrix;
   private final GapPenalties transmembraneGaps;
@@ -51,8 +57,8 @@ public final class TopologyAwareSumOfPairs implements Objective {
     return new TopologyAwareSumOfPairs(
         SubstitutionMatrix.PHAT,
         SubstitutionMatrix.BLOSUM62,
-        new GapPenalties(8.0, 3.0),
-        new GapPenalties(3.0, 1.0));
+        TRANSMEMBRANE_GAPS,
+        GENERAL_GAPS);
   }
 
   @Override
