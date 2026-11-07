@@ -11,8 +11,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.transept.model.ProteinSet;
 import org.transept.operator.MergeAdjacentGapRunsMutation;
 import org.transept.operator.RandomChoiceMutation;
+import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
+import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.testing.Alignments;
 import org.transept.testing.SeededRandom;
 import org.uma.evolver.parameter.type.CategoricalParameter;
@@ -52,6 +54,22 @@ class MsaParametersTest {
         RandomChoiceMutation.class,
         MsaOperators.mutation(
             "randomChoice", 0.5, 4, Alignments.unstructured(proteins), new SeededRandom(1)));
+  }
+
+  @Test
+  @DisplayName("given the new mutation names, when built, then their operators are returned")
+  void givenNewMutationNames_whenBuilt_thenTheirOperatorsAreReturned() {
+    // Arrange
+    ProteinSet proteins = Alignments.proteins("ACDEF:OOMMM", "ACDE:OOMM");
+    var structures = Alignments.unstructured(proteins);
+
+    // Act & Assert
+    assertInstanceOf(
+        TmSafeBlockShiftMutation.class,
+        MsaOperators.mutation("tmSafeBlockShift", 0.5, 0, structures, new SeededRandom(1)));
+    assertInstanceOf(
+        TmSafeWindowRealignMutation.class,
+        MsaOperators.mutation("tmSafeWindowRealign", 0.5, 0, structures, new SeededRandom(1)));
   }
 
   @Test
