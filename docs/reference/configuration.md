@@ -43,8 +43,10 @@ the space are errors.
 | `variation` | `crossoverAndMutationVariation` | | Crossover, then mutation |
 | `crossover` | `tmSafeSinglePoint` | `tmSafeSinglePoint` | Single-point crossover that never cuts a transmembrane helix |
 | `crossoverProbability` | 0.0–1.0 | 0.8 | Probability of crossing two parents |
+| `cutCandidates` | integer, 1–64 | 1 | Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random |
 | `mutation` | `tmSafeGapShift`, `mergeGapRuns`, `randomChoice` | `tmSafeGapShift` | The mutations of `--mutation` ([cli](cli.md)) |
 | `mutationProbability` | 0.0–1.0 | 0.2 | Probability of mutating a child |
+| `maxShift` | integer, 0–200 | 0 | Largest number of columns `tmSafeGapShift` (also within `randomChoice`) can move a gap run; 0 is no limit |
 | `selection` | `tournament`, `random` | `tournament` | How parents are chosen |
 | `selectionTournamentSize` | integer, 2–10 | 2 | With `tournament`: solutions compared per choice (by rank, then crowding distance) |
 
@@ -54,7 +56,7 @@ published one; with it, the results are identical to those of earlier versions w
 seed.
 
 The operator options of the command line (`--mutation`, `--crossover-probability`,
-`--mutation-probability`) set the same parameters; give each parameter in one place only.
+`--mutation-probability`, `--max-shift`, `--cut-candidates`) set the same parameters; give each parameter in one place only.
 
 ## SPEA2
 

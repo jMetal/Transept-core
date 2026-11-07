@@ -264,6 +264,12 @@ second parent, where they start at column 3 instead of column 2 as for the other
 of padding keeps them in register. The trailing columns that are gaps in every row disappear when
 the child is evaluated.
 
+**How much padding a cut needs varies a lot.** With few gaps it can be zero, but in alignments with
+long variable regions a random cut can displace a block of the second parent by hundreds of columns,
+which also makes alignments grow. With `--cut-candidates k`, the crossover draws `k` valid cuts and
+uses the one that adds the fewest gaps. The default, 1, is a cut at random. Preferring those cuts
+does not always help, because it also explores less: compare both on your data.
+
 A two-point variant was also evaluated; it did not improve the results and was removed.
 
 ## Step 9: mutation
@@ -328,6 +334,9 @@ protein:
    row: 0.60 a gap, 0.95 a residue without structure, 0.90 any other residue. After 60
    rejections, a valid position chosen uniformly at random is used.
 3. Insert the run at the accepted position; the length of the alignment does not change.
+
+By default the new position can be anywhere in the row, so a run can jump over many residues, even a
+whole helix. `--max-shift n` limits a move to `n` columns.
 
 In the example, `p2` and `p3` change. The original implementation used a variant that only
 *discouraged* positions inside helices (acceptance 0.05), so a run could still break a helix; it

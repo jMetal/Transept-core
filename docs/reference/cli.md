@@ -50,13 +50,15 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
 | `--population-size` | 100 | Population size; also the offspring size (unless the configuration sets it) and, for PAES, the archive size |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
 | `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
+| `--cut-candidates` | 1 | Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random. Also applies to the crossover that fills the initial population |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
+| `--max-shift` | 0 | Largest number of columns the mutation can move a gap run (`TM_SAFE_GAP_SHIFT` and `RANDOM_CHOICE`); 0 is no limit |
 | `--configuration` | (none) | NSGA-II, SPEA2 and the GA: configuration from their parameter space, `--parameter value ...` ([configuration](configuration.md)). Unset parameters keep their default |
 | `--configuration-file` | (none) | The same, read from the first non-blank line of a file |
 
-`--mutation`, `--crossover-probability` and `--mutation-probability` set the corresponding
-parameters of the configuration of the configurable algorithms; giving one of them and the same parameter in
+`--mutation`, `--crossover-probability`, `--mutation-probability`, `--max-shift` and
+`--cut-candidates` set the corresponding parameters of the configuration of the configurable algorithms; giving one of them and the same parameter in
 `--configuration` is an error.
 
 The initial population holds the distinct seeds and, for the rest, distinct crossover children
