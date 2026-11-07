@@ -33,13 +33,18 @@ variation:
             mutationProbability:
               type: double
               range: [0.0, 1.0]
-            maxShift:
-              type: integer
-              range: [0, 200]
           values:
             tmSafeGapShift:
+              conditionalParameters:
+                maxShift:
+                  type: integer
+                  range: [0, 200]
             mergeGapRuns:
             randomChoice:
+              conditionalParameters:
+                maxShift:
+                  type: integer
+                  range: [0, 200]
 #
 selection:
   type: categorical

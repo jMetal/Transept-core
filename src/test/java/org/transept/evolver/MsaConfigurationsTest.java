@@ -49,6 +49,20 @@ class MsaConfigurationsTest {
   class NsgaTwo {
 
     @Test
+    @DisplayName("given the mutations, when read, then only those that shift gaps have a limit")
+    void givenMutations_whenRead_thenOnlyThoseThatShiftGapsHaveLimit() {
+      // Act
+      var mutation = MsaConfigurations.parameterSpace(MsaNsga2.PARAMETER_SPACE).get("mutation");
+
+      // Assert: tmSafeGapShift and randomChoice, but not mergeGapRuns
+      assertEquals(
+          2,
+          mutation.conditionalParameters().stream()
+              .filter(conditional -> conditional.parameter().name().equals("maxShift"))
+              .count());
+    }
+
+    @Test
     @DisplayName("given the default configuration, when read, then it is the published one")
     void givenDefaultConfiguration_whenRead_thenItIsThePublishedOne() {
       // Act
