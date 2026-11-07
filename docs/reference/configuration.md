@@ -46,7 +46,7 @@ the space are errors.
 | `cutCandidates` | integer, 1–64 | 1 | Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random |
 | `mutation` | `tmSafeGapShift`, `mergeGapRuns`, `randomChoice` | `tmSafeGapShift` | The mutations of `--mutation` ([cli](cli.md)) |
 | `mutationProbability` | 0.0–1.0 | 0.2 | Probability of mutating a child |
-| `maxShift` | integer, 0–200 | 0 | Largest number of columns `tmSafeGapShift` (also within `randomChoice`) can move a gap run; 0 is no limit |
+| `maxShift` | integer, 0–200 | 0 | With `tmSafeGapShift` or `randomChoice`: largest number of columns a gap run can move; 0 is no limit |
 | `selection` | `tournament`, `random` | `tournament` | How parents are chosen |
 | `selectionTournamentSize` | integer, 2–10 | 2 | With `tournament`: solutions compared per choice (by rank, then crowding distance) |
 
