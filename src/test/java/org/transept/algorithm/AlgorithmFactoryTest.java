@@ -335,7 +335,8 @@ class AlgorithmFactoryTest {
               + " --variation crossoverAndMutationVariation --crossover tmSafeSinglePoint"
               + " --crossoverProbability 0.8 --cutCandidates 1"
               + " --mutation tmSafeGapShift"
-              + " --mutationProbability 0.2 --maxShift 0 --selection tournament"
+              + " --mutationProbability 0.2 --maxShift 0 --blockShift 1"
+              + " --selection tournament"
               + " --selectionTournamentSize 2",
           run.configuration());
     }

@@ -16,6 +16,7 @@ import org.transept.evolver.MsaSpea2;
 import org.transept.operator.MergeAdjacentGapRunsMutation;
 import org.transept.operator.RandomChoiceMutation;
 import org.transept.operator.RandomSource;
+import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
 import org.transept.problem.StructuralMsaProblem;
@@ -256,6 +257,7 @@ public final class AlgorithmFactory {
       case TM_SAFE_GAP_SHIFT -> MsaOperators.TM_SAFE_GAP_SHIFT;
       case MERGE_GAP_RUNS -> MsaOperators.MERGE_GAP_RUNS;
       case RANDOM_CHOICE -> MsaOperators.RANDOM_CHOICE;
+      case TM_SAFE_BLOCK_SHIFT -> MsaOperators.TM_SAFE_BLOCK_SHIFT;
     };
   }
 
@@ -386,6 +388,9 @@ public final class AlgorithmFactory {
               configuration.maxShift(),
               random);
       case MERGE_GAP_RUNS -> new MergeAdjacentGapRunsMutation(probability, random);
+      case TM_SAFE_BLOCK_SHIFT ->
+          new TmSafeBlockShiftMutation(
+              probability, TmSafeBlockShiftMutation.DEFAULT_MAX_SHIFT, random);
       case RANDOM_CHOICE ->
           new RandomChoiceMutation(
               probability,

@@ -5,6 +5,7 @@ import org.transept.alignment.MsaSolution;
 import org.transept.operator.MergeAdjacentGapRunsMutation;
 import org.transept.operator.RandomChoiceMutation;
 import org.transept.operator.RandomSource;
+import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
 import org.transept.structure.ProteinStructures;
@@ -26,12 +27,15 @@ public final class MsaOperators {
   /** {@link #TM_SAFE_GAP_SHIFT} or {@link #MERGE_GAP_RUNS}, chosen at random each time. */
   public static final String RANDOM_CHOICE = "randomChoice";
 
+  /** Moves a block of gaps a few columns in several rows at once. */
+  public static final String TM_SAFE_BLOCK_SHIFT = "tmSafeBlockShift";
+
   /** Crossover names, in the order of the parameter spaces. */
   public static final List<String> CROSSOVERS = List.of(TM_SAFE_SINGLE_POINT);
 
   /** Mutation names, in the order of the parameter spaces. */
   public static final List<String> MUTATIONS =
-      List.of(TM_SAFE_GAP_SHIFT, MERGE_GAP_RUNS, RANDOM_CHOICE);
+      List.of(TM_SAFE_GAP_SHIFT, MERGE_GAP_RUNS, RANDOM_CHOICE, TM_SAFE_BLOCK_SHIFT);
 
   private MsaOperators() {}
 
@@ -72,6 +76,30 @@ public final class MsaOperators {
       int maxShift,
       ProteinStructures structures,
       RandomSource random) {
+    int blockShift = TmSafeBlockShiftMutation.DEFAULT_MAX_SHIFT;
+    return mutation(name, probability, maxShift, blockShift, structures, random);
+  }
+
+  /**
+   * Builds a mutation.
+   *
+   * @param name mutation name
+   * @param probability mutation probability
+   * @param maxShift largest number of columns a gap run can move; {@link
+   *     TmSafeGapShiftMutation#UNLIMITED_SHIFT} for no limit
+   * @param blockShift largest number of columns a block of gaps can move
+   * @param structures structures used to recognise residues without structural data
+   * @param random source of random numbers
+   * @return the mutation
+   * @throws IllegalArgumentException if the name is unknown
+   */
+  public static MutationOperator<MsaSolution> mutation(
+      String name,
+      double probability,
+      int maxShift,
+      int blockShift,
+      ProteinStructures structures,
+      RandomSource random) {
     return switch (name) {
       case TM_SAFE_GAP_SHIFT ->
           new TmSafeGapShiftMutation(
@@ -85,6 +113,7 @@ public final class MsaOperators {
                   mutation(MERGE_GAP_RUNS, 1.0, maxShift, structures, random)),
               1,
               random);
+      case TM_SAFE_BLOCK_SHIFT -> new TmSafeBlockShiftMutation(probability, blockShift, random);
       default ->
           throw new IllegalArgumentException("Unknown mutation: " + name + "; valid: " + MUTATIONS);
     };

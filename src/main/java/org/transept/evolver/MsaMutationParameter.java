@@ -3,6 +3,7 @@ package org.transept.evolver;
 import java.util.List;
 import org.transept.alignment.MsaSolution;
 import org.transept.operator.RandomSource;
+import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.structure.ProteinStructures;
 import org.uma.evolver.parameter.ConditionalParameter;
@@ -10,10 +11,10 @@ import org.uma.evolver.parameter.catalogue.mutationparameter.MutationParameter;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 
 /**
- * Mutation of a parameter space, with the global sub-parameter {@code mutationProbability} and,
- * for the mutations that move gap runs at random, the conditional {@code maxShift}. The algorithm
- * gives the structures and the source of random numbers as the non-configurable sub-parameters
- * {@code structures} and {@code random}.
+ * Mutation of a parameter space, with the global sub-parameter {@code mutationProbability} and, for
+ * the mutations that have them, the conditional {@code maxShift} and {@code blockShift}. The
+ * algorithm gives the structures and the source of random numbers as the non-configurable
+ * sub-parameters {@code structures} and {@code random}.
  */
 public class MsaMutationParameter extends MutationParameter<MsaSolution> {
 
@@ -33,15 +34,15 @@ public class MsaMutationParameter extends MutationParameter<MsaSolution> {
     return mutation((Double) findGlobalSubParameter("mutationProbability").value());
   }
 
-  /** Returns the limit of the chosen mutation, if it moves gap runs at random. */
-  private int maxShift() {
+  /** Returns a setting of the chosen mutation, or the given value if it does not have it. */
+  private int conditionalValue(String name, int otherwise) {
     return conditionalParameters().stream()
         .filter(conditional -> conditional.condition().test(value()))
         .map(ConditionalParameter::parameter)
-        .filter(parameter -> parameter.name().equals("maxShift"))
+        .filter(parameter -> parameter.name().equals(name))
         .findFirst()
         .map(parameter -> (Integer) parameter.value())
-        .orElse(TmSafeGapShiftMutation.UNLIMITED_SHIFT);
+        .orElse(otherwise);
   }
 
   /**
@@ -54,7 +55,8 @@ public class MsaMutationParameter extends MutationParameter<MsaSolution> {
     return MsaOperators.mutation(
         value(),
         probability,
-        maxShift(),
+        conditionalValue("maxShift", TmSafeGapShiftMutation.UNLIMITED_SHIFT),
+        conditionalValue("blockShift", TmSafeBlockShiftMutation.DEFAULT_MAX_SHIFT),
         (ProteinStructures) nonConfigurableSubParameters().get("structures"),
         (RandomSource) nonConfigurableSubParameters().get("random"));
   }

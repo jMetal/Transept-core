@@ -16,5 +16,10 @@ public enum MutationType {
    * Applies {@code TM_SAFE_GAP_SHIFT} or {@code MERGE_GAP_RUNS}, chosen uniformly at random each
    * time ({@code RandomChoiceMutation}).
    */
-  RANDOM_CHOICE
+  RANDOM_CHOICE,
+  /**
+   * Moves a block of gaps a few columns in several rows at once ({@code
+   * TmSafeBlockShiftMutation}).
+   */
+  TM_SAFE_BLOCK_SHIFT
 }
