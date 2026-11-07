@@ -8,9 +8,10 @@ import org.uma.evolver.parameter.catalogue.mutationparameter.MutationParameter;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 
 /**
- * Mutation of a parameter space, with the global sub-parameter {@code mutationProbability}. The
- * algorithm gives the structures and the source of random numbers as the non-configurable
- * sub-parameters {@code structures} and {@code random}.
+ * Mutation of a parameter space, with the global sub-parameters {@code mutationProbability} and
+ * {@code maxShift} (which only affects the mutations that move gap runs at random). The algorithm
+ * gives the structures and the source of random numbers as the non-configurable sub-parameters
+ * {@code structures} and {@code random}.
  */
 public class MsaMutationParameter extends MutationParameter<MsaSolution> {
 
@@ -40,6 +41,7 @@ public class MsaMutationParameter extends MutationParameter<MsaSolution> {
     return MsaOperators.mutation(
         value(),
         probability,
+        (Integer) findGlobalSubParameter("maxShift").value(),
         (ProteinStructures) nonConfigurableSubParameters().get("structures"),
         (RandomSource) nonConfigurableSubParameters().get("random"));
   }

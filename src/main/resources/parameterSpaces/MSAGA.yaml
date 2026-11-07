@@ -30,6 +30,9 @@ variation:
             mutationProbability:
               type: double
               range: [0.0, 1.0]
+            maxShift:
+              type: integer
+              range: [0, 200]
           values:
             tmSafeGapShift:
             mergeGapRuns:

@@ -57,24 +57,30 @@ public final class MsaOperators {
    *
    * @param name mutation name
    * @param probability mutation probability
+   * @param maxShift largest number of columns a gap run can move; {@link
+   *     TmSafeGapShiftMutation#UNLIMITED_SHIFT} for no limit
    * @param structures structures used to recognise residues without structural data
    * @param random source of random numbers
    * @return the mutation
    * @throws IllegalArgumentException if the name is unknown
    */
   public static MutationOperator<MsaSolution> mutation(
-      String name, double probability, ProteinStructures structures, RandomSource random) {
+      String name,
+      double probability,
+      int maxShift,
+      ProteinStructures structures,
+      RandomSource random) {
     return switch (name) {
       case TM_SAFE_GAP_SHIFT ->
           new TmSafeGapShiftMutation(
-              probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random);
+              probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, maxShift, random);
       case MERGE_GAP_RUNS -> new MergeAdjacentGapRunsMutation(probability, random);
       case RANDOM_CHOICE ->
           new RandomChoiceMutation(
               probability,
               List.of(
-                  mutation(TM_SAFE_GAP_SHIFT, 1.0, structures, random),
-                  mutation(MERGE_GAP_RUNS, 1.0, structures, random)),
+                  mutation(TM_SAFE_GAP_SHIFT, 1.0, maxShift, structures, random),
+                  mutation(MERGE_GAP_RUNS, 1.0, maxShift, structures, random)),
               1,
               random);
       default ->

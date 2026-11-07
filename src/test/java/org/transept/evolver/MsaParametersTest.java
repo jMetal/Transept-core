@@ -29,7 +29,7 @@ class MsaParametersTest {
 
     // Act
     var mutation =
-        MsaOperators.mutation(name, 0.5, Alignments.unstructured(proteins), new SeededRandom(1));
+        MsaOperators.mutation(name, 0.5, 0, Alignments.unstructured(proteins), new SeededRandom(1));
 
     // Assert
     Class<?> expected =
@@ -62,7 +62,7 @@ class MsaParametersTest {
         () -> MsaOperators.crossover("PMX", 0.9, new SeededRandom(1)));
     assertThrows(
         IllegalArgumentException.class,
-        () -> MsaOperators.mutation("swap", 0.1, Alignments.unstructured(proteins), null));
+        () -> MsaOperators.mutation("swap", 0.1, 0, Alignments.unstructured(proteins), null));
   }
 
   @Test

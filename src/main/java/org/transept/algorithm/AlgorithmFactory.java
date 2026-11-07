@@ -228,6 +228,7 @@ public final class AlgorithmFactory {
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
     values.put("mutation", mutationName(configuration.mutationType()));
     values.put("mutationProbability", Double.toString(configuration.mutationProbability()));
+    values.put("maxShift", Integer.toString(configuration.maxShift()));
     values.putAll(MsaConfigurations.parse(configuration.configuration()));
     ParameterSpace space = MsaConfigurations.parameterSpace(type.parameterSpace());
     MsaConfigurations.requireKnownNames(values, space);
@@ -372,7 +373,11 @@ public final class AlgorithmFactory {
     return switch (type) {
       case TM_SAFE_GAP_SHIFT ->
           new TmSafeGapShiftMutation(
-              probability, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, random);
+              probability,
+              structures,
+              TmSafeGapShiftMutation.DEFAULT_MAX_TRIES,
+              configuration.maxShift(),
+              random);
       case MERGE_GAP_RUNS -> new MergeAdjacentGapRunsMutation(probability, random);
       case RANDOM_CHOICE ->
           new RandomChoiceMutation(

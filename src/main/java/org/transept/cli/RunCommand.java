@@ -15,6 +15,7 @@ import org.transept.algorithm.MutationType;
 import org.transept.evolver.MsaConfigurations;
 import org.transept.objective.ObjectiveSet;
 import org.transept.objective.StructuralLddt;
+import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.run.ExperimentRunner;
 import org.transept.run.ExperimentRunner.RunSummary;
 import org.transept.run.Json;
@@ -119,6 +120,13 @@ public final class RunCommand implements Callable<Integer> {
   MutationType mutation;
 
   @Option(
+      names = "--max-shift",
+      description =
+          "Largest number of columns the mutation can move a gap run (TM_SAFE_GAP_SHIFT and"
+              + " RANDOM_CHOICE). Default: 0, no limit.")
+  Integer maxShift;
+
+  @Option(
       names = "--algorithm",
       defaultValue = "NSGA_II",
       description =
@@ -186,7 +194,8 @@ public final class RunCommand implements Callable<Integer> {
                   threads,
                   mutation == null ? MutationType.TM_SAFE_GAP_SHIFT : mutation,
                   maxRunTime(),
-                  configurationText()),
+                  configurationText(),
+                  maxShift == null ? TmSafeGapShiftMutation.UNLIMITED_SHIFT : maxShift),
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
@@ -235,6 +244,7 @@ public final class RunCommand implements Callable<Integer> {
     requireNotBoth(mutationProbability != null, values, "mutationProbability",
         "--mutation-probability");
     requireNotBoth(mutation != null, values, "mutation", "--mutation");
+    requireNotBoth(maxShift != null, values, "maxShift", "--max-shift");
     return text;
   }
 

@@ -28,6 +28,10 @@ import org.uma.jmetal.operator.mutation.MutationOperator;
  * <p>After {@code maxTries} rejections a valid position is chosen uniformly. If no valid
  * position differs from the original one, the solution is left unchanged.
  *
+ * <p>The new position can be anywhere in the row unless {@code maxShift} limits how many columns
+ * the run can move. Moving a run displaces the residues it jumps over, so short moves change the
+ * alignment less, and cannot take a whole helix out of register at once.
+ *
  * <p>It replaces the mutation of the original implementation ({@code
  * BioShiftClosedGapsMSAMutation}, TM-M2StructAlign, tag {@code legacy-v1.0}). Differences: a helix
  * is never broken (the original only discouraged it, with acceptance 0.05, and not at all in
@@ -49,9 +53,13 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
   /** Number of rejection-sampling attempts, as in the original operator. */
   public static final int DEFAULT_MAX_TRIES = 60;
 
+  /** Value of {@code maxShift} that leaves the distance of a move unlimited. */
+  public static final int UNLIMITED_SHIFT = 0;
+
   private final double probability;
   private final ProteinStructures structures;
   private final int maxTries;
+  private final int maxShift;
   private final RandomSource random;
 
   /**
@@ -74,15 +82,37 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
    */
   public TmSafeGapShiftMutation(
       double probability, ProteinStructures structures, int maxTries, RandomSource random) {
+    this(probability, structures, maxTries, UNLIMITED_SHIFT, random);
+  }
+
+  /**
+   * Creates the operator.
+   *
+   * @param probability probability of mutating a solution
+   * @param structures structures used to recognise residues without structural data
+   * @param maxTries rejection-sampling attempts before choosing a valid position uniformly
+   * @param maxShift largest number of columns a run can move; {@link #UNLIMITED_SHIFT} for no limit
+   * @param random source of random numbers
+   */
+  public TmSafeGapShiftMutation(
+      double probability,
+      ProteinStructures structures,
+      int maxTries,
+      int maxShift,
+      RandomSource random) {
     if (!(probability >= 0.0 && probability <= 1.0)) {
       throw new IllegalArgumentException("Mutation probability must be in [0, 1]: " + probability);
     }
     if (maxTries < 1) {
       throw new IllegalArgumentException("maxTries must be positive: " + maxTries);
     }
+    if (maxShift < 0) {
+      throw new IllegalArgumentException("maxShift cannot be negative: " + maxShift);
+    }
     this.probability = probability;
     this.structures = structures;
     this.maxTries = maxTries;
+    this.maxShift = maxShift;
     this.random = random;
   }
 
@@ -123,17 +153,25 @@ public final class TmSafeGapShiftMutation implements MutationOperator<MsaSolutio
     return result;
   }
 
-  /** Positions of the reduced row whose boundary does not split a helix, except the original. */
-  private static List<Integer> validPositions(
+  /**
+   * Positions of the reduced row within reach whose boundary does not split a helix, except the
+   * original.
+   */
+  private List<Integer> validPositions(
       ProteinSequence protein, int[] residuesBefore, int originalStart) {
     List<Integer> valid = new ArrayList<>();
     for (int position = 0; position < residuesBefore.length; position++) {
       if (position != originalStart
+          && withinReach(position, originalStart)
           && !TmBoundaries.splitsHelix(protein, residuesBefore[position])) {
         valid.add(position);
       }
     }
     return valid;
+  }
+
+  private boolean withinReach(int position, int originalStart) {
+    return maxShift == UNLIMITED_SHIFT || Math.abs(position - originalStart) <= maxShift;
   }
 
   private int choosePosition(
