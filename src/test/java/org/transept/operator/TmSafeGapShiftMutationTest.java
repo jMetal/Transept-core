@@ -193,6 +193,81 @@ class TmSafeGapShiftMutationTest {
   }
 
   @Nested
+  @DisplayName("When limiting how far a run can move")
+  class Reach {
+
+    private static final String RESIDUES = "A".repeat(30);
+    private static final String ALIGNED = "A".repeat(10) + "--" + "A".repeat(20);
+
+    private ProteinSet proteins() {
+      return Alignments.proteins(
+          RESIDUES + ":" + "O".repeat(30), "A".repeat(32) + ":" + "O".repeat(32));
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {1, 2, 3, 4, 5, 6, 7, 8})
+    @DisplayName("given a limit, when mutating, then the run moves within it")
+    void givenLimit_whenMutating_thenRunMovesWithinIt(long seed) {
+      // Arrange
+      ProteinSet proteins = proteins();
+      TmSafeGapShiftMutation mutation =
+          new TmSafeGapShiftMutation(
+              1.0, Alignments.fullyStructured(proteins), 60, 3, new SeededRandom(seed));
+      MsaSolution solution = Alignments.solution(proteins, ALIGNED, "A".repeat(32));
+
+      // Act
+      mutation.execute(solution);
+
+      // Assert: it moved, and at most 3 columns
+      int start = Alignments.rows(solution).get(0).indexOf('-');
+      assertTrue(start != 10 && Math.abs(start - 10) <= 3, "moved to " + start);
+    }
+
+    @Test
+    @DisplayName("given no valid position within reach, when mutating, then nothing changes")
+    void givenNoValidPositionWithinReach_whenMutating_thenNothingChanges() {
+      // Arrange: the only other valid position is at the far end of the helix
+      ProteinSet proteins =
+          Alignments.proteins(
+              "A".repeat(10) + ":" + "M".repeat(10), "A".repeat(11) + ":" + "O".repeat(11));
+      TmSafeGapShiftMutation mutation =
+          new TmSafeGapShiftMutation(
+              1.0, Alignments.fullyStructured(proteins), 60, 3, new SeededRandom(1));
+      MsaSolution solution = Alignments.solution(proteins, "-" + "A".repeat(10), "A".repeat(11));
+
+      // Act
+      mutation.execute(solution);
+
+      // Assert
+      assertEquals("-" + "A".repeat(10), Alignments.rows(solution).get(0));
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {1, 2, 3})
+    @DisplayName("given no limit, when mutating, then it behaves as without the parameter")
+    void givenNoLimit_whenMutating_thenItBehavesAsWithoutTheParameter(long seed) {
+      // Arrange
+      ProteinSet proteins = proteins();
+      var structures = Alignments.fullyStructured(proteins);
+      MsaSolution first = Alignments.solution(proteins, ALIGNED, "A".repeat(32));
+      MsaSolution second = Alignments.solution(proteins, ALIGNED, "A".repeat(32));
+
+      // Act
+      new TmSafeGapShiftMutation(1.0, structures, 60, new SeededRandom(seed)).execute(first);
+      new TmSafeGapShiftMutation(
+              1.0,
+              structures,
+              60,
+              TmSafeGapShiftMutation.UNLIMITED_SHIFT,
+              new SeededRandom(seed))
+          .execute(second);
+
+      // Assert
+      assertEquals(Alignments.rows(first), Alignments.rows(second));
+    }
+  }
+
+  @Nested
   @DisplayName("When the operator is misused")
   class Misuse {
 
@@ -212,6 +287,11 @@ class TmSafeGapShiftMutationTest {
       assertThrows(
           IllegalArgumentException.class,
           () -> new TmSafeGapShiftMutation(1.0, Alignments.fullyStructured(proteins), 0, random));
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              new TmSafeGapShiftMutation(
+                  1.0, Alignments.fullyStructured(proteins), 60, -1, random));
     }
   }
 }

@@ -79,6 +79,75 @@ class TmSafeSinglePointCrossoverTest {
     }
 
     @Test
+    @DisplayName("given a cut, when asking for its padding, then the gaps it adds are counted")
+    void givenCut_whenAskingForPadding_thenGapsItAddsAreCounted() {
+      // Arrange
+      ProteinSet proteins = Alignments.proteins("ACDE:OOOO", "ACDE:OOOO");
+      MsaSolution first = Alignments.solution(proteins, "AC--DE", "A-CD-E");
+      MsaSolution second = Alignments.solution(proteins, "A-CDE-", "ACD--E");
+
+      // Act & Assert: the child of this cut has "--" of padding in its first row
+      assertEquals(2, TmSafeSinglePointCrossover.padding(first, second, 1));
+    }
+
+    @Test
+    @DisplayName("given several candidates, when crossing, then the least padding is used")
+    void givenSeveralCandidates_whenCrossing_thenCutWithLeastPaddingIsUsed() {
+      // Arrange
+      ProteinSet proteins = Alignments.proteins("ACDE:OOOO", "ACDE:OOOO");
+      MsaSolution first = Alignments.solution(proteins, "AC--DE", "A-CD-E");
+      MsaSolution second = Alignments.solution(proteins, "A-CDE-", "ACD--E");
+      List<Integer> cuts = crossover.compatibleCuts(first);
+      int worst = 0;
+      int best = 0;
+      for (int index = 0; index < cuts.size(); index++) {
+        long padding = TmSafeSinglePointCrossover.padding(first, second, cuts.get(index));
+        if (padding > TmSafeSinglePointCrossover.padding(first, second, cuts.get(worst))) {
+          worst = index;
+        }
+        if (padding < TmSafeSinglePointCrossover.padding(first, second, cuts.get(best))) {
+          best = index;
+        }
+      }
+      RandomSource random = mock(RandomSource.class);
+      when(random.nextDouble()).thenReturn(0.0);
+      when(random.nextInt(0, cuts.size() - 1)).thenReturn(worst, best);
+      TmSafeSinglePointCrossover operator = new TmSafeSinglePointCrossover(1.0, 2, random);
+
+      // Act
+      MsaSolution child = operator.execute(List.of(first, second)).get(0);
+
+      // Assert
+      assertTrue(worst != best);
+      assertEquals(
+          Alignments.rows(crossover.recombine(first, second, cuts.get(best))),
+          Alignments.rows(child));
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {1, 2, 3})
+    @DisplayName("given one candidate, when crossing, then it behaves as without the parameter")
+    void givenOneCandidate_whenCrossing_thenItBehavesAsWithoutTheParameter(long seed) {
+      // Arrange
+      ProteinSet proteins = Alignments.proteins("ACDE:OOOO", "ACDE:OOOO");
+      MsaSolution first = Alignments.solution(proteins, "AC--DE", "A-CD-E");
+      MsaSolution second = Alignments.solution(proteins, "A-CDE-", "ACD--E");
+
+      // Act
+      List<MsaSolution> before =
+          new TmSafeSinglePointCrossover(1.0, new SeededRandom(seed))
+              .execute(List.of(first, second));
+      List<MsaSolution> after =
+          new TmSafeSinglePointCrossover(
+                  1.0, TmSafeSinglePointCrossover.DEFAULT_CUT_CANDIDATES, new SeededRandom(seed))
+              .execute(List.of(first, second));
+
+      // Assert
+      assertEquals(Alignments.rows(before.get(0)), Alignments.rows(after.get(0)));
+      assertEquals(Alignments.rows(before.get(1)), Alignments.rows(after.get(1)));
+    }
+
+    @Test
     @DisplayName("given no safe cut, when crossing, then children are copies of the parents")
     void givenNoSafeCut_whenCrossing_thenChildrenAreCopies() {
       // Arrange
@@ -183,6 +252,15 @@ class TmSafeSinglePointCrossoverTest {
     void givenInvalidProbability_whenCreating_thenIllegalArgumentExceptionIsThrown(double value) {
       // Act & Assert
       assertThrows(IllegalArgumentException.class, () -> new TmSafeSinglePointCrossover(value));
+    }
+
+    @Test
+    @DisplayName("given no candidate cuts, when creating, then an exception is thrown")
+    void givenNoCandidateCuts_whenCreating_thenIllegalArgumentExceptionIsThrown() {
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> new TmSafeSinglePointCrossover(0.5, 0, new SeededRandom(1)));
     }
 
     @Test

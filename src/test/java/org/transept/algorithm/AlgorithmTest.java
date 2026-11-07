@@ -146,5 +146,28 @@ class AlgorithmTest {
           IllegalArgumentException.class,
           () -> new AlgorithmConfiguration(evaluations, population, offspring, pc, pm, threads));
     }
+
+    @ParameterizedTest
+    @CsvSource({"-1, 1", "0, 0"})
+    @DisplayName("given invalid operator settings, when creating, then an exception is thrown")
+    void givenInvalidOperatorSettings_whenCreating_thenIllegalArgumentExceptionIsThrown(
+        int maxShift, int cutCandidates) {
+      // Act & Assert
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              new AlgorithmConfiguration(
+                  10,
+                  10,
+                  10,
+                  0.8,
+                  0.2,
+                  1,
+                  MutationType.TM_SAFE_GAP_SHIFT,
+                  null,
+                  "",
+                  maxShift,
+                  cutCandidates));
+    }
   }
 }

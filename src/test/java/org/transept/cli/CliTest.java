@@ -316,6 +316,47 @@ class CliTest {
       assertThrows(IllegalArgumentException.class, command::configurationText);
     }
 
+    @Test
+    @DisplayName("given the options of the operators twice, when resolving, then it fails")
+    void givenOperatorOptionsAlsoInConfiguration_whenResolving_thenItFails() {
+      // Arrange
+      RunCommand shift = new RunCommand();
+      shift.maxShift = 5;
+      shift.configuration = "--maxShift 10";
+      RunCommand cuts = new RunCommand();
+      cuts.cutCandidates = 2;
+      cuts.configuration = "--cutCandidates 4";
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, shift::configurationText);
+      assertThrows(IllegalArgumentException.class, cuts::configurationText);
+    }
+
+    @Test
+    @DisplayName("given the options of the operators, when running, then they are recorded")
+    void givenOperatorOptions_whenRunning_thenTheyAreRecorded() throws IOException {
+      // Arrange
+      String[] arguments = runArguments("operators", "left,right,true");
+      String[] withOptions = Arrays.copyOf(arguments, arguments.length + 4);
+      withOptions[arguments.length] = "--max-shift";
+      withOptions[arguments.length + 1] = "7";
+      withOptions[arguments.length + 2] = "--cut-candidates";
+      withOptions[arguments.length + 3] = "3";
+
+      // Act
+      int status = TranseptCli.execute(withOptions);
+
+      // Assert
+      assertEquals(0, status);
+      Path run = outputRoot.resolve("ejecuciones/synthetic/operators");
+      String config = Files.readString(run.resolve("config.json"));
+      assertTrue(config.contains("\"maxShift\":7"), config);
+      assertTrue(config.contains("\"cutCandidates\":3"), config);
+      String metadata = Files.readString(run.resolve("metadata.json"));
+      assertTrue(metadata.contains("--maxShift 7"), metadata);
+      assertTrue(metadata.contains("--cutCandidates 3"), metadata);
+    }
+
     private String[] runArguments(String runId, String seeds) {
       return new String[] {
         "run",

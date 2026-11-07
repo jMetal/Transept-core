@@ -105,6 +105,37 @@ class TmSafetyIT {
         0, breakingRuns(configuration, run, solutions), mutation.toString());
   }
 
+  @ParameterizedTest
+  @EnumSource(
+      value = AlgorithmType.class,
+      names = {"NSGA_II", "SPEA2", "GENETIC_ALGORITHM", "SMS_EMOA", "MOEA_D", "PAES"})
+  @DisplayName("given a limited shift and several cuts, when running, then no helix breaks")
+  void givenLimitedShiftAndSeveralCuts_whenRunning_thenNoHelixBreaks(AlgorithmType type)
+      throws IOException {
+    // Arrange
+    Path run = directory.resolve("settings").resolve(type.name());
+    RunConfiguration configuration =
+        new RunConfiguration(
+            dataRoot,
+            SyntheticDataset.NAME,
+            List.of("left", "right"),
+            run,
+            13L,
+            new AlgorithmConfiguration(
+                400, 8, 8, 0.9, 1.0, 1, MutationType.TM_SAFE_GAP_SHIFT, null, "", 3, 4),
+            type,
+            MappingPolicy.VERIFIED,
+            15f,
+            100,
+            type.isSingleObjective() ? ObjectiveSet.LDDT : ObjectiveSet.SOPWTP_LDDT);
+
+    // Act
+    int solutions = new ExperimentRunner().run(configuration).frontSize();
+
+    // Assert
+    assertEquals(0, breakingRuns(configuration, run, solutions), type + " broke a helix");
+  }
+
   private static int breakingRuns(RunConfiguration configuration, Path run, int solutions)
       throws IOException {
     ProteinSet proteins = new ThreeLineTopologyReader().read(configuration.topologyFile());

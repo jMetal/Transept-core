@@ -42,6 +42,19 @@ class MsaParametersTest {
   }
 
   @Test
+  @DisplayName("given a limit, when building the mutation that chooses, then it is built")
+  void givenLimit_whenBuildingRandomChoice_thenItIsBuilt() {
+    // Arrange
+    ProteinSet proteins = Alignments.proteins("ACDEF:OOMMM", "ACDE:OOMM");
+
+    // Act & Assert
+    assertInstanceOf(
+        RandomChoiceMutation.class,
+        MsaOperators.mutation(
+            "randomChoice", 0.5, 4, Alignments.unstructured(proteins), new SeededRandom(1)));
+  }
+
+  @Test
   @DisplayName("given the crossover name, when built, then the TM-safe crossover is returned")
   void givenCrossoverName_whenBuilt_thenTmSafeCrossoverIsReturned() {
     // Act & Assert

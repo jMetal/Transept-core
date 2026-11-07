@@ -59,6 +59,8 @@ class MsaConfigurationsTest {
       assertEquals("0.2", defaults.get("mutationProbability"));
       assertEquals(MsaOperators.TM_SAFE_GAP_SHIFT, defaults.get("mutation"));
       assertEquals("2", defaults.get("selectionTournamentSize"));
+      assertEquals("0", defaults.get("maxShift"));
+      assertEquals("1", defaults.get("cutCandidates"));
       MsaConfigurations.requireKnownNames(
           defaults, MsaConfigurations.parameterSpace(MsaNsga2.PARAMETER_SPACE));
     }
