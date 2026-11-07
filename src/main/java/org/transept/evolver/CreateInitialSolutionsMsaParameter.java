@@ -43,6 +43,7 @@ public class CreateInitialSolutionsMsaParameter
         (List<Msa>) nonConfigurableSubParameters().get("seeds"),
         populationSize,
         (RandomSource) nonConfigurableSubParameters().get("random"),
-        (MutationOperator<MsaSolution>) nonConfigurableSubParameters().get("copyMutation"));
+        (MutationOperator<MsaSolution>) nonConfigurableSubParameters().get("copyMutation"),
+        (Integer) nonConfigurableSubParameters().get("cutCandidates"));
   }
 }

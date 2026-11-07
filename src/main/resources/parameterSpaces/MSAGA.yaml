@@ -22,6 +22,9 @@ variation:
             crossoverProbability:
               type: double
               range: [0.0, 1.0]
+            cutCandidates:
+              type: integer
+              range: [1, 64]
           values:
             tmSafeSinglePoint:
         mutation:

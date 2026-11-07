@@ -226,6 +226,7 @@ public final class AlgorithmFactory {
     values.put(
         "offspringPopulationSize", Integer.toString(configuration.offspringPopulationSize()));
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
+    values.put("cutCandidates", Integer.toString(configuration.cutCandidates()));
     values.put("mutation", mutationName(configuration.mutationType()));
     values.put("mutationProbability", Double.toString(configuration.mutationProbability()));
     values.put("maxShift", Integer.toString(configuration.maxShift()));
@@ -347,7 +348,12 @@ public final class AlgorithmFactory {
 
   private SeededPopulationCreation population() {
     return new SeededPopulationCreation(
-        problem, seeds, configuration.populationSize(), random, mutation(1.0));
+        problem,
+        seeds,
+        configuration.populationSize(),
+        random,
+        mutation(1.0),
+        configuration.cutCandidates());
   }
 
   /** MOEA/D population: seeds spread over equally spaced subproblems. */
@@ -358,7 +364,8 @@ public final class AlgorithmFactory {
   }
 
   private CrossoverOperator<MsaSolution> crossover() {
-    return new TmSafeSinglePointCrossover(configuration.crossoverProbability(), random);
+    return new TmSafeSinglePointCrossover(
+        configuration.crossoverProbability(), configuration.cutCandidates(), random);
   }
 
   private MutationOperator<MsaSolution> mutation() {

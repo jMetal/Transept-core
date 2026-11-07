@@ -16,6 +16,7 @@ import org.transept.evolver.MsaConfigurations;
 import org.transept.objective.ObjectiveSet;
 import org.transept.objective.StructuralLddt;
 import org.transept.operator.TmSafeGapShiftMutation;
+import org.transept.operator.TmSafeSinglePointCrossover;
 import org.transept.run.ExperimentRunner;
 import org.transept.run.ExperimentRunner.RunSummary;
 import org.transept.run.Json;
@@ -107,6 +108,13 @@ public final class RunCommand implements Callable<Integer> {
   Double crossoverProbability;
 
   @Option(
+      names = "--cut-candidates",
+      description =
+          "Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps."
+              + " Default: 1, a cut at random.")
+  Integer cutCandidates;
+
+  @Option(
       names = "--mutation-probability",
       description = "Default: 1.0 for PAES (mutation-only), 0.2 for the other algorithms.")
   Double mutationProbability;
@@ -195,7 +203,10 @@ public final class RunCommand implements Callable<Integer> {
                   mutation == null ? MutationType.TM_SAFE_GAP_SHIFT : mutation,
                   maxRunTime(),
                   configurationText(),
-                  maxShift == null ? TmSafeGapShiftMutation.UNLIMITED_SHIFT : maxShift),
+                  maxShift == null ? TmSafeGapShiftMutation.UNLIMITED_SHIFT : maxShift,
+                  cutCandidates == null
+                      ? TmSafeSinglePointCrossover.DEFAULT_CUT_CANDIDATES
+                      : cutCandidates),
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
@@ -245,6 +256,7 @@ public final class RunCommand implements Callable<Integer> {
         "--mutation-probability");
     requireNotBoth(mutation != null, values, "mutation", "--mutation");
     requireNotBoth(maxShift != null, values, "maxShift", "--max-shift");
+    requireNotBoth(cutCandidates != null, values, "cutCandidates", "--cut-candidates");
     return text;
   }
 

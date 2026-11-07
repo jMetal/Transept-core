@@ -2,6 +2,7 @@ package org.transept.algorithm;
 
 import java.time.Duration;
 import org.transept.operator.TmSafeGapShiftMutation;
+import org.transept.operator.TmSafeSinglePointCrossover;
 
 /**
  * Parameters of the evolutionary algorithm.
@@ -18,6 +19,8 @@ import org.transept.operator.TmSafeGapShiftMutation;
  * @param configuration configuration string ({@code --parameter value ...}) of the algorithms
  *     built from a parameter space; empty to use their default configuration
  * @param maxShift largest number of columns the mutation can move a gap run; 0 for no limit
+ * @param cutCandidates valid cuts the crossover draws, of which it uses the one with the least
+ *     padding; 1 for a cut at random
  */
 public record AlgorithmConfiguration(
     int maxEvaluations,
@@ -29,7 +32,8 @@ public record AlgorithmConfiguration(
     MutationType mutationType,
     Duration maxTime,
     String configuration,
-    int maxShift) {
+    int maxShift,
+    int cutCandidates) {
 
   /** Crossover probability used in the published experiments. */
   public static final double DEFAULT_CROSSOVER_PROBABILITY = 0.8;
@@ -55,6 +59,7 @@ public record AlgorithmConfiguration(
     if (maxShift < 0) {
       throw new IllegalArgumentException("maxShift cannot be negative: " + maxShift);
     }
+    requirePositive(cutCandidates, "cutCandidates");
   }
 
   /**
@@ -91,7 +96,8 @@ public record AlgorithmConfiguration(
         mutationType,
         maxTime,
         configuration,
-        TmSafeGapShiftMutation.UNLIMITED_SHIFT);
+        TmSafeGapShiftMutation.UNLIMITED_SHIFT,
+        TmSafeSinglePointCrossover.DEFAULT_CUT_CANDIDATES);
   }
 
   /**

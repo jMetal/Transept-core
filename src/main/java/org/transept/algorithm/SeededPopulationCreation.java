@@ -38,6 +38,7 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
   private final int populationSize;
   private final RandomSource random;
   private final MutationOperator<MsaSolution> mutation;
+  private final int cutCandidates;
 
   /**
    * Creates the population builder.
@@ -54,6 +55,33 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
       int populationSize,
       RandomSource random,
       MutationOperator<MsaSolution> mutation) {
+    this(
+        problem,
+        seeds,
+        populationSize,
+        random,
+        mutation,
+        TmSafeSinglePointCrossover.DEFAULT_CUT_CANDIDATES);
+  }
+
+  /**
+   * Creates the population builder.
+   *
+   * @param problem problem whose proteins the seeds align
+   * @param seeds seed alignments, in order of preference
+   * @param populationSize number of solutions to create
+   * @param random source of random numbers for parent selection and crossover
+   * @param mutation mutation used for the fallback copies; it should mutate with probability 1
+   * @param cutCandidates valid cuts the crossover draws, of which it uses the one with the least
+   *     padding
+   */
+  public SeededPopulationCreation(
+      StructuralMsaProblem problem,
+      List<Msa> seeds,
+      int populationSize,
+      RandomSource random,
+      MutationOperator<MsaSolution> mutation,
+      int cutCandidates) {
     if (populationSize < 1) {
       throw new IllegalArgumentException("Population size must be positive: " + populationSize);
     }
@@ -68,6 +96,7 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
     this.populationSize = populationSize;
     this.random = random;
     this.mutation = mutation;
+    this.cutCandidates = cutCandidates;
   }
 
   /**
@@ -97,7 +126,8 @@ public final class SeededPopulationCreation implements SolutionsCreation<MsaSolu
           "At least two distinct seed alignments are needed to fill a population of "
               + populationSize);
     }
-    fillWithDistinctChildren(population, new TmSafeSinglePointCrossover(1.0, random));
+    fillWithDistinctChildren(
+        population, new TmSafeSinglePointCrossover(1.0, cutCandidates, random));
     return population;
   }
 

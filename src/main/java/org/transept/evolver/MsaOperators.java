@@ -40,16 +40,18 @@ public final class MsaOperators {
    *
    * @param name crossover name
    * @param probability crossover probability
+   * @param cutCandidates valid cuts drawn per crossover, of which the one with the least padding is
+   *     used
    * @param random source of random numbers
    * @return the crossover
    * @throws IllegalArgumentException if the name is unknown
    */
   public static CrossoverOperator<MsaSolution> crossover(
-      String name, double probability, RandomSource random) {
+      String name, double probability, int cutCandidates, RandomSource random) {
     if (!TM_SAFE_SINGLE_POINT.equals(name)) {
       throw new IllegalArgumentException("Unknown crossover: " + name + "; valid: " + CROSSOVERS);
     }
-    return new TmSafeSinglePointCrossover(probability, random);
+    return new TmSafeSinglePointCrossover(probability, cutCandidates, random);
   }
 
   /**

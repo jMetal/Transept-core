@@ -24,10 +24,18 @@ import org.uma.jmetal.operator.crossover.CrossoverOperator;
  * <p>Port of {@code BioSPXMSACrossover} (without its unused {@code alpha} parameter). Every
  * crossover produces two children, (first | second) and (second | first), each with its own
  * probability draw.
+ *
+ * <p>The padding depends on the cut: it can be zero, or displace whole blocks of the second parent
+ * in alignments with long variable regions. With {@code cutCandidates} above 1, that many valid
+ * cuts are drawn and the one that needs the least padding is used.
  */
 public final class TmSafeSinglePointCrossover implements CrossoverOperator<MsaSolution> {
 
+  /** Number of candidate cuts that leaves the choice of the cut at random. */
+  public static final int DEFAULT_CUT_CANDIDATES = 1;
+
   private final double probability;
+  private final int cutCandidates;
   private final RandomSource random;
 
   /**
@@ -46,10 +54,26 @@ public final class TmSafeSinglePointCrossover implements CrossoverOperator<MsaSo
    * @param random source of random numbers
    */
   public TmSafeSinglePointCrossover(double probability, RandomSource random) {
+    this(probability, DEFAULT_CUT_CANDIDATES, random);
+  }
+
+  /**
+   * Creates the operator.
+   *
+   * @param probability probability of applying the crossover to each child
+   * @param cutCandidates valid cuts drawn per crossover, of which the one with the least padding is
+   *     used
+   * @param random source of random numbers
+   */
+  public TmSafeSinglePointCrossover(double probability, int cutCandidates, RandomSource random) {
     if (!(probability >= 0.0 && probability <= 1.0)) {
       throw new IllegalArgumentException("Crossover probability must be in [0, 1]: " + probability);
     }
+    if (cutCandidates < 1) {
+      throw new IllegalArgumentException("cutCandidates must be positive: " + cutCandidates);
+    }
     this.probability = probability;
+    this.cutCandidates = cutCandidates;
     this.random = random;
   }
 
@@ -110,13 +134,8 @@ public final class TmSafeSinglePointCrossover implements CrossoverOperator<MsaSo
    */
   public MsaSolution recombine(MsaSolution first, MsaSolution second, int cut) {
     int sequences = first.variables().size();
-    int[] suffixStart = new int[sequences];
-    int minimumSuffixStart = Integer.MAX_VALUE;
-    for (int sequence = 0; sequence < sequences; sequence++) {
-      int residuesOnLeft = residuesUpTo(first.variables().get(sequence), cut);
-      suffixStart[sequence] = columnAfterResidues(second.variables().get(sequence), residuesOnLeft);
-      minimumSuffixStart = Math.min(minimumSuffixStart, suffixStart[sequence]);
-    }
+    int[] suffixStart = suffixStarts(first, second, cut);
+    int minimumSuffixStart = Arrays.stream(suffixStart).min().orElse(0);
     List<GapIntervals> childRows = new ArrayList<>(sequences);
     for (int sequence = 0; sequence < sequences; sequence++) {
       boolean[] prefix = first.variables().get(sequence).toMask();
@@ -139,7 +158,7 @@ public final class TmSafeSinglePointCrossover implements CrossoverOperator<MsaSo
   private MsaSolution offspring(MsaSolution first, MsaSolution second) {
     MsaSolution child = first.copy();
     if (random.nextDouble() < probability) {
-      Optional<Integer> cut = randomCut(first);
+      Optional<Integer> cut = chooseCut(first, second);
       if (cut.isPresent()) {
         child = recombine(first, second, cut.get());
       }
@@ -147,11 +166,43 @@ public final class TmSafeSinglePointCrossover implements CrossoverOperator<MsaSo
     return child;
   }
 
-  private Optional<Integer> randomCut(MsaSolution first) {
+  private Optional<Integer> chooseCut(MsaSolution first, MsaSolution second) {
     List<Integer> cuts = compatibleCuts(first);
-    return cuts.isEmpty()
-        ? Optional.empty()
-        : Optional.of(cuts.get(random.nextInt(0, cuts.size() - 1)));
+    Optional<Integer> best = Optional.empty();
+    long leastPadding = Long.MAX_VALUE;
+    for (int draw = 0; draw < cutCandidates && !cuts.isEmpty(); draw++) {
+      int cut = cuts.get(random.nextInt(0, cuts.size() - 1));
+      long padding = cutCandidates == 1 ? 0 : padding(first, second, cut);
+      if (padding < leastPadding) {
+        leastPadding = padding;
+        best = Optional.of(cut);
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Returns the gap columns that a cut adds to the child, over all its rows.
+   *
+   * @param first parent providing columns {@code [0, cut]}
+   * @param second parent providing the remaining residues of every sequence
+   * @param cut cut column of the first parent
+   * @return the total padding
+   */
+  public static long padding(MsaSolution first, MsaSolution second, int cut) {
+    int[] suffixStart = suffixStarts(first, second, cut);
+    int minimum = Arrays.stream(suffixStart).min().orElse(0);
+    return Arrays.stream(suffixStart).asLongStream().map(start -> start - minimum).sum();
+  }
+
+  /** First column of the second parent with the residues that each row takes from it. */
+  private static int[] suffixStarts(MsaSolution first, MsaSolution second, int cut) {
+    int[] suffixStart = new int[first.variables().size()];
+    for (int sequence = 0; sequence < suffixStart.length; sequence++) {
+      int residuesOnLeft = residuesUpTo(first.variables().get(sequence), cut);
+      suffixStart[sequence] = columnAfterResidues(second.variables().get(sequence), residuesOnLeft);
+    }
+    return suffixStart;
   }
 
   private static boolean isGapOnly(List<GapIntervals> rows, int column) {

@@ -21,7 +21,8 @@ final class MsaComponents {
    * configured with: the source of random numbers, the structures and the seeds.
    */
   static void setNonConfigurableParameters(ParameterSpace space, MsaRunContext context) {
-    space.get("crossover").addNonConfigurableSubParameter("random", context.random());
+    var crossover = (MsaCrossoverParameter) space.get("crossover");
+    crossover.addNonConfigurableSubParameter("random", context.random());
     var mutation = (MsaMutationParameter) space.get("mutation");
     mutation.addNonConfigurableSubParameter("structures", context.structures());
     mutation.addNonConfigurableSubParameter("random", context.random());
@@ -29,7 +30,8 @@ final class MsaComponents {
         .get("createInitialSolutions")
         .addNonConfigurableSubParameter("seeds", context.seeds())
         .addNonConfigurableSubParameter("random", context.random())
-        .addNonConfigurableSubParameter("copyMutation", mutation.mutation(1.0));
+        .addNonConfigurableSubParameter("copyMutation", mutation.mutation(1.0))
+        .addNonConfigurableSubParameter("cutCandidates", crossover.cutCandidates());
   }
 
   /**

@@ -47,7 +47,7 @@ class MsaParametersTest {
     // Act & Assert
     assertInstanceOf(
         TmSafeSinglePointCrossover.class,
-        MsaOperators.crossover("tmSafeSinglePoint", 0.9, new SeededRandom(1)));
+        MsaOperators.crossover("tmSafeSinglePoint", 0.9, 1, new SeededRandom(1)));
   }
 
   @Test
@@ -59,7 +59,7 @@ class MsaParametersTest {
     // Act & Assert
     assertThrows(
         IllegalArgumentException.class,
-        () -> MsaOperators.crossover("PMX", 0.9, new SeededRandom(1)));
+        () -> MsaOperators.crossover("PMX", 0.9, 1, new SeededRandom(1)));
     assertThrows(
         IllegalArgumentException.class,
         () -> MsaOperators.mutation("swap", 0.1, 0, Alignments.unstructured(proteins), null));
