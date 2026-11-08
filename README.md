@@ -85,7 +85,8 @@ repository. [T6](docs/tutorials/T6-your-own-dataset.md) explains how to prepare 
 
 Reference: [command line](docs/reference/cli.md),
 [configuring the algorithms](docs/reference/configuration.md),
-[output files](docs/reference/outputs.md) and [metrics](docs/reference/metrics.md).
+[operators](docs/reference/operators.md), [output files](docs/reference/outputs.md) and
+[metrics](docs/reference/metrics.md).
 
 ## Related publications
 

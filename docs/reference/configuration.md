@@ -41,9 +41,9 @@ the space are errors.
 | `createInitialSolutions` | `seededDistinct` | `seededDistinct` | The seed alignments followed by distinct crossover children ([T2, Step 7](../tutorials/T2-problem-formulation.md#step-7-the-initial-population)) |
 | `offspringPopulationSize` | integer, 1–1000 | the population size | Children per generation |
 | `variation` | `crossoverAndMutationVariation` | | Crossover, then mutation |
-| `crossover` | `tmSafeSinglePoint` | `tmSafeSinglePoint` | Single-point crossover that never cuts a transmembrane helix |
+| `crossover` | `tmSafeSinglePoint`, `tmSafeUniform` | `tmSafeSinglePoint` | The crossovers of `--crossover` ([cli](cli.md)) |
 | `crossoverProbability` | 0.0–1.0 | 0.8 | Probability of crossing two parents |
-| `cutCandidates` | integer, 1–64 | 1 | Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random |
+| `cutCandidates` | integer, 1–64 | 1 | Valid cuts the single-point crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random. It also applies to the crossover that fills the initial population, so it counts with `tmSafeUniform` too |
 | `mutation` | `tmSafeGapShift`, `mergeGapRuns`, `randomChoice`, `tmSafeBlockShift`, `tmSafeWindowRealign` | `tmSafeGapShift` | The mutations of `--mutation` ([cli](cli.md)) |
 | `mutationProbability` | 0.0–1.0 | 0.2 | Probability of mutating a child |
 | `maxShift` | integer, 0–200 | 0 | With `tmSafeGapShift` or `randomChoice`: largest number of columns a gap run can move; 0 is no limit |
@@ -57,7 +57,7 @@ NSGA-II's (non-dominated sorting and crowding distance). The default configurati
 published one; with it, the results are identical to those of earlier versions with the same
 seed.
 
-The operator options of the command line (`--mutation`, `--crossover-probability`,
+The operator options of the command line (`--crossover`, `--mutation`, `--crossover-probability`,
 `--mutation-probability`, `--max-shift`, `--cut-candidates`) set the same parameters; give each parameter in one place only.
 
 ## SPEA2

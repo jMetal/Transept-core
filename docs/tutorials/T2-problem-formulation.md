@@ -272,6 +272,27 @@ does not always help, because it also explores less: compare both on your data.
 
 A two-point variant was also evaluated; it did not improve the results and was removed.
 
+**`TM_SAFE_UNIFORM`** (class `TmSafeUniformCrossover`, `--crossover TM_SAFE_UNIFORM`) is the uniform
+crossover of SAGA (Notredame and Higgins, 1996). It looks for the **consistent positions** of the two
+parents: places where, in every protein, both parents have the same residues on the left. Between
+two consecutive consistent positions, each parent holds the same residues of every protein, aligned
+in its own way, so a child can take that block from either parent:
+
+```text
+first parent      second parent     first child       second child
+A-CD-E            AC-DE-            A-CDE-            AC-D-E
+AC-DE-            A-CD-E            AC-D-E            A-CDE-
+```
+
+Here the consistent positions are after columns 1, 3 and 4 and at both ends, which makes four
+blocks: `A`, the next two columns, `D` and the last two columns; the first and third are the same in
+both parents. The first child takes the second block from the first parent and the rest from the
+second; the second child does the opposite. No gap is added: every block keeps the gaps it had in its
+parent, although a child can be longer than both parents if it takes the longer version of several
+blocks. A child separates two transmembrane residues only where one of its parents did. When the parents agree only at the
+start and the end, the children are copies of them. One probability draw decides whether the two
+parents are crossed. The initial population is always filled with the single-point crossover.
+
 ## Step 9: mutation
 
 A mutation changes one alignment. All mutations work on the gap layouts and keep every row a

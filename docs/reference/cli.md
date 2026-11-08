@@ -49,16 +49,17 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
 | `--max-time` | (none) | Stop after this many seconds instead; exclusive with `--max-evaluations`. Runs that stop by time are not reproducible exactly |
 | `--population-size` | 100 | Population size; also the offspring size (unless the configuration sets it) and, for PAES, the archive size |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
-| `--crossover-probability` | 0.8 | Probability of applying the crossover (single point, never cuts a transmembrane helix) to each child |
-| `--cut-candidates` | 1 | Valid cuts the crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random. Also applies to the crossover that fills the initial population |
+| `--crossover` | `TM_SAFE_SINGLE_POINT` | Crossover operator (see below) |
+| `--crossover-probability` | 0.8 | Probability of applying the crossover |
+| `--cut-candidates` | 1 | Valid cuts the single-point crossover draws, of which it uses the one that adds the fewest gaps; 1 is a cut at random. Also applies to the crossover that fills the initial population, which is always the single-point one |
 | `--mutation` | `TM_SAFE_GAP_SHIFT` | Mutation operator (see below) |
 | `--mutation-probability` | 0.2 (1.0 for PAES) | Probability of mutating each child |
 | `--max-shift` | 0 | Largest number of columns the mutation can move a gap run (`TM_SAFE_GAP_SHIFT` and `RANDOM_CHOICE`); 0 is no limit |
 | `--configuration` | (none) | NSGA-II, SPEA2 and the GA: configuration from their parameter space, `--parameter value ...` ([configuration](configuration.md)). Unset parameters keep their default |
 | `--configuration-file` | (none) | The same, read from the first non-blank line of a file |
 
-`--mutation`, `--crossover-probability`, `--mutation-probability`, `--max-shift` and
-`--cut-candidates` set the corresponding parameters of the configuration of the configurable algorithms; giving one of them and the same parameter in
+`--crossover`, `--mutation`, `--crossover-probability`, `--mutation-probability`, `--max-shift`
+and `--cut-candidates` set the corresponding parameters of the configuration of the configurable algorithms; giving one of them and the same parameter in
 `--configuration` is an error.
 
 The initial population holds the distinct seeds and, for the rest, distinct crossover children
@@ -82,6 +83,11 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 The multiobjective algorithms accept two or three objectives and the genetic algorithms one;
 the random searches accept any number.
 
+| `--crossover` | Never cuts a helix | Effect |
+| --- | --- | --- |
+| `TM_SAFE_SINGLE_POINT` (default) | Yes | Takes the start of one parent and the rest of the other, padding with gaps to keep the second part aligned |
+| `TM_SAFE_UNIFORM` | Yes | Exchanges blocks between the columns where both parents agree; adds no gap |
+
 | `--mutation` | Never breaks a helix | Effect |
 | --- | --- | --- |
 | `TM_SAFE_GAP_SHIFT` (default) | Yes | Moves a gap run of one row to a position that does not split a helix |
@@ -90,7 +96,8 @@ the random searches accept any number.
 | `TM_SAFE_BLOCK_SHIFT` | Yes | Moves a block of gaps shared by several rows one column (by default) left or right |
 | `TM_SAFE_WINDOW_REALIGN` | Yes | Realigns the residues of one row against the others inside a window of 50 columns (by default) |
 
-The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes every operator.
+The [formulation tutorial](../tutorials/T2-problem-formulation.md) describes every operator, and
+the [operators reference](operators.md) lists their names and parameters in one place.
 
 ### Objectives and structures
 
