@@ -14,6 +14,7 @@ import org.transept.operator.RandomChoiceMutation;
 import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
+import org.transept.operator.TmSafeUniformCrossover;
 import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.testing.Alignments;
 import org.transept.testing.SeededRandom;
@@ -79,6 +80,9 @@ class MsaParametersTest {
     assertInstanceOf(
         TmSafeSinglePointCrossover.class,
         MsaOperators.crossover("tmSafeSinglePoint", 0.9, 1, new SeededRandom(1)));
+    assertInstanceOf(
+        TmSafeUniformCrossover.class,
+        MsaOperators.crossover("tmSafeUniform", 0.9, 1, new SeededRandom(1)));
   }
 
   @Test

@@ -179,6 +179,36 @@ class AlgorithmFactoryTest {
       }
     }
 
+    @ParameterizedTest
+    @EnumSource(
+        value = AlgorithmType.class,
+        names = {"NSGA_II", "GENETIC_ALGORITHM", "SMS_EMOA", "MOEA_D", "NSGA_III"})
+    @DisplayName("given the uniform crossover, when running, then the front is valid")
+    void givenUniformCrossover_whenRunning_thenFrontIsValid(AlgorithmType type) {
+      // Arrange
+      AlgorithmFactory factory =
+          new AlgorithmFactory(
+              type == AlgorithmType.GENETIC_ALGORITHM
+                  ? new StructuralMsaProblem(
+                      "test", proteins, List.of(new StructuralLddt(structures, 15f)))
+                  : problem,
+              seeds,
+              new AlgorithmConfiguration(
+                  EVALUATIONS, POPULATION_SIZE, POPULATION_SIZE, 1.0, 0.2, 1,
+                  MutationType.TM_SAFE_GAP_SHIFT, null, "", 0, 1, CrossoverType.TM_SAFE_UNIFORM),
+              structures,
+              new SeededRandom(7));
+      SearchRun run = factory.create(type);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertFalse(run.front().isEmpty(), type.toString());
+      if (type.isConfigurable()) {
+        assertTrue(run.configuration().contains("--crossover tmSafeUniform"), run.configuration());
+      }
+    }
   }
 
   @Nested
