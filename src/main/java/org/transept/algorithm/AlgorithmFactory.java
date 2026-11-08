@@ -19,6 +19,7 @@ import org.transept.operator.RandomSource;
 import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
+import org.transept.operator.TmSafeUniformCrossover;
 import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.problem.StructuralMsaProblem;
 import org.transept.structure.ProteinStructures;
@@ -228,6 +229,7 @@ public final class AlgorithmFactory {
     values.put(
         "offspringPopulationSize", Integer.toString(configuration.offspringPopulationSize()));
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
+    values.put("crossover", crossoverName(configuration.crossoverType()));
     values.put("cutCandidates", Integer.toString(configuration.cutCandidates()));
     values.put("mutation", mutationName(configuration.mutationType()));
     values.put("mutationProbability", Double.toString(configuration.mutationProbability()));
@@ -251,6 +253,13 @@ public final class AlgorithmFactory {
       String name, AsynchronousMultiThreadedGeneticAlgorithm<MsaSolution> algorithm) {
     algorithm.setInitialSolutionsCreation(population());
     return SearchRun.of(algorithm, name);
+  }
+
+  private static String crossoverName(CrossoverType type) {
+    return switch (type) {
+      case TM_SAFE_SINGLE_POINT -> MsaOperators.TM_SAFE_SINGLE_POINT;
+      case TM_SAFE_UNIFORM -> MsaOperators.TM_SAFE_UNIFORM;
+    };
   }
 
   private static String mutationName(MutationType type) {
@@ -368,8 +377,13 @@ public final class AlgorithmFactory {
   }
 
   private CrossoverOperator<MsaSolution> crossover() {
-    return new TmSafeSinglePointCrossover(
-        configuration.crossoverProbability(), configuration.cutCandidates(), random);
+    return switch (configuration.crossoverType()) {
+      case TM_SAFE_SINGLE_POINT ->
+          new TmSafeSinglePointCrossover(
+              configuration.crossoverProbability(), configuration.cutCandidates(), random);
+      case TM_SAFE_UNIFORM ->
+          new TmSafeUniformCrossover(configuration.crossoverProbability(), random);
+    };
   }
 
   private MutationOperator<MsaSolution> mutation() {

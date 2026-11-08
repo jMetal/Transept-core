@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.transept.algorithm.AlgorithmConfiguration;
 import org.transept.algorithm.AlgorithmType;
+import org.transept.algorithm.CrossoverType;
 import org.transept.algorithm.MutationType;
 import org.transept.evolver.MsaConfigurations;
 import org.transept.objective.ObjectiveSet;
@@ -106,6 +107,14 @@ public final class RunCommand implements Callable<Integer> {
 
   @Option(names = "--crossover-probability", description = "Default: 0.8.")
   Double crossoverProbability;
+
+  @Option(
+      names = "--crossover",
+      description =
+          "Crossover operator: ${COMPLETION-CANDIDATES}. Default: TM_SAFE_SINGLE_POINT. Neither"
+              + " cuts a transmembrane helix. TM_SAFE_UNIFORM exchanges blocks between the"
+              + " columns where both parents agree, adding no gap.")
+  CrossoverType crossover;
 
   @Option(
       names = "--cut-candidates",
@@ -206,7 +215,8 @@ public final class RunCommand implements Callable<Integer> {
                   maxShift == null ? TmSafeGapShiftMutation.UNLIMITED_SHIFT : maxShift,
                   cutCandidates == null
                       ? TmSafeSinglePointCrossover.DEFAULT_CUT_CANDIDATES
-                      : cutCandidates),
+                      : cutCandidates,
+                  crossover == null ? CrossoverType.TM_SAFE_SINGLE_POINT : crossover),
               algorithm,
               mappingPolicy,
               StructuralLddt.DEFAULT_CUTOFF,
@@ -254,6 +264,7 @@ public final class RunCommand implements Callable<Integer> {
         "--crossover-probability");
     requireNotBoth(mutationProbability != null, values, "mutationProbability",
         "--mutation-probability");
+    requireNotBoth(crossover != null, values, "crossover", "--crossover");
     requireNotBoth(mutation != null, values, "mutation", "--mutation");
     requireNotBoth(maxShift != null, values, "maxShift", "--max-shift");
     requireNotBoth(cutCandidates != null, values, "cutCandidates", "--cut-candidates");

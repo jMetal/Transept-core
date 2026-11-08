@@ -21,6 +21,7 @@ import org.transept.operator.TmSafeSinglePointCrossover;
  * @param maxShift largest number of columns the mutation can move a gap run; 0 for no limit
  * @param cutCandidates valid cuts the crossover draws, of which it uses the one with the least
  *     padding; 1 for a cut at random
+ * @param crossoverType crossover operator
  */
 public record AlgorithmConfiguration(
     int maxEvaluations,
@@ -33,7 +34,8 @@ public record AlgorithmConfiguration(
     Duration maxTime,
     String configuration,
     int maxShift,
-    int cutCandidates) {
+    int cutCandidates,
+    CrossoverType crossoverType) {
 
   /** Crossover probability used in the published experiments. */
   public static final double DEFAULT_CROSSOVER_PROBABILITY = 0.8;
@@ -60,6 +62,53 @@ public record AlgorithmConfiguration(
       throw new IllegalArgumentException("maxShift cannot be negative: " + maxShift);
     }
     requirePositive(cutCandidates, "cutCandidates");
+    if (crossoverType == null) {
+      throw new IllegalArgumentException("crossoverType is required");
+    }
+  }
+
+  /**
+   * Creates a configuration with the default crossover, the TM-safe single-point one.
+   *
+   * @param maxEvaluations stopping criterion, number of evaluations (ignored if {@code maxTime}
+   *     is set)
+   * @param populationSize population size
+   * @param offspringPopulationSize offspring created per generation
+   * @param crossoverProbability probability of the TM-safe crossover
+   * @param mutationProbability probability of the gap-shift mutation
+   * @param threads number of evaluation threads; 1 evaluates sequentially
+   * @param mutationType mutation operator
+   * @param maxTime stopping criterion by computing time, or {@code null} to stop by evaluations
+   * @param configuration configuration string of the algorithms built from a parameter space
+   * @param maxShift largest number of columns the mutation can move a gap run; 0 for no limit
+   * @param cutCandidates valid cuts the crossover draws, of which it uses the one with the least
+   *     padding; 1 for a cut at random
+   */
+  public AlgorithmConfiguration(
+      int maxEvaluations,
+      int populationSize,
+      int offspringPopulationSize,
+      double crossoverProbability,
+      double mutationProbability,
+      int threads,
+      MutationType mutationType,
+      Duration maxTime,
+      String configuration,
+      int maxShift,
+      int cutCandidates) {
+    this(
+        maxEvaluations,
+        populationSize,
+        offspringPopulationSize,
+        crossoverProbability,
+        mutationProbability,
+        threads,
+        mutationType,
+        maxTime,
+        configuration,
+        maxShift,
+        cutCandidates,
+        CrossoverType.TM_SAFE_SINGLE_POINT);
   }
 
   /**

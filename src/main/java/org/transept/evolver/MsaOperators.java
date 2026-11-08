@@ -8,6 +8,7 @@ import org.transept.operator.RandomSource;
 import org.transept.operator.TmSafeBlockShiftMutation;
 import org.transept.operator.TmSafeGapShiftMutation;
 import org.transept.operator.TmSafeSinglePointCrossover;
+import org.transept.operator.TmSafeUniformCrossover;
 import org.transept.operator.TmSafeWindowRealignMutation;
 import org.transept.structure.ProteinStructures;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
@@ -18,6 +19,9 @@ public final class MsaOperators {
 
   /** Crossover that never cuts a transmembrane helix. */
   public static final String TM_SAFE_SINGLE_POINT = "tmSafeSinglePoint";
+
+  /** Uniform crossover between the positions where both parents agree; adds no gap. */
+  public static final String TM_SAFE_UNIFORM = "tmSafeUniform";
 
   /** Gap shift that never breaks a transmembrane helix. */
   public static final String TM_SAFE_GAP_SHIFT = "tmSafeGapShift";
@@ -35,7 +39,7 @@ public final class MsaOperators {
   public static final String TM_SAFE_WINDOW_REALIGN = "tmSafeWindowRealign";
 
   /** Crossover names, in the order of the parameter spaces. */
-  public static final List<String> CROSSOVERS = List.of(TM_SAFE_SINGLE_POINT);
+  public static final List<String> CROSSOVERS = List.of(TM_SAFE_SINGLE_POINT, TM_SAFE_UNIFORM);
 
   /** Mutation names, in the order of the parameter spaces. */
   public static final List<String> MUTATIONS =
@@ -54,17 +58,21 @@ public final class MsaOperators {
    * @param name crossover name
    * @param probability crossover probability
    * @param cutCandidates valid cuts drawn per crossover, of which the one with the least padding is
-   *     used
+   *     used (single-point crossover only)
    * @param random source of random numbers
    * @return the crossover
    * @throws IllegalArgumentException if the name is unknown
    */
   public static CrossoverOperator<MsaSolution> crossover(
       String name, double probability, int cutCandidates, RandomSource random) {
-    if (!TM_SAFE_SINGLE_POINT.equals(name)) {
-      throw new IllegalArgumentException("Unknown crossover: " + name + "; valid: " + CROSSOVERS);
-    }
-    return new TmSafeSinglePointCrossover(probability, cutCandidates, random);
+    return switch (name) {
+      case TM_SAFE_SINGLE_POINT ->
+          new TmSafeSinglePointCrossover(probability, cutCandidates, random);
+      case TM_SAFE_UNIFORM -> new TmSafeUniformCrossover(probability, random);
+      default ->
+          throw new IllegalArgumentException(
+              "Unknown crossover: " + name + "; valid: " + CROSSOVERS);
+    };
   }
 
   /**

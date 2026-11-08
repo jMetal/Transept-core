@@ -42,6 +42,7 @@ variation:
               range: [1, 64]
           values:
             tmSafeSinglePoint:
+            tmSafeUniform:
         mutation:
           type: categorical
           globalSubParameters:
