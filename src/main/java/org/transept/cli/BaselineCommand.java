@@ -19,7 +19,8 @@ import picocli.CommandLine.Option;
 @Command(
     name = "baseline",
     mixinStandardHelpOptions = true,
-    description = "Score every precomputed alignment of the given datasets.")
+    description =
+        "Score every precomputed alignment of the given datasets, or the given alignment files.")
 public final class BaselineCommand implements Callable<Integer> {
 
   @Option(names = "--data-root", required = true, description = "Dataset root (.../GPCRdb).")
@@ -31,6 +32,14 @@ public final class BaselineCommand implements Callable<Integer> {
       split = ",",
       description = "Dataset names, e.g. classF,classT2_19.")
   List<String> datasets;
+
+  @Option(
+      names = "--alignments",
+      split = ",",
+      description =
+          "Score these aligned FASTA files instead of the precomputed ones, e.g. the internal"
+              + " seeds of a run; needs a single dataset.")
+  List<Path> alignments;
 
   @Option(names = "--output", description = "CSV file to write; standard output if absent.")
   Optional<Path> output;
@@ -48,8 +57,15 @@ public final class BaselineCommand implements Callable<Integer> {
         new BaselineScorer(
             dataRoot, mappingPolicy, StructuralLddt.DEFAULT_CUTOFF);
     List<BaselineScore> scores = new ArrayList<>();
-    for (String dataset : datasets) {
-      scores.addAll(scorer.score(dataset));
+    if (alignments != null && !alignments.isEmpty()) {
+      if (datasets.size() != 1) {
+        throw new IllegalArgumentException("--alignments needs a single dataset in --datasets");
+      }
+      scores.addAll(scorer.score(datasets.get(0), alignments));
+    } else {
+      for (String dataset : datasets) {
+        scores.addAll(scorer.score(dataset));
+      }
     }
     String csv = toCsv(scores);
     if (output.isPresent()) {

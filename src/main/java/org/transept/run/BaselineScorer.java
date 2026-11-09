@@ -83,6 +83,19 @@ public final class BaselineScorer {
     if (!Files.isDirectory(directory)) {
       throw new InvalidInputFileException("Missing precomputed directory: " + directory);
     }
+    return score(dataset, PrecomputedAlignments.list(directory));
+  }
+
+  /**
+   * Scores the given alignment files of a dataset, in the given order, such as the internal seeds
+   * of a run. A file outside the dataset root is reported with its absolute path.
+   *
+   * @param dataset dataset name
+   * @param files aligned FASTA files of the proteins of the dataset
+   * @return one score per file; unreadable or inconsistent files are reported, not thrown
+   * @throws IOException if the topology or structures cannot be read
+   */
+  public List<BaselineScore> score(String dataset, List<Path> files) throws IOException {
     Path topology =
         dataRoot.resolve("sequences/tmregions").resolve(dataset + "_predicted_topologies.3line");
     ProteinSet proteins = new ThreeLineTopologyReader().read(topology);
@@ -98,7 +111,6 @@ public final class BaselineScorer {
             TopologyAwareSumOfPairs.withDefaultParameters(),
             new StructuralLddt(structures, cutoff));
 
-    List<Path> files = PrecomputedAlignments.list(directory);
     List<BaselineScore> scores = new ArrayList<>(files.size());
     for (Path file : files) {
       scores.add(scoreFile(dataset, file, proteins, objectives));
@@ -110,7 +122,10 @@ public final class BaselineScorer {
       String dataset, Path file, ProteinSet proteins, List<Objective> objectives)
       throws IOException {
     String method = PrecomputedAlignments.methodName(file, dataset);
-    String relative = dataRoot.relativize(file).toString();
+    Path absolute = file.toAbsolutePath().normalize();
+    Path root = dataRoot.toAbsolutePath().normalize();
+    String relative =
+        absolute.startsWith(root) ? root.relativize(absolute).toString() : absolute.toString();
     BaselineScore score;
     try {
       Msa read = new FastaAlignmentReader().read(file, proteins);
