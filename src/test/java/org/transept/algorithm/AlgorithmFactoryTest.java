@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -177,6 +181,27 @@ class AlgorithmFactoryTest {
       for (MsaSolution solution : run.front()) {
         assertEquals(3, solution.toMsa().size());
       }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = AlgorithmType.class,
+        names = {"NSGA_II", "SPEA2", "SMS_EMOA", "PAES", "RANDOM_SEEDED", "ASYNC_NSGA_II"})
+    @DisplayName("given a stop request, when running, then it ends early with a valid front")
+    void givenStopRequest_whenRunning_thenItEndsEarlyWithValidFront(
+        AlgorithmType type, @TempDir Path directory) throws IOException {
+      // Arrange: the stop is requested before the run starts
+      Path file = Files.writeString(directory.resolve(StopRequest.FILE_NAME), "");
+      StopRequest stop = StopRequest.byFile(file);
+      SearchRun run = factory(POPULATION_SIZE, 0.2).stoppableBy(stop).create(type);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertTrue(run.evaluations() < EVALUATIONS, type + ": " + run.evaluations());
+      assertFalse(run.front().isEmpty(), type + " after " + run.evaluations() + " evaluations");
+      assertTrue(stop.wasRequested());
     }
 
     @ParameterizedTest

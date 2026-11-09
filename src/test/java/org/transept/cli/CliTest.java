@@ -1,9 +1,11 @@
 package org.transept.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -12,6 +14,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.transept.algorithm.AlgorithmType;
 import org.transept.algorithm.MutationType;
+import org.transept.algorithm.StopRequest;
 import org.transept.run.BaselineScorer.BaselineScore;
 import org.transept.testing.SyntheticDataset;
 
@@ -160,6 +164,51 @@ class CliTest {
       // Act & Assert
       assertEquals(2, TranseptCli.execute("run", "--dataset", "x"));
       assertEquals(0, TranseptCli.execute("--version"));
+    }
+
+    @Test
+    @DisplayName("given a stop requested during the run, when running, then it keeps its results")
+    void givenStopRequestedDuringTheRun_whenRunning_thenItKeepsItsResults() throws Exception {
+      // Arrange: a budget too large to finish, and a stop requested once the run has started
+      Path runDirectory = outputRoot.resolve("ejecuciones/synthetic/stopped");
+      Thread user =
+          new Thread(
+              () -> {
+                try {
+                  while (!Files.isRegularFile(runDirectory.resolve("progress.jsonl"))) {
+                    Thread.sleep(20);
+                  }
+                  Files.writeString(runDirectory.resolve(StopRequest.FILE_NAME), "");
+                } catch (IOException | InterruptedException exception) {
+                  Thread.currentThread().interrupt();
+                }
+              });
+      user.start();
+
+      // Act
+      int status =
+          assertTimeoutPreemptively(
+              Duration.ofSeconds(60),
+              () ->
+                  TranseptCli.execute(
+                      "run",
+                      "--data-root", dataRoot.toString(),
+                      "--dataset", SyntheticDataset.NAME,
+                      "--seeds", "left,right",
+                      "--output-root", outputRoot.toString(),
+                      "--run-id", "stopped",
+                      "--seed", "3",
+                      "--max-evaluations", "100000000",
+                      "--population-size", "8",
+                      "--progress-interval", "8"));
+      user.join();
+
+      // Assert
+      String metadata = Files.readString(runDirectory.resolve("metadata.json"));
+      assertEquals(0, status);
+      assertTrue(metadata.contains("\"stoppedByUser\":true"), metadata);
+      assertTrue(Files.isRegularFile(runDirectory.resolve("FUN.csv")));
+      assertFalse(Files.exists(runDirectory.resolve(StopRequest.FILE_NAME)));
     }
 
     @Test
