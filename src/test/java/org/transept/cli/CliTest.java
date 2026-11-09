@@ -1,6 +1,7 @@
 package org.transept.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -430,6 +431,50 @@ class CliTest {
       assertEquals(0, status);
       assertEquals("dataset,method,SOPwTP,lDDT,file,status,message", lines.get(0));
       assertEquals(4, lines.size());
+    }
+
+    @Test
+    @DisplayName("given alignment files, when scoring, then only they are written")
+    void givenAlignmentFiles_whenScoring_thenOnlyTheyAreWritten() throws IOException {
+      // Arrange
+      Path csv = directory.resolve("seeds.csv");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "baseline",
+              "--data-root", dataRoot.toString(),
+              "--datasets", SyntheticDataset.NAME,
+              "--alignments", leftSeed().toString(),
+              "--output", csv.toString());
+
+      // Assert
+      List<String> lines = Files.readAllLines(csv);
+      assertEquals(0, status);
+      assertEquals(2, lines.size());
+      assertTrue(lines.get(1).contains("\"left\""), lines.get(1));
+    }
+
+    @Test
+    @DisplayName("given alignment files and two datasets, when scoring, then it fails")
+    void givenAlignmentFilesAndTwoDatasets_whenScoring_thenItFails() {
+      // Act
+      int status =
+          TranseptCli.execute(
+              "baseline",
+              "--data-root", dataRoot.toString(),
+              "--datasets", SyntheticDataset.NAME + ",other",
+              "--alignments", leftSeed().toString());
+
+      // Assert
+      assertNotEquals(0, status);
+    }
+
+    private Path leftSeed() {
+      return dataRoot
+          .resolve("precomputed")
+          .resolve(SyntheticDataset.NAME)
+          .resolve("left_" + SyntheticDataset.NAME + ".fasta");
     }
 
     @Test

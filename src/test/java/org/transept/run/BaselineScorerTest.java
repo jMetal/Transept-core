@@ -75,6 +75,24 @@ class BaselineScorerTest {
     }
 
     @Test
+    @DisplayName("given files outside the root, when scoring them, then they score the same")
+    void givenFilesOutsideTheRoot_whenScoringThem_thenTheyScoreAsPrecomputed(
+        @TempDir Path elsewhere) throws IOException {
+      // Arrange: the true alignment, saved as a seed of a run
+      Path seed = elsewhere.resolve("biojava-g20x2.fasta");
+      Files.copy(root.resolve("precomputed/synthetic/true_synthetic.fasta"), seed);
+
+      // Act
+      List<BaselineScore> scores = scorer.score(SyntheticDataset.NAME, List.of(seed));
+
+      // Assert
+      assertEquals(1, scores.size());
+      assertEquals("biojava-g20x2", scores.get(0).method());
+      assertEquals(seed.toAbsolutePath().normalize().toString(), scores.get(0).file());
+      assertEquals(scorer.score(SyntheticDataset.NAME).get(3).values(), scores.get(0).values());
+    }
+
+    @Test
     @DisplayName("given a missing dataset, when scoring, then an exception is thrown")
     void givenMissingDataset_whenScoring_thenInvalidInputFileExceptionIsThrown() {
       // Act & Assert
