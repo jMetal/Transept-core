@@ -141,7 +141,9 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar algorithms
 
 ## `baseline`
 
-Scores every precomputed alignment of the given datasets with the two objectives.
+Scores every precomputed alignment of the given datasets with the two objectives, or the alignment
+files given with `--alignments`, such as the internal seeds that a run saved in its `seeds/`
+folder (their paths are in its `metadata.json`).
 
 ```bash
 java -jar target/transept-core-0.1.0-jar-with-dependencies.jar baseline \
@@ -154,6 +156,7 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar baseline \
 | --- | --- | --- |
 | `--data-root` | (required) | `GPCRdb` directory |
 | `--datasets` | (required) | Dataset names, comma-separated |
+| `--alignments` | (none) | Aligned FASTA files to score instead of the precomputed ones, comma-separated; needs a single dataset. The method is the name of the file without `.fasta` |
 | `--output` | standard output | CSV file to write (see [outputs](outputs.md)) |
 | `--mapping-policy` | as in `run` | |
 
