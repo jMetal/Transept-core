@@ -14,17 +14,29 @@ line that can be used on its own or driven by the Transept graphical interface.
 Transept refines alignments produced by existing tools (MAFFT, Kalign, ClustalW...) or computed
 internally with BioJava, using multiobjective evolutionary algorithms built on
 [jMetal](https://github.com/jMetal/jMetal) and [Evolver](https://github.com/jMetal/Evolver).
-Every solution is an alignment, and by default two objectives are maximised at the same time:
+Every solution is an alignment, scored by objectives that are maximised at the same time. None of
+them uses a reference alignment:
 
 | Objective | What it rewards |
 | --- | --- |
 | **SOPwTP** (topology-aware sum of pairs) | Residue pairs scored with PHAT when both residues are transmembrane (TM) and BLOSUM62 otherwise; affine gap penalties that are higher in TM regions (8/3) than elsewhere (3/1) |
 | **lDDT** (structural consistency) | Superposition-free lDDT computed from AlphaFold2 Cα distance matrices (inclusion radius 15 Å): aligned residues should have the same local distances in every structure |
+| **Coverage** (aligned-pair coverage) | Aligning residues at all: for every pair of proteins, the columns where both have a residue, relative to the shorter protein. The lDDT is a mean over the aligned residues, so it can rise by aligning fewer of them; the coverage counters that |
 
-`--objectives` selects other formulations (the lDDT alone, or a third objective, the
-aligned-pair coverage). The search never cuts a TM helix when recombining alignments, and the
-default mutation moves gap blocks preferably into loops. The result is a set of Pareto-optimal
-alignments that trade sequence and structural consistency.
+`--objectives` chooses the formulation:
+
+| `--objectives` | Objectives | Algorithms |
+| --- | --- | --- |
+| `SOPWTP_LDDT` (default) | SOPwTP and lDDT | The multiobjective ones |
+| `SOPWTP_LDDT_COVERAGE` (experimental) | SOPwTP, lDDT and coverage | The multiobjective ones |
+| `LDDT` | lDDT alone | The genetic algorithms |
+
+The random searches accept any of them.
+
+The [metrics reference](docs/reference/metrics.md) defines the coverage precisely. No operator ever
+separates two TM residues that were together, so the search never breaks a helix that the seed
+alignments kept whole. The result is a set of Pareto-optimal alignments that trade sequence and
+structural consistency (and, with three objectives, how much is aligned).
 
 Algorithms: NSGA-II (default), SPEA2 and a genetic algorithm, configurable through Evolver
 parameter spaces, their asynchronous parallel variants, and NSGA-III, AGE-MOEA, SMS-EMOA,
