@@ -83,6 +83,7 @@ public final class AlgorithmFactory {
   private final AlgorithmConfiguration configuration;
   private final ProteinStructures structures;
   private final RandomSource random;
+  private StopRequest stop = StopRequest.NEVER;
 
   /**
    * Creates the factory.
@@ -104,6 +105,17 @@ public final class AlgorithmFactory {
     this.configuration = configuration;
     this.structures = structures;
     this.random = random;
+  }
+
+  /**
+   * Lets the algorithms built from now on stop early, keeping their results, when requested.
+   *
+   * @param request the request to watch
+   * @return this factory
+   */
+  public AlgorithmFactory stoppableBy(StopRequest request) {
+    this.stop = request == null ? StopRequest.NEVER : request;
+    return this;
   }
 
   /**
@@ -245,7 +257,7 @@ public final class AlgorithmFactory {
 
   private MsaRunContext context() {
     return new MsaRunContext(
-        seeds, structures, random, configuration.threads(), configuration.maxTime());
+        seeds, structures, random, configuration.threads(), configuration.maxTime(), stop);
   }
 
   /** An asynchronous algorithm of jMetal that starts from the seeded population. */
@@ -422,9 +434,11 @@ public final class AlgorithmFactory {
   }
 
   private Termination termination() {
-    return configuration.maxTime() == null
-        ? new TerminationByEvaluations(configuration.maxEvaluations())
-        : new TerminationByComputingTime(configuration.maxTime().toMillis());
+    Termination budget =
+        configuration.maxTime() == null
+            ? new TerminationByEvaluations(configuration.maxEvaluations())
+            : new TerminationByComputingTime(configuration.maxTime().toMillis());
+    return new StoppableTermination(budget, stop);
   }
 
   private Evaluation<MsaSolution> evaluation() {

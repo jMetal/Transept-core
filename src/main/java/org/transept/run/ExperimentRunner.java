@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import org.transept.algorithm.AlgorithmFactory;
 import org.transept.algorithm.SearchRun;
+import org.transept.algorithm.StopRequest;
 import org.transept.alignment.GapIntervals;
 import org.transept.alignment.MsaSolution;
 import org.transept.io.FastaAlignmentWriter;
@@ -81,6 +82,7 @@ public final class ExperimentRunner {
     JMetalRandom.getInstance().setSeed(configuration.randomSeed());
     Experiment experiment = Experiment.load(configuration);
     StructuralMsaProblem problem = experiment.problem();
+    StopRequest stop = StopRequest.byFile(directory.resolve(StopRequest.FILE_NAME));
     SearchRun search =
         new AlgorithmFactory(
                 problem,
@@ -88,6 +90,7 @@ public final class ExperimentRunner {
                 configuration.algorithm(),
                 experiment.structures(),
                 RandomSource.jmetal())
+            .stoppableBy(stop)
             .create(configuration.algorithmType());
     ProgressObserver progress =
         new ProgressObserver(problem, directory, configuration.progressInterval());
@@ -99,9 +102,11 @@ public final class ExperimentRunner {
     long runtime = search.runtimeMillis();
     writeRuntime(directory, runtime, search.evaluations());
     RunSummary summary = new RunSummary(directory, search.evaluations(), runtime, front.size());
-    write(
-        directory.resolve("metadata.json"),
-        Json.write(metadata(experiment, configuration, search, summary, start)) + "\n");
+    Map<String, Object> metadata = metadata(experiment, configuration, search, summary, start);
+    // Stopped by the user: the budget was not spent, and the run cannot be repeated exactly
+    metadata.put("stoppedByUser", stop.wasRequested());
+    write(directory.resolve("metadata.json"), Json.write(metadata) + "\n");
+    Files.deleteIfExists(directory.resolve(StopRequest.FILE_NAME));
     return summary;
   }
 

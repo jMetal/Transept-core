@@ -1,5 +1,6 @@
 package org.transept.evolver;
 
+import org.transept.algorithm.StoppableTermination;
 import org.transept.alignment.MsaSolution;
 import org.uma.evolver.parameter.ParameterSpace;
 import org.uma.jmetal.component.catalogue.common.evaluation.Evaluation;
@@ -51,10 +52,15 @@ final class MsaComponents {
         : new SequentialEvaluation<>(problem);
   }
 
-  /** The time limit of the context, or the given termination by evaluations. */
+  /**
+   * The time limit of the context, or the given termination by evaluations; either way, also met
+   * when the user asks the run to stop.
+   */
   static Termination termination(MsaRunContext context, Termination byEvaluations) {
-    return context.maxTime() == null
-        ? byEvaluations
-        : new TerminationByComputingTime(context.maxTime().toMillis());
+    Termination budget =
+        context.maxTime() == null
+            ? byEvaluations
+            : new TerminationByComputingTime(context.maxTime().toMillis());
+    return new StoppableTermination(budget, context.stop());
   }
 }
