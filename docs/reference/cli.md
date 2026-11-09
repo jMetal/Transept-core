@@ -58,6 +58,16 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
 | `--configuration` | (none) | NSGA-II, SPEA2 and the GA: configuration from their parameter space, `--parameter value ...` ([configuration](configuration.md)). Unset parameters keep their default |
 | `--configuration-file` | (none) | The same, read from the first non-blank line of a file |
 
+#### Stopping a run early
+
+Creating a file called `STOP` in the run directory (`<output-root>/ejecuciones/<dataset>/<run-id>/`)
+ends the run at its next check, as if its budget were spent: it writes its results as usual, records
+`"stoppedByUser": true` in `metadata.json` and deletes the file. The file is looked for at most
+five times per second. If the algorithm has no results yet, it first finishes its first generation
+(two populations evaluated), or its first solution in a random search. A run stopped this way cannot
+be repeated exactly. The Monitor page of the Transept interface does this with its **Stop and keep
+the results** button.
+
 `--crossover`, `--mutation`, `--crossover-probability`, `--mutation-probability`, `--max-shift`
 and `--cut-candidates` set the corresponding parameters of the configuration of the configurable algorithms; giving one of them and the same parameter in
 `--configuration` is an error.
