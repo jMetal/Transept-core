@@ -119,6 +119,12 @@ Reference: [command line](docs/reference/cli.md),
   `GPCRdb` directory.
 - `scripts/slurm/` prepares and runs experimental campaigns on a Slurm cluster.
 
+## Citation
+
+If you use Transept core, please cite it as described in [CITATION.cff](CITATION.cff); GitHub also
+shows it under "Cite this repository". The changes of every version are in
+[CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
 Transept core is free software, distributed under the

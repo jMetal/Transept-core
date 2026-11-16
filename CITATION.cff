@@ -1,0 +1,57 @@
+cff-version: 1.2.0
+message: "If you use Transept core, please cite it as below."
+type: software
+title: "Transept core: multiobjective, structure-guided multiple sequence alignment of transmembrane proteins"
+version: 0.1.0
+license: GPL-3.0-only
+repository-code: "https://github.com/jMetal/Transept-core"
+abstract: >-
+  Transept core refines multiple sequence alignments of transmembrane proteins with multiobjective
+  evolutionary algorithms. It optimises a topology-aware sum of pairs and a structural consistency
+  score computed from AlphaFold2 models, never splits a transmembrane helix, and returns a set of
+  trade-off alignments. It is the engine of the Transept interface.
+keywords:
+  - multiple sequence alignment
+  - transmembrane proteins
+  - G protein-coupled receptors
+  - multiobjective optimisation
+  - AlphaFold2
+  - jMetal
+authors:
+  - family-names: "Cedeño-Muñoz"
+    given-names: "Joel"
+    affiliation: "State Technical University of Quevedo"
+  - family-names: "Zambrano-Vega"
+    given-names: "Cristian"
+    affiliation: "State Technical University of Quevedo"
+  - family-names: "Nebro"
+    given-names: "Antonio J."
+    affiliation: "University of Málaga"
+references:
+  - type: article
+    title: "TMP-M2Align: A Topology-Aware Multiobjective Approach to the Multiple Sequence Alignment of Transmembrane Proteins"
+    authors:
+      - family-names: "Cedeño-Muñoz"
+        given-names: "Joel"
+      - family-names: "Zambrano-Vega"
+        given-names: "Cristian"
+      - family-names: "Nebro"
+        given-names: "Antonio J."
+    journal: "Algorithms"
+    volume: 18
+    issue: 10
+    start: 640
+    year: 2025
+    doi: "10.3390/a18100640"
+  - type: data
+    title: "A Curated Dataset of Human GPCR Sequences, AlphaFold-Predicted Structures, Transmembrane Topologies, and Reference Alignments for Structural Bioinformatics"
+    authors:
+      - family-names: "Zambrano-Vega"
+        given-names: "Cristian"
+      - family-names: "Cedeño-Muñoz"
+        given-names: "Joel"
+      - family-names: "Nebro"
+        given-names: "Antonio J."
+    version: "1.0.0"
+    year: 2026
+    doi: "10.5281/zenodo.23243974"
