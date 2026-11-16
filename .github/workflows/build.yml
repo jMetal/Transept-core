@@ -1,0 +1,29 @@
+name: Build
+
+# Compiles, runs the unit and integration tests, and checks the style (Checkstyle) and the line
+# coverage (JaCoCo), as `mvn verify` does locally. The integration tests that need the real
+# benchmark are skipped, because GPCR_DATASET is not set here.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the build records the git commit in metadata.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build, test and check
+        run: mvn -B verify
