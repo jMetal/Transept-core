@@ -10,12 +10,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  # On Linux only: the macOS hosted runners were often not available.
   verify:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
