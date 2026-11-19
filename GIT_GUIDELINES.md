@@ -6,11 +6,16 @@ This project follows the [Conventional Commits](https://www.conventionalcommits.
 
 | Branch | Role |
 |------------|------------------------------------------------------|
-| `develop`  | Default working branch. Development branches start here and are merged back into it |
-| `main`     | Published state. It only receives `develop`, on request |
+| `develop`  | Integration branch. Working branches start here and return here through a pull request |
+| `main`     | Published state. Only the maintainers bring `develop` into it |
+| `feat/...`, `fix/...`, `docs/...` | Working branches, one per change, started from `develop` |
 
-- Work on `develop` or on a development branch started from it; never commit directly to `main`.
-- Synchronise `develop` with `main`, and push both, only when explicitly requested.
+- Start every change on a working branch from an up-to-date `develop`, and open a pull request
+  into `develop`. Never commit directly to `main`.
+- Keep a pull request to one topic; describe what changes, why, and how it was checked.
+- A change of the command line or the output files of Transept core needs a matching pull request
+  in the other repository (Transept core or Transept); link them to each other.
+- AI assistants push, open pull requests or merge only when the user asks.
 
 ## Message format
 
@@ -34,7 +39,8 @@ This project follows the [Conventional Commits](https://www.conventionalcommits.
 Each commit must represent **one single logical change**. Guidelines:
 
 - If the commit message needs "and" to describe what it does, split it into two commits.
-- Ensure the project builds and all tests pass before committing (e.g., `mvn clean test`).
+- Ensure the project builds and all checks pass before committing: `mvn clean verify` in Transept
+  core, `make lint` and `make test` in Transept.
 - Never mix production code changes with test changes in the same commit.
 - Never mix code changes with documentation changes in the same commit.
 

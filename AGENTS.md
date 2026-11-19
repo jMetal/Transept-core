@@ -7,8 +7,9 @@ first, then `JAVA_CODING_GUIDELINES.md` and `GIT_GUIDELINES.md`.
 ## 1. What this project is
 
 Transept core is a multiobjective evolutionary tool (NSGA-II by default, built with jMetal and
-Evolver) for multiple sequence alignment (MSA) of transmembrane proteins, specifically human
-GPCRs. It derives from the TM-M2StructAlign software. By default it optimizes two objectives:
+Evolver) for multiple sequence alignment (MSA) of transmembrane proteins: human GPCRs first, and any
+other transmembrane family with a topology and structure models. It derives from the
+TM-M2StructAlign software. By default it optimizes two objectives:
 
 1. **SOPwTP** (`objective.TopologyAwareSumOfPairs`): sum of pairs using PHAT when both residues
    are transmembrane (TM) and BLOSUM62 otherwise, with affine gap penalties that differ for TM
@@ -88,7 +89,7 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 | `algorithm` | `SeededPopulationCreation`, `AlgorithmConfiguration`, `AlgorithmType`, `AlgorithmFactory` (NSGA-II, SPEA2 and the GA from `evolver`; asynchronous NSGA-II and GA from `jmetal-parallel`; NSGA-III, AGE-MOEA, SMS-EMOA, MOEA/D, PAES and random search built with jMetal), `SearchRun`, `RandomAlignmentCreation`, `PerturbedSeedCreation` |
 | `evolver` | Algorithms built with Evolver from a parameter space (`src/main/resources/parameterSpaces/*.yaml`) and a default configuration (`defaultConfigurations/*Default.txt`): `MsaNsga2`, `MsaSpea2`, `MsaGeneticAlgorithm`, their parameters (`MsaParameterFactory`, `Msa*Parameter`), `MsaComponents`, `MsaOperators`, `MsaConfigurations`, `MsaRunContext` |
 | `run` | `RunConfiguration`, `Experiment`, `ExperimentRunner`, `ProgressObserver`, `BaselineScorer`, `Json` |
-| `cli` | `run` and `baseline` commands |
+| `cli` | The commands `run`, `seeds`, `algorithms`, `baseline`, `score` and `repair` |
 | `evaluation` | Comparison with GPCRdb reference alignments (`ScoreReport`, command `score`) |
 
 ## 5. Conventions
@@ -113,10 +114,11 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
 
 ## 6. Pitfalls (read before touching these areas)
 
-1. **Objective 2 differs from the published one.** The lDDT is the mean of the anchor scores; the
-   original aggregation (harmonic mean with occupancy, divided by the length) rewarded compact
-   alignments and was removed (finding A3). Like any superposition-free local score, it is nearly
-   blind to helix register shifts: check alignments against reference-based metrics.
+1. **Objective 2 differs from the one of TM-M2StructAlign.** The lDDT is the mean of the anchor
+   scores; the original aggregation (harmonic mean with occupancy, divided by the length) rewarded
+   short, compact alignments over complete ones, so it was removed. Like any superposition-free
+   local score, it is nearly blind to helix register shifts: check alignments against
+   reference-based metrics.
 2. **Structure mapping.** The verified mapping corrects OXER1 and MCHR1, which the original
    implementation mis-mapped; it changes the lDDT of classA_002, classA_004 and classA_004_19.
    The published values can only be reproduced with the original TM-M2StructAlign software
@@ -132,7 +134,8 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
    in `@TempDir`.
 6. **TM integrity is not a formal constraint** (`numberOfConstraints() = 0`), but no operator
    breaks a helix: the crossover never cuts one and every mutation forbids it. Gaps inside helices
-   inherited from the seeds are kept. Do not change defaults without asking the authors.
+   inherited from the seeds are kept unless `--repair-seeds` moves them out. Propose changes to
+   the defaults in an issue or a pull request before making them.
 7. **Superseded components are removed, not kept as options** (the original mutation, the
    original lDDT aggregation, the legacy mapping, the two-point crossover, the original filling
    of the initial population): reproducing the published results is the job of the original
@@ -159,15 +162,18 @@ commands and their expected output.
 - Modify files in `Dataset_Structural_GPCRs` that belong to the published v1.0.0 snapshot without
   an explicit request. Data changes go to a new version (v1.1.0).
 - Commit large data or run outputs to this repository.
-- Push, merge `develop` into `main`, or open PRs unless asked (the working branch is `develop`).
+- Commit to `main`, merge `develop` into `main`, push, or open pull requests unless asked. Work
+  on a branch started from `develop` and merge it through a pull request into `develop`.
 - Change objective definitions, operator behavior, or default hyperparameters silently: they
-  determine published results. Propose the change first.
+  determine the results users get. Propose the change first, with the evidence.
+
 ## 9. Graphical user interface
 
 The [Transept](https://github.com/jMetal/Transept) interface (Streamlit) drives this tool only
-through its commands (`run`, `seeds`, `algorithms`) and the output files, and reads the parameter
-spaces and default configurations from the JAR. Treat the CLI options, the output formats and
-those resources as its public API: when you change them, update the interface in step.
+through its commands (`run`, `seeds`, `algorithms`, `score`, `repair`) and the output files,
+and reads the parameter spaces and default configurations from the JAR. Treat the CLI options,
+the output formats and those resources as its public API: when you change them, update the
+interface in step.
 
 - Keep all logic in the library (`org.transept`); `cli` is a thin layer. No `System.exit`, no
   console-only output, and no interactive prompts in library code.
