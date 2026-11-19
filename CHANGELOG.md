@@ -11,7 +11,9 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 ### Added
 
-- Command line with the commands `run`, `seeds`, `algorithms`, `baseline` and `score`.
+- Command line with the commands `run`, `seeds`, `algorithms`, `baseline`, `score` and `repair`.
+- `repair`: moves the gaps that split a transmembrane helix out of any alignment, without search,
+  as `run --repair-seeds` does with the seeds (tutorial T8).
 - Algorithms: NSGA-II (default), SPEA2 and a genetic algorithm configurable from Evolver parameter
   spaces; their asynchronous parallel variants; NSGA-III, AGE-MOEA, AGE-MOEA-II, SMS-EMOA, MOEA/D,
   PAES, and two random searches as sanity checks.

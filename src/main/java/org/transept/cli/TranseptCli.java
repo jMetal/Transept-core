@@ -19,7 +19,8 @@ import picocli.CommandLine.Command;
       BaselineCommand.class,
       AlgorithmsCommand.class,
       SeedsCommand.class,
-      ScoreCommand.class
+      ScoreCommand.class,
+      RepairCommand.class
     })
 public final class TranseptCli {
 

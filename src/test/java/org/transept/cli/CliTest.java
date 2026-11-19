@@ -120,6 +120,121 @@ class CliTest {
   }
 
   @Nested
+  @DisplayName("When using the repair command")
+  class Repair {
+
+    private Path write(String name, String content) throws IOException {
+      Path path = directory.resolve(name);
+      Files.createDirectories(path.getParent());
+      Files.writeString(path, content);
+      return path;
+    }
+
+    @Test
+    @DisplayName("given a gap inside a helix, when repairing, then it moves to the nearest end")
+    void givenGapInsideHelix_whenRepairing_thenItMovesToTheNearestEnd() throws IOException {
+      // Arrange: the gap of a splits its helix after two residues; the N-terminal end is nearer
+      Path topology = write("topology.3line", ">a\nACDEF\nMMMMM\n>b\nACDEF\nMMMMM\n");
+      Path alignment = write("in/mafft_x.fasta", ">a\nAC-DEF\n>b\nACDEF-\n");
+      Path output = directory.resolve("out");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "repair",
+              "--topology", topology.toString(),
+              "--output-dir", output.toString(),
+              alignment.toString());
+
+      // Assert
+      assertEquals(0, status);
+      List<String> lines = Files.readAllLines(output.resolve("mafft_x.fasta"));
+      assertEquals(List.of(">a", "-ACDEF", ">b", "ACDEF-"), lines);
+    }
+
+    @Test
+    @DisplayName("given several alignments, when repairing, then each one is written")
+    void givenSeveralAlignments_whenRepairing_thenEachOneIsWritten() throws IOException {
+      // Arrange
+      Path topology = write("topology.3line", ">a\nACDEF\nMMMMM\n>b\nACDEF\nOOOOO\n");
+      Path first = write("in/one.fasta", ">a\nACDEF-\n>b\nAC-DEF\n");
+      Path second = write("in/two.fasta", ">a\nACD-EF\n>b\nACDEF-\n");
+      Path output = directory.resolve("out");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "repair",
+              "--topology", topology.toString(),
+              "--output-dir", output.toString(),
+              first.toString(),
+              second.toString());
+
+      // Assert: outside the helices (b is all O) a gap stays where it was
+      assertEquals(0, status);
+      assertEquals(
+          List.of(">a", "ACDEF-", ">b", "AC-DEF"), Files.readAllLines(output.resolve("one.fasta")));
+      assertEquals(
+          List.of(">a", "ACDEF-", ">b", "ACDEF-"), Files.readAllLines(output.resolve("two.fasta")));
+    }
+
+    @Test
+    @DisplayName("given an alignment of other proteins, when repairing, then it fails")
+    void givenAlignmentOfOtherProteins_whenRepairing_thenItFails() throws IOException {
+      // Arrange
+      Path topology = write("topology.3line", ">a\nACDEF\nMMMMM\n>b\nACDEF\nMMMMM\n");
+      Path alignment = write("in/x.fasta", ">a\nACDEG\n>b\nACDEF\n");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "repair",
+              "--topology", topology.toString(),
+              "--output-dir", directory.resolve("out").toString(),
+              alignment.toString());
+
+      // Assert
+      assertNotEquals(0, status);
+      assertFalse(Files.exists(directory.resolve("out/x.fasta")));
+    }
+
+    @Test
+    @DisplayName("given the input directory as output, when repairing, then it refuses")
+    void givenInputDirectoryAsOutput_whenRepairing_thenItRefuses() throws IOException {
+      // Arrange
+      Path topology = write("topology.3line", ">a\nACDEF\nMMMMM\n>b\nACDEF\nMMMMM\n");
+      Path alignment = write("in/x.fasta", ">a\nACDEF\n>b\nACDEF\n");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "repair",
+              "--topology", topology.toString(),
+              "--output-dir", directory.resolve("in").toString(),
+              alignment.toString());
+
+      // Assert
+      assertEquals(2, status);
+      assertEquals(">a\nACDEF\n>b\nACDEF\n", Files.readString(alignment));
+    }
+
+    @Test
+    @DisplayName("given no alignment, when repairing, then a usage error is reported")
+    void givenNoAlignment_whenRepairing_thenUsageErrorIsReported() throws IOException {
+      // Arrange
+      Path topology = write("topology.3line", ">a\nACDEF\nMMMMM\n");
+
+      // Act
+      int status =
+          TranseptCli.execute(
+              "repair", "--topology", topology.toString(), "--output-dir", directory.toString());
+
+      // Assert
+      assertEquals(2, status);
+    }
+  }
+
+  @Nested
   @DisplayName("When using the run command")
   class Run {
 

@@ -192,3 +192,27 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar score \
 | `--msa-root` | (required) | Directory searched recursively for alignments |
 | `--glob` | `MSA*.fasta` | Pattern of the alignment files |
 | `--output` | `<msa-root>/evaluation_metrics.csv` | CSV report; it never overwrites an input file |
+
+## `repair`
+
+Moves the gaps that split a transmembrane helix out of alignments, without any search: the same
+repair that `run --repair-seeds` applies to the seeds
+([T8](../tutorials/T8-repairing-helix-gaps.md)). Each gap run inside a helix moves to the nearest
+position outside the helices; the residues keep their order and the length of the alignment does
+not change. The repaired alignments are written with the same file names, and the command prints how
+many gap runs it moved in each one.
+
+```bash
+java -jar target/transept-core-0.1.0-jar-with-dependencies.jar repair \
+  --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
+  --output-dir repaired \
+  ../Dataset_Structural_GPCRs/GPCRdb/precomputed/classF/mafft_classF.fasta
+```
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--topology` | (required) | Three-line topology file of the proteins of the alignments |
+| `--output-dir` | (required) | Directory for the repaired alignments; it must not be that of an input |
+| `ALIGNMENT...` | (required) | One or more alignments (FASTA) of the proteins of the topology |
+
+An alignment whose rows are not the proteins of the topology, with their residues, is an error.

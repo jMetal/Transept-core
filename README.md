@@ -94,6 +94,7 @@ repository. [T6](docs/tutorials/T6-your-own-dataset.md) explains how to prepare 
 | [T5. Comparing algorithms and operators](docs/tutorials/T5-comparing-algorithms-and-operators.md) | Running configurations fairly, measuring them with quality indicators and paired tests |
 | [T6. Using your own dataset](docs/tutorials/T6-your-own-dataset.md) | The input files a dataset needs and how to check that they are read correctly |
 | [T7. Adding a variation operator](docs/tutorials/T7-adding-an-operator.md) | The rules every operator follows, its tests, and how to expose it in the command line |
+| [T8. Repairing the gaps inside helices](docs/tutorials/T8-repairing-helix-gaps.md) | What the repair does, the `repair` command and `--repair-seeds`, and how much it changes the aligners of the benchmark |
 
 Reference: [command line](docs/reference/cli.md),
 [configuring the algorithms](docs/reference/configuration.md),
