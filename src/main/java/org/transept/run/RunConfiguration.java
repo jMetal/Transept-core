@@ -27,7 +27,7 @@ import org.transept.structure.MappingPolicy;
  * @param progressInterval evaluations between progress records
  * @param objectives objectives that are optimised
  * @param repairSeeds whether the gaps that split a transmembrane helix are moved out of the
- *     seed alignments before the search
+ *     precomputed seed alignments before the search; the internal seeds are always repaired
  * @param internalSeedsDirectory directory of the precomputed internal seeds of the dataset ({@code
  *     seeds} command), or {@code null} to compute them in the run
  */

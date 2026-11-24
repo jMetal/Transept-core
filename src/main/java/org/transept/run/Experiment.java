@@ -107,14 +107,17 @@ public record Experiment(
                       new InvalidInputFileException(
                           "No unique seed alignment of '" + method + "' in "
                               + configuration.precomputedDirectory()));
-      seeds.add(seed(configuration, method, file, reader.read(file, proteins), "file"));
+      seeds.add(
+          seed(
+              method, file, reader.read(file, proteins), "file", configuration.repairSeeds()));
     }
     return List.copyOf(seeds);
   }
 
   /**
    * Reads the precomputed internal seeds if they match the proteins; otherwise computes them and
-   * writes them to {@code seeds/} of the run directory.
+   * writes them to {@code seeds/} of the run directory. Their aligner does not know the topology,
+   * so they are always repaired.
    */
   private static List<SeedAlignment> internalSeeds(
       RunConfiguration configuration, ProteinSet proteins) throws IOException {
@@ -125,8 +128,8 @@ public record Experiment(
         List<SeedAlignment> seeds = new ArrayList<>();
         for (InternalSeedStore.StoredSeed stored : lookup.seeds()) {
           seeds.add(
-              seed(configuration, InternalSeeds.NAME + ":" + stored.method(), stored.file(),
-                  stored.alignment(), "precomputed"));
+              seed(InternalSeeds.NAME + ":" + stored.method(), stored.file(),
+                  stored.alignment(), "precomputed", true));
         }
         return seeds;
       }
@@ -139,16 +142,15 @@ public record Experiment(
       Path file = directory.resolve(generated.method() + ".fasta");
       new FastaAlignmentWriter().write(generated.alignment(), file);
       seeds.add(
-          seed(configuration, InternalSeeds.NAME + ":" + generated.method(), file,
-              generated.alignment(), "computed"));
+          seed(InternalSeeds.NAME + ":" + generated.method(), file,
+              generated.alignment(), "computed", true));
     }
     return seeds;
   }
 
   private static SeedAlignment seed(
-      RunConfiguration configuration, String method, Path file, Msa alignment, String origin)
-      throws IOException {
-    if (!configuration.repairSeeds()) {
+      String method, Path file, Msa alignment, String origin, boolean repair) throws IOException {
+    if (!repair) {
       return new SeedAlignment(method, file, sha256(file), alignment, 0, origin);
     }
     TmHelixRepair.Result repaired = TmHelixRepair.repair(alignment);

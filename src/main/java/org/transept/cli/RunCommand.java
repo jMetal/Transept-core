@@ -64,9 +64,14 @@ public final class RunCommand implements Callable<Integer> {
 
   @Option(
       names = "--repair-seeds",
+      negatable = true,
+      defaultValue = "true",
+      fallbackValue = "true",
       description =
           "Move the gaps that split a transmembrane helix out of the seed alignments before the"
-              + " search (the operators never create such gaps, but keep those of the seeds).")
+              + " search (the operators never create such gaps). Default: yes."
+              + " --no-repair-seeds keeps the gaps of the precomputed alignments; the internal"
+              + " seeds are always repaired.")
   boolean repairSeeds;
 
   @Option(names = "--output-root", required = true, description = "Root of the results tree.")
