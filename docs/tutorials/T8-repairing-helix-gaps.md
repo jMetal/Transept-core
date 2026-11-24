@@ -11,8 +11,8 @@
 Most aligners do not know where the transmembrane helices are, and place gaps inside them: a gap
 inside a helix means that a stretch of a helix has no counterpart in the other proteins, which is
 rarely what the structures say. Transept's operators never open such a gap, but the seed alignments
-bring their own. The **repair** moves them out, without any search: before a run with
-`--repair-seeds`, or on any alignment with the `repair` command.
+bring their own. The **repair** moves them out, without any search: before every run (unless
+`--no-repair-seeds` is given), or on any alignment with the `repair` command.
 
 This tutorial explains what the repair does, how to use it, and how much it changes the accuracy of
 the aligners of the benchmark.
@@ -70,8 +70,9 @@ its inputs. To score the repaired alignments against a reference, use `score` wi
 
 ## Step 4: repairing the seeds of a run
 
-`run --repair-seeds` applies the same repair to every seed alignment, internal or precomputed, before
-the search. `metadata.json` records how many gap runs it moved in each seed (`repairedGapRuns`).
+`run` applies the same repair to every seed alignment before the search. With `--no-repair-seeds` the
+precomputed alignments keep their gaps, and so may the alignments of the front; the internal seeds
+are always repaired, because their aligner does not know the topology. `metadata.json` records how many gap runs it moved in each seed (`repairedGapRuns`).
 Since the operators never open a gap inside a helix, no alignment of the final front has one.
 
 The graphical interface of Transept repairs the seeds by default (**Repair the seeds** in **New
@@ -105,13 +106,16 @@ references (median over the datasets where they can be scored):
   counts transmembrane residues facing a gap in *another* protein, and a repaired helix can end up
   facing the gaps of other rows. Gaps inside helices and the TM-gap rate measure different things.
 
-In short: the repair removes the gaps inside helices at almost no cost in accuracy. It is not what
-makes a Transept alignment better than its seeds; the search is.
+In short: on these datasets the repair removes the gaps inside helices at almost no cost in accuracy.
+It is not what makes a Transept alignment better than its seeds; the search is. In more divergent
+families the cost can be higher, because some gaps inside annotated helices are also in the reference
+alignments: compare both options if you are not sure.
 
 ## Summary
 
 | To | Use |
 | --- | --- |
 | Remove the gaps inside helices of any alignment | `repair --topology ... --output-dir ... ALIGNMENT...` |
-| Start a run from repaired seeds | `run --repair-seeds` |
+| Start a run from repaired seeds | `run` (default) |
+| Keep the gaps of the precomputed seeds | `run --no-repair-seeds` |
 | See how many gap runs were moved in each seed | `repairedGapRuns` in `metadata.json` |

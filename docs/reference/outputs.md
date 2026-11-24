@@ -52,7 +52,7 @@ the dataset version and the git commit of `metadata.json`, it is enough to repea
 | `startedAt`, `finishedAt`, `runtimeMs`, `evaluations`, `frontSize` | Timing and size of the result |
 | `stoppedByUser` | `true` if the run was stopped early with a `STOP` file ([cli](cli.md#stopping-a-run-early)): `evaluations` is then below the budget, and the run cannot be repeated exactly |
 | `objectives` | Objective names, in the order of `FUN.csv` |
-| `seeds` | For every seed: `method` (`internal:biojava-g<open>x<extension>` for internal seeds), file, SHA-256, `duplicateOf` if it is identical to an earlier seed, `repairedGapRuns` (gap runs moved out of helices by `--repair-seeds`) and `origin` (`file`, `precomputed` or `computed`) |
+| `seeds` | For every seed: `method` (`internal:biojava-g<open>x<extension>` for internal seeds), file, SHA-256, `duplicateOf` if it is identical to an earlier seed, `repairedGapRuns` (gap runs moved out of helices by the repair) and `origin` (`file`, `precomputed` or `computed`) |
 | `structures` | For every protein: mapping `status`, sequence `identity` and `coverage` of the mapping, and a `detail` message |
 | `proteinsWithoutStructure` | Proteins whose structure is not used by the lDDT |
 

@@ -34,7 +34,7 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
 | `--data-root` | (required) | `GPCRdb` directory of the [dataset repository](https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs) |
 | `--dataset` | (required) | Dataset name, e.g. `classF` or `classA_001_19` |
 | `--seeds` | `internal` | Seed alignments of the initial population, comma-separated: `internal` (up to 10 alignments computed by the tool with BioJava's progressive aligner, see the `seeds` command) and/or tools whose `precomputed/<dataset>/<tool>_<dataset>.fasta` exist |
-| `--repair-seeds` | off | Move the gaps that split a transmembrane helix out of every seed before the search (the operators never create such gaps, but keep those of the seeds) |
+| `--repair-seeds`, `--no-repair-seeds` | on | Move the gaps that split a transmembrane helix out of every seed before the search. The operators never create such gaps, so no alignment of the front has one. `--no-repair-seeds` keeps the gaps of the precomputed alignments; the internal seeds are always repaired |
 | `--output-root` | (required) | Root of the results tree |
 | `--run-id` | (required) | Run identifier; the run writes to `<output-root>/ejecuciones/<dataset>/<run-id>/`, which must not exist |
 | `--seed` | (required) | Seed of the random generator; the same seed and options reproduce the run exactly |
@@ -196,7 +196,7 @@ java -jar target/transept-core-0.1.0-jar-with-dependencies.jar score \
 ## `repair`
 
 Moves the gaps that split a transmembrane helix out of alignments, without any search: the same
-repair that `run --repair-seeds` applies to the seeds
+repair that `run` applies to the seeds by default
 ([T8](../tutorials/T8-repairing-helix-gaps.md)). Each gap run inside a helix moves to the nearest
 position outside the helices; the residues keep their order and the length of the alignment does
 not change. The repaired alignments are written with the same file names, and the command prints how
