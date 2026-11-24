@@ -1,18 +1,25 @@
 package org.transept.operator;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.LongStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.transept.alignment.GapIntervals;
+import org.transept.alignment.Msa;
 import org.transept.alignment.MsaSolution;
 import org.transept.model.ProteinSet;
+import org.transept.objective.TopologyAwareSumOfPairs;
 import org.transept.testing.Alignments;
 import org.transept.testing.SeededRandom;
 
@@ -79,6 +86,113 @@ class TmSafeWindowRealignMutationTest {
 
     // Assert
     assertEquals("AA-AA", rows.get(0));
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @CsvSource(
+      delimiter = '|',
+      value = {
+        // Each expected row would be another if one transmembrane residue were enough for PHAT
+        "only the mutated residue is transmembrane | PKKD:OMMO | NAWER:OOOOO | PKKD-",
+        "only the other residue is transmembrane   | NIEP:OOOO | YYKDL:OMMMO | NIEP-",
+        "both helices, with mixed pairs when moved | REYI:OMMO | PQGVI:OMMMO | -REYI"
+      })
+  @DisplayName("given a topology, when realigning, then the matrices are those of SOPwTP")
+  void givenTopology_whenRealigning_thenMatricesAreThoseOfSopwtp(
+      String name, String mutated, String other, String expected) {
+    // Arrange
+    ProteinSet proteins = Alignments.proteins(mutated, other);
+    String residues = proteins.get(0).residues();
+
+    // Act
+    List<String> rows = realign(proteins, 0, 0, 5, residues + "-", proteins.get(1).residues());
+
+    // Assert
+    assertEquals(expected, rows.get(0), name);
+    assertEquals(bestScore(proteins, 5, rows), score(proteins, rows), name);
+  }
+
+  @ParameterizedTest
+  @MethodSource("seeds")
+  @DisplayName("given rows without gaps, when realigning one, then it gets the best SOPwTP")
+  void givenRowsWithoutGaps_whenRealigningOne_thenItGetsTheBestSopwtp(long seed) {
+    // Arrange: with the other rows full and the ends outside the membrane, the score is exact
+    Random random = new Random(seed);
+    int columns = 9;
+    int gaps = 1 + random.nextInt(4);
+    ProteinSet proteins =
+        Alignments.proteins(
+            randomProtein(random, columns - gaps),
+            randomProtein(random, columns),
+            randomProtein(random, columns));
+    String start = proteins.get(0).residues() + "-".repeat(gaps);
+
+    // Act
+    List<String> rows =
+        realign(proteins, 0, 0, columns, start, proteins.get(1).residues(),
+            proteins.get(2).residues());
+
+    // Assert
+    assertEquals(bestScore(proteins, columns, rows), score(proteins, rows));
+    assertEquals(
+        0, Alignments.helixBreakingRuns(proteins.get(0), GapIntervals.fromAlignedRow(rows.get(0))));
+  }
+
+  @ParameterizedTest
+  @CsvSource({"X", "B", "Z"})
+  @DisplayName("given an ambiguous residue facing a helix, when realigning, then it is scored")
+  void givenAmbiguousResidueFacingHelix_whenRealigning_thenItIsScored(String residue) {
+    // Arrange: PHAT has no ambiguity codes, and SOPwTP scores these pairs with BLOSUM62
+    ProteinSet mutated = Alignments.proteins("AWWCC:OMMOO", "A" + residue + "WCCA:OOOOOO");
+    ProteinSet other = Alignments.proteins("A" + residue + "WCC:OOOOO", "AWWCCA:OMMOOO");
+
+    // Act & Assert
+    assertDoesNotThrow(() -> realign(mutated, 0, 0, 6, "AWWCC-", "A" + residue + "WCCA"));
+    assertDoesNotThrow(() -> realign(other, 0, 0, 6, "A" + residue + "WCC-", "AWWCCA"));
+  }
+
+  private static LongStream seeds() {
+    return LongStream.rangeClosed(1, 300);
+  }
+
+  /** A random protein with random topology, whose ends are outside the membrane. */
+  private static String randomProtein(Random random, int length) {
+    String letters = "ACDEFGHIKLMNPQRSTVWY";
+    StringBuilder residues = new StringBuilder();
+    StringBuilder topology = new StringBuilder();
+    for (int index = 0; index < length; index++) {
+      boolean end = index == 0 || index == length - 1;
+      residues.append(letters.charAt(random.nextInt(letters.length())));
+      topology.append(!end && random.nextBoolean() ? 'M' : 'O');
+    }
+    return residues + ":" + topology;
+  }
+
+  private static double score(ProteinSet proteins, List<String> rows) {
+    return TopologyAwareSumOfPairs.withDefaultParameters()
+        .evaluate(Msa.fromAlignedRows(proteins, rows));
+  }
+
+  /** Best SOPwTP over every placement of the first row that breaks no helix. */
+  private static double bestScore(ProteinSet proteins, int columns, List<String> rows) {
+    String residues = proteins.get(0).residues();
+    double best = Double.NEGATIVE_INFINITY;
+    for (int mask = 0; mask < 1 << columns; mask++) {
+      if (Integer.bitCount(mask) == residues.length()) {
+        StringBuilder row = new StringBuilder();
+        int next = 0;
+        for (int column = 0; column < columns; column++) {
+          row.append((mask >> column & 1) == 1 ? residues.charAt(next++) : '-');
+        }
+        GapIntervals gaps = GapIntervals.fromAlignedRow(row);
+        if (Alignments.helixBreakingRuns(proteins.get(0), gaps) == 0) {
+          List<String> candidate = new ArrayList<>(rows);
+          candidate.set(0, row.toString());
+          best = Math.max(best, score(proteins, candidate));
+        }
+      }
+    }
+    return best;
   }
 
   @ParameterizedTest
