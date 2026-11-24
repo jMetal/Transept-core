@@ -18,7 +18,8 @@ formats and defaults may change, but every change must keep the two repositories
 - **Algorithms**: NSGA-II (default), SPEA2 and a GA built with Evolver from parameter spaces; their
   asynchronous variants; NSGA-III, AGE-MOEA, AGE-MOEA-II, SMS-EMOA, MOEA/D, PAES and random searches.
 - **Operators** never split a transmembrane helix. Gaps inside helices that come from the seed
-  alignments are kept unless `run --repair-seeds` (or the `repair` command) moves them out first.
+  alignments are moved out first by default; `run --no-repair-seeds` keeps those of the precomputed
+  alignments.
 - **Seeds**: precomputed alignments of the dataset (`--seeds`) or internal ones computed with BioJava.
 - **Evaluation**: `score` compares alignments with a reference (Pair F1, TM-pair F1, TM-gap rate,
   coverage). The benchmark is Dataset_Structural_GPCRs v1.0.0 (Zenodo), human GPCRs with GPCRdb

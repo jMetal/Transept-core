@@ -134,8 +134,8 @@ it runs in a few seconds. Tests use a generated dataset (`testing.SyntheticDatas
    in `@TempDir`.
 6. **TM integrity is not a formal constraint** (`numberOfConstraints() = 0`), but no operator
    breaks a helix: the crossover never cuts one and every mutation forbids it. Gaps inside helices
-   inherited from the seeds are kept unless `--repair-seeds` moves them out. Propose changes to
-   the defaults in an issue or a pull request before making them.
+   inherited from the seeds are moved out by default; `--no-repair-seeds` keeps those of the
+   precomputed alignments. Propose changes to the defaults in an issue or a pull request before making them.
 7. **Superseded components are removed, not kept as options** (the original mutation, the
    original lDDT aggregation, the legacy mapping, the two-point crossover, the original filling
    of the initial population): reproducing the published results is the job of the original
