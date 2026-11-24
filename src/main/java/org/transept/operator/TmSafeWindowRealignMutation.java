@@ -18,10 +18,16 @@ import org.uma.jmetal.operator.mutation.MutationOperator;
  * <p>With the mutation probability, a row with gaps and one of its gap runs are chosen at random,
  * and then a window of columns that contains the run. The residues of the row in the window are
  * placed again in the columns of the window: their order is kept, the other rows do not change and
- * no column is added, so the alignment keeps its length. The placement maximises the sum of pairs
- * of the row with the rest, with the matrices and gap penalties of {@link TopologyAwareSumOfPairs},
- * and gaps cannot separate two transmembrane residues. If there is no such placement, the solution
- * is left unchanged.
+ * no column is added, so the alignment keeps its length. The placement maximises an approximation
+ * of the sum of pairs of the row with the rest, with the matrices and gap penalties of {@link
+ * TopologyAwareSumOfPairs}, and gaps cannot separate two transmembrane residues. If there is no
+ * such placement, the solution is left unchanged.
+ *
+ * <p>The approximation is exact when the other rows have no gaps in the window and the row neither
+ * starts nor ends in the membrane. Otherwise it differs from the objective in the gaps: a run opens
+ * only against the rows with a residue in its first column, the runs that continue outside the
+ * window and the openings in the other rows are not considered, and a gap does not count as
+ * transmembrane. So a realignment can lower the objective.
  *
  * <p>The objective inside the window is only the sequence: it does not use the structures. It
  * follows the iterative refinement that realigns one sequence with the rest ("remove first",
@@ -227,7 +233,7 @@ public final class TmSafeWindowRealignMutation implements MutationOperator<MsaSo
         if (other == GAP) {
           score -= (mineTm ? tmGaps : otherGaps).extend();
         } else {
-          boolean tm = mineTm || transmembrane[line][column];
+          boolean tm = mineTm && transmembrane[line][column];
           score += (tm ? TM_MATRIX : OTHER_MATRIX).score(mine, other);
         }
       }
