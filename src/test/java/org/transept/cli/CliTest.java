@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -351,6 +352,40 @@ class CliTest {
       assertTrue(metadata.contains("\"repairedGapRuns\":"), metadata);
       assertTrue(Files.isRegularFile(run.resolve("seeds/biojava-g20x2.fasta")));
       assertTrue(Files.readString(run.resolve("config.json")).contains("\"repairSeeds\":true"));
+    }
+
+    @ParameterizedTest(name = "{0}: repaired = {1}")
+    @CsvSource({"default, true", "--repair-seeds, true", "--no-repair-seeds, false"})
+    @DisplayName("given a repair option, when running, then the precomputed seeds follow it")
+    void givenRepairOption_whenRunning_thenThePrecomputedSeedsFollowIt(
+        String option, boolean repaired) throws IOException {
+      // Arrange: the alignment "true" has one gap inside a helix
+      List<String> arguments =
+          new ArrayList<>(
+              List.of(
+                  "run",
+                  "--data-root", dataRoot.toString(),
+                  "--dataset", SyntheticDataset.NAME,
+                  "--seeds", "true,left",
+                  "--output-root", outputRoot.toString(),
+                  "--run-id", "repair",
+                  "--seed", "3",
+                  "--max-evaluations", "50",
+                  "--population-size", "8"));
+      if (option.startsWith("--")) {
+        arguments.add(option);
+      }
+
+      // Act
+      int status = TranseptCli.execute(arguments.toArray(new String[0]));
+
+      // Assert
+      Path run = outputRoot.resolve("ejecuciones/synthetic/repair");
+      String config = Files.readString(run.resolve("config.json"));
+      String metadata = Files.readString(run.resolve("metadata.json"));
+      assertEquals(0, status);
+      assertTrue(config.contains("\"repairSeeds\":" + repaired), config);
+      assertEquals(repaired, metadata.contains("\"repairedGapRuns\":1"), metadata);
     }
 
     @Test
