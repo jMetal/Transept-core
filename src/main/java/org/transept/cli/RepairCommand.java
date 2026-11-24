@@ -20,13 +20,13 @@ import picocli.CommandLine.Spec;
 
 /**
  * Moves the gaps that split a transmembrane helix out of alignments, without any search: the same
- * repair that {@code run --repair-seeds} applies to the seed alignments.
+ * repair that {@code run} applies to the seed alignments by default.
  */
 @Command(
     name = "repair",
     mixinStandardHelpOptions = true,
     description = {
-      "Move the gaps that split a transmembrane helix out of alignments, as run --repair-seeds "
+      "Move the gaps that split a transmembrane helix out of alignments, as run "
           + "does with the seeds, and write the repaired alignments.",
       "Each gap run inside a helix moves to the nearest position outside the helices; the "
           + "residues keep their order and the length of the alignment does not change."
