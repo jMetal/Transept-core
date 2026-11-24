@@ -46,6 +46,8 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 - The AlphaFold distances are mapped to the sequence checking residue identity, not only the
   numbering: isoforms that differ from the sequence were mapped to wrong residues.
+- The window realignment scores residue pairs with PHAT only when both are transmembrane, as SOPwTP
+  does; one was enough, and an ambiguous residue (X, B, Z) facing a helix made the run fail.
 - Gap-only columns are always removed before evaluation.
 - The gap-shift mutation could loop forever when no row had a run of two or more gaps.
 - Proteins without a structure are recorded in `metadata.json` instead of only being reported on

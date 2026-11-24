@@ -391,8 +391,9 @@ window of columns, in the spirit of the local realignment of iterative aligners:
 1. Choose at random a protein that has gaps, one of its gap runs, and a window of `realignWindow`
    columns (50 by default) that contains the run.
 2. Place the residues of that protein inside the window again, by dynamic programming, against the
-   other proteins, keeping their order: the score is the substitution score (PHAT inside the membrane, BLOSUM62 outside)
-   and the gap penalties of SOPwTP. A placement that would separate two transmembrane residues is
+   other proteins, keeping their order: the score uses the substitution
+   matrices of SOPwTP (PHAT when both residues are transmembrane, BLOSUM62 otherwise) and its gap
+   penalties, simplified, so the realignment can also lower SOPwTP. A placement that would separate two transmembrane residues is
    not allowed. The structures are not used.
 3. The columns outside the window, the other proteins and the length of the alignment do not change.
 

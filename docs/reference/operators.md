@@ -28,7 +28,7 @@ searches do not use the crossover.
 | `MERGE_GAP_RUNS` | `mergeGapRuns` | none | Joins two consecutive gap runs of one protein |
 | `RANDOM_CHOICE` | `randomChoice` | `maxShift` | `TM_SAFE_GAP_SHIFT` or `MERGE_GAP_RUNS`, chosen at random each time |
 | `TM_SAFE_BLOCK_SHIFT` | `tmSafeBlockShift` | `blockShift` (1–20, default 1) | Moves a block of gaps shared by several proteins up to `blockShift` columns, keeping those proteins aligned with each other (SAGA) |
-| `TM_SAFE_WINDOW_REALIGN` | `tmSafeWindowRealign` | `realignWindow` (10–500, default 50) | Realigns the residues of one protein against the others inside a window of columns, by dynamic programming with the substitution matrices and gap penalties of SOPwTP |
+| `TM_SAFE_WINDOW_REALIGN` | `tmSafeWindowRealign` | `realignWindow` (10–500, default 50) | Realigns the residues of one protein against the others inside a window of columns, by dynamic programming with the substitution matrices and gap penalties of SOPwTP. It approximates SOPwTP (the gaps of the other proteins are simplified), so it usually raises it but can lower it |
 
 All use `--mutation-probability` (`mutationProbability`, default 0.2; 1.0 for PAES).
 
