@@ -22,8 +22,8 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 - Formulations: SOPwTP and lDDT (default), lDDT alone for the genetic algorithms, and SOPwTP, lDDT
   and aligned-pair coverage (experimental).
 - Operators that never split a transmembrane helix: single-point and uniform crossovers; gap shift,
-  merge of gap runs, random choice, block shift and window realignment mutations, with their
-  parameters in the configurations.
+  merge of gap runs, block shift and window realignment mutations, and a random choice among these
+  four, with their parameters in the configurations.
 - Internal seed alignments computed with BioJava, so that a dataset needs no precomputed alignments.
 - `baseline` scores seed alignments, including those given with `--alignments`; `score` compares
   alignments with a reference alignment (pair F1, TM-pair F1, TM-gap rate, coverage).

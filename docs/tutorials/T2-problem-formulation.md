@@ -369,8 +369,8 @@ gap boundary, so it never breaks a helix; when one of the two runs breaks a heli
 moved, which repairs the break. The length of the alignment does not change. In the first child,
 the run of `p2` at column 10 moves to column 2.
 
-**`RANDOM_CHOICE`** (class `RandomChoiceMutation`) applies `TM_SAFE_GAP_SHIFT` or
-`MERGE_GAP_RUNS`, chosen uniformly at random each time the child is mutated.
+**`RANDOM_CHOICE`** (class `RandomChoiceMutation`) applies one of the other four mutations, chosen
+uniformly at random each time the child is mutated.
 
 **`TM_SAFE_BLOCK_SHIFT`** (class `TmSafeBlockShiftMutation`) moves a vertical block of gaps in
 several proteins at once, based on the block shuffling of SAGA (Notredame and Higgins, 1996):
@@ -398,7 +398,7 @@ window of columns, in the spirit of the local realignment of iterative aligners:
 3. The columns outside the window, the other proteins and the length of the alignment do not change.
 
 `blockShift` and `realignWindow` are set in a configuration ([configuration](../reference/configuration.md));
-with `--mutation`, the defaults are used. `RANDOM_CHOICE` does not include these two mutations.
+with `--mutation`, the defaults are used. Both also apply to `RANDOM_CHOICE`.
 
 **How much a mutation changes an alignment** matters as much as what it does. Applied once to each
 seed alignment of `classF`:

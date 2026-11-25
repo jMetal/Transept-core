@@ -131,7 +131,9 @@ smsemoa                 6    0.018    0.007     4/6   1.000
 - **`RANDOM_CHOICE` looks promising but is not proven.** It wins on 5 of 6 seeds and contributes
   most of the combined front (111 solutions, against 20 of NSGA-II with the default mutation), but
   the p-values (0.44 and 0.06) do not support a difference. It is a candidate for a larger study,
-  not a reason to change the default.
+  not a reason to change the default. In these runs it chose only between `TM_SAFE_GAP_SHIFT` and
+  `MERGE_GAP_RUNS`; now it chooses among the four mutations, so your numbers will differ, and the
+  choice among the four has not been evaluated yet.
 - **NSGA-II and SMS-EMOA are indistinguishable** with these runs: the differences in median are
   smaller than the spread, and the p-values are large. SMS-EMOA costs three times as much time.
 - **"Not significant" does not mean "equal".** Six seeds detect only large differences. To claim

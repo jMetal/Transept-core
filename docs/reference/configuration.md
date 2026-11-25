@@ -47,8 +47,8 @@ the space are errors.
 | `mutation` | `tmSafeGapShift`, `mergeGapRuns`, `randomChoice`, `tmSafeBlockShift`, `tmSafeWindowRealign` | `tmSafeGapShift` | The mutations of `--mutation` ([cli](cli.md)) |
 | `mutationProbability` | 0.0–1.0 | 0.2 | Probability of mutating a child |
 | `maxShift` | integer, 0–200 | 0 | With `tmSafeGapShift` or `randomChoice`: largest number of columns a gap run can move; 0 is no limit |
-| `blockShift` | integer, 1–20 | 1 | With `tmSafeBlockShift`: largest number of columns a block of gaps can move |
-| `realignWindow` | integer, 10–500 | 50 | With `tmSafeWindowRealign`: number of columns of the window that is realigned |
+| `blockShift` | integer, 1–20 | 1 | With `tmSafeBlockShift` or `randomChoice`: largest number of columns a block of gaps can move |
+| `realignWindow` | integer, 10–500 | 50 | With `tmSafeWindowRealign` or `randomChoice`: number of columns of the window that is realigned |
 | `selection` | `tournament`, `random` | `tournament` | How parents are chosen |
 | `selectionTournamentSize` | integer, 2–10 | 2 | With `tournament`: solutions compared per choice (by rank, then crowding distance) |
 
