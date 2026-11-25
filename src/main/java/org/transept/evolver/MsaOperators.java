@@ -29,7 +29,7 @@ public final class MsaOperators {
   /** Joins two consecutive gap runs of a row. */
   public static final String MERGE_GAP_RUNS = "mergeGapRuns";
 
-  /** {@link #TM_SAFE_GAP_SHIFT} or {@link #MERGE_GAP_RUNS}, chosen at random each time. */
+  /** One of the other four mutations, chosen uniformly at random each time. */
   public static final String RANDOM_CHOICE = "randomChoice";
 
   /** Moves a block of gaps a few columns in several rows at once. */
@@ -129,8 +129,11 @@ public final class MsaOperators {
           new RandomChoiceMutation(
               probability,
               List.of(
-                  mutation(TM_SAFE_GAP_SHIFT, 1.0, maxShift, structures, random),
-                  mutation(MERGE_GAP_RUNS, 1.0, maxShift, structures, random)),
+                  new TmSafeGapShiftMutation(
+                      1.0, structures, TmSafeGapShiftMutation.DEFAULT_MAX_TRIES, maxShift, random),
+                  new MergeAdjacentGapRunsMutation(1.0, random),
+                  new TmSafeBlockShiftMutation(1.0, blockShift, random),
+                  new TmSafeWindowRealignMutation(1.0, realignWindow, random)),
               1,
               random);
       case TM_SAFE_BLOCK_SHIFT -> new TmSafeBlockShiftMutation(probability, blockShift, random);

@@ -427,7 +427,9 @@ public final class AlgorithmFactory {
               probability,
               List.of(
                   mutation(MutationType.TM_SAFE_GAP_SHIFT, 1.0),
-                  mutation(MutationType.MERGE_GAP_RUNS, 1.0)),
+                  mutation(MutationType.MERGE_GAP_RUNS, 1.0),
+                  mutation(MutationType.TM_SAFE_BLOCK_SHIFT, 1.0),
+                  mutation(MutationType.TM_SAFE_WINDOW_REALIGN, 1.0)),
               1,
               random);
     };

@@ -60,6 +60,12 @@ variation:
                 maxShift:
                   type: integer
                   range: [0, 200]
+                blockShift:
+                  type: integer
+                  range: [1, 20]
+                realignWindow:
+                  type: integer
+                  range: [10, 500]
             tmSafeBlockShift:
               conditionalParameters:
                 blockShift:

@@ -13,8 +13,8 @@ public enum MutationType {
    */
   MERGE_GAP_RUNS,
   /**
-   * Applies {@code TM_SAFE_GAP_SHIFT} or {@code MERGE_GAP_RUNS}, chosen uniformly at random each
-   * time ({@code RandomChoiceMutation}).
+   * Applies one of the other four mutations, chosen uniformly at random each time ({@code
+   * RandomChoiceMutation}).
    */
   RANDOM_CHOICE,
   /**

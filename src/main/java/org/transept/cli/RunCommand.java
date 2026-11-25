@@ -137,8 +137,8 @@ public final class RunCommand implements Callable<Integer> {
       names = "--mutation",
       description =
           "Mutation operator: ${COMPLETION-CANDIDATES}. Default: TM_SAFE_GAP_SHIFT. None of them"
-              + " breaks a transmembrane helix. RANDOM_CHOICE picks TM_SAFE_GAP_SHIFT or"
-              + " MERGE_GAP_RUNS each time.")
+              + " breaks a transmembrane helix. RANDOM_CHOICE picks one of the other four each"
+              + " time.")
   MutationType mutation;
 
   @Option(
