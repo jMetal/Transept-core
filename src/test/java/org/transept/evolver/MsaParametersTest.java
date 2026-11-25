@@ -1,7 +1,9 @@
 package org.transept.evolver;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +57,33 @@ class MsaParametersTest {
         RandomChoiceMutation.class,
         MsaOperators.mutation(
             "randomChoice", 0.5, 4, Alignments.unstructured(proteins), new SeededRandom(1)));
+  }
+
+  @Test
+  @DisplayName("given the mutation that chooses, when built, then it chooses among the other four")
+  void givenRandomChoice_whenBuilt_thenItChoosesAmongTheOtherFour() {
+    // Arrange
+    ProteinSet proteins = Alignments.proteins("ACDEF:OOMMM", "ACDE:OOMM");
+
+    // Act
+    var mutation =
+        (RandomChoiceMutation)
+            MsaOperators.mutation(
+                "randomChoice", 0.5, 4, 3, 20, Alignments.unstructured(proteins),
+                new SeededRandom(1));
+
+    // Assert
+    assertEquals(
+        List.of(
+            "TmSafeGapShiftMutation",
+            "MergeAdjacentGapRunsMutation",
+            "TmSafeBlockShiftMutation",
+            "TmSafeWindowRealignMutation"),
+        mutation.operators().stream()
+            .map(operator -> operator.getClass().getSimpleName())
+            .toList());
+    assertTrue(
+        mutation.operators().stream().allMatch(operator -> operator.mutationProbability() == 1.0));
   }
 
   @Test
