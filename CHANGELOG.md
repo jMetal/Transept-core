@@ -47,6 +47,8 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 ### Fixed
 
+- Invalid input of `repair`, `baseline`, `score` and `seeds` (an alignment of other proteins, a
+  missing file) printed a Java stack trace; it is now one line, `Error: <message>`, with exit code 1.
 - The AlphaFold distances are mapped to the sequence checking residue identity, not only the
   numbering: isoforms that differ from the sequence were mapped to wrong residues.
 - The window realignment scores residue pairs with PHAT only when both are transmembrane, as SOPwTP

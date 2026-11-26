@@ -13,9 +13,15 @@ java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar <command> 
 | `algorithms` | Print the algorithms available, as JSON |
 | `baseline` | Score the precomputed alignments of one or more datasets |
 | `score` | Compare the alignments of a directory with a reference alignment |
+| `repair` | Move the gaps inside helices out of alignments, without search |
 
 `--help` prints the options of a command and `--version` the version. Options can be stored in a
 file, one per line, and passed as `@file.args`.
+
+A wrong option ends with exit code 2 and the usage of the command. Invalid input, such as an
+alignment whose rows are not the proteins of the topology, ends with exit code 1 and one line,
+`Error: <message>`, on the standard error; anything else, which would be a bug, also prints its
+stack trace. `run` also writes its errors as JSON in `error.json` ([outputs](outputs.md)).
 
 ## `run`
 
