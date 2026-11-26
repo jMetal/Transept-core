@@ -6,7 +6,7 @@ evolutionary algorithms, guided by their topology and AlphaFold2 structures. The
 interface (Streamlit, separate repository) drives it only through its commands and output files,
 so those are a contract between the two projects.
 
-Both projects are developed collaboratively and are still prototypes (0.1.0): options, output
+Both projects are developed collaboratively and are still prototypes (0.1): options, output
 formats and defaults may change, but every change must keep the two repositories in step.
 
 ## Current state

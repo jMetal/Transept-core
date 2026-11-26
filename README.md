@@ -6,7 +6,7 @@ Transept core is the engine of [Transept](https://github.com/jMetal/Transept), a
 aligning transmembrane proteins such as G protein-coupled receptors (GPCRs). It is a Java command
 line that can be used on its own or driven by the Transept graphical interface.
 
-> **Status: prototype (0.1.0).** Options, output formats and defaults may still change. Please
+> **Status: prototype (0.1-SNAPSHOT).** Options, output formats and defaults may still change. Please
 > report problems and suggestions in the [issues](https://github.com/jMetal/Transept-core/issues).
 
 ## What it does
@@ -46,14 +46,14 @@ MOEA/D, PAES and random search for comparison (`java -jar ... algorithms` lists 
 
 Requirements: Java 21 or later.
 
-The simplest way is to download `transept-core-0.1.0-jar-with-dependencies.jar` from the
+The simplest way is to download `transept-core-<version>-jar-with-dependencies.jar` from the
 [releases](https://github.com/jMetal/Transept-core/releases) and the benchmark data:
 
 ```bash
 git clone https://github.com/TM-M2StructAlign/Dataset_Structural_GPCRs.git
 git -C Dataset_Structural_GPCRs checkout v1.0.0
 
-java -jar transept-core-0.1.0-jar-with-dependencies.jar run \
+java -jar transept-core-<version>-jar-with-dependencies.jar run \
   --data-root Dataset_Structural_GPCRs/GPCRdb \
   --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
@@ -72,8 +72,34 @@ picocli) is downloaded from Maven Central.
 
 ```bash
 git clone https://github.com/jMetal/Transept-core.git && cd Transept-core
-mvn clean package -DskipTests      # target/transept-core-0.1.0-jar-with-dependencies.jar
+mvn clean package -DskipTests      # target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar
 ```
+
+### As a dependency
+
+Transept core is published in Maven Central as `org.uma.jmetal:transept-core`. Until the first
+release, the development version (`0.1-SNAPSHOT`) is in the snapshot repository of Maven Central,
+which has to be declared:
+
+```xml
+<repositories>
+  <repository>
+    <id>central-snapshots</id>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+  </repository>
+</repositories>
+
+<dependency>
+  <groupId>org.uma.jmetal</groupId>
+  <artifactId>transept-core</artifactId>
+  <version>0.1-SNAPSHOT</version>
+</dependency>
+```
+
+The jar with every dependency is built locally (`mvn package`) and is not published in Maven
+Central.
 
 ## Benchmark data
 

@@ -45,19 +45,19 @@ the reduced `_19` variants (19 proteins each, required by mTM-align).
 
 ```bash
 mvn clean verify     # unit + integration tests, Checkstyle, JaCoCo; must pass before committing
-mvn clean package    # target/transept-core-0.1.0-jar-with-dependencies.jar
+mvn clean package    # target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar
 GPCR_DATASET=../Dataset_Structural_GPCRs/GPCRdb mvn verify   # also runs real-data ITs
 ```
 
 The JAR runs the picocli command line (`cli.TranseptCli`):
 
 ```bash
-java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id seed_000 --seed 0 \
   --max-evaluations 10000 --population-size 100 --threads 4
-java -jar target/transept-core-0.1.0-jar-with-dependencies.jar baseline \
+java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar baseline \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --datasets classF --output baselines.csv
 ```
 

@@ -14,7 +14,7 @@ and what every crossover and mutation does. A small example with three proteins 
 Its output is printed by a class of the project, so you can run it and change it:
 
 ```bash
-java -cp target/transept-core-0.1.0-jar-with-dependencies.jar \
+java -cp target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar \
   org.transept.example.FormulationTour
 ```
 

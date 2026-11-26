@@ -11,6 +11,9 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 ### Added
 
+- Publication in Maven Central as `org.uma.jmetal:transept-core`: `mvn deploy` sends the
+  development version (`0.1-SNAPSHOT`) to the snapshot repository, and `mvn -P release deploy` a
+  release to the Central Portal. The jar with dependencies is built but not deployed.
 - Command line with the commands `run`, `seeds`, `algorithms`, `baseline`, `score` and `repair`.
 - `repair`: moves the gaps that split a transmembrane helix out of any alignment, without search,
   as `run` does with the seeds (tutorial T8).

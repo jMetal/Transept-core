@@ -20,7 +20,7 @@ a file, `--configuration-file`). Only the parameters you give change; the rest k
 value:
 
 ```bash
-java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id random-selection --seed 1 \

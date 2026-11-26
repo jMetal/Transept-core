@@ -47,7 +47,7 @@ for seed in 1 2 3 4 5 6; do
                 "moead:--algorithm MOEA_D" \
                 "randomseeded:--algorithm RANDOM_SEEDED"; do
     name=${config%%:*}; options=${config#*:}
-    java -jar target/transept-core-0.1.0-jar-with-dependencies.jar run \
+    java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
       --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
       --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
       --output-root comparison --run-id ${name}_seed_$seed --seed $seed \
