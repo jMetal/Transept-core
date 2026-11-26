@@ -6,7 +6,7 @@
 
     <groupId>org.uma.jmetal</groupId>
     <artifactId>transept-core</artifactId>
-    <version>0.1.0</version>
+    <version>0.1-SNAPSHOT</version>
     <name>Transept core</name>
     <description>Multiobjective, structure-guided alignment of transmembrane proteins: the engine of Transept.</description>
     <url>https://github.com/jMetal/Transept-core</url>
@@ -62,6 +62,8 @@
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <checkstyle.version>14.4.0</checkstyle.version>
         <git.commit.plugin.version>10.0.1</git.commit.plugin.version>
+        <central.plugin.version>0.8.0</central.plugin.version>
+        <source.plugin.version>3.3.1</source.plugin.version>
 
         <!-- Quality gates apply only to the rewritten core -->
         <quality.package>org/transept/**</quality.package>
@@ -311,6 +313,37 @@
                 </executions>
             </plugin>
 
+            <!--
+              mvn deploy: SNAPSHOT versions go to the snapshot repository of Maven Central
+              (https://central.sonatype.com/repository/maven-snapshots/); releases, with -P release,
+              are uploaded to the Central Portal and published by hand from it (autoPublish false).
+              Needs the "central" server (Central Portal token) in ~/.m2/settings.xml.
+            -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${central.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>false</autoPublish>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${source.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -324,6 +357,8 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <!-- Built in target/ for the command line, but neither installed nor deployed (135 MB) -->
+                    <attach>false</attach>
                 </configuration>
                 <executions>
                     <execution>
@@ -338,8 +373,8 @@
     </build>
 
     <!--
-      Publishing to Maven Central: mvn -P release clean deploy
-      Needs the "central" server (Central Portal token) in ~/.m2/settings.xml and a GPG key.
+      Releases (a version without -SNAPSHOT): mvn -P release clean deploy
+      Adds the Javadoc and the GPG signatures that Central requires; needs a GPG key.
       Central rejects releases that depend on SNAPSHOT versions (jMetal, Evolver).
     -->
     <profiles>
@@ -347,29 +382,6 @@
             <id>release</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.central</groupId>
-                        <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <publishingServerId>central</publishingServerId>
-                            <autoPublish>false</autoPublish>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.3.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
