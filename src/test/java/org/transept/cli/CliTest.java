@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,11 +39,26 @@ class CliTest {
 
   private Path dataRoot;
   private Path outputRoot;
+  private PrintStream originalOut;
+  private PrintStream originalErr;
+  private ByteArrayOutputStream errors;
 
   @BeforeEach
   void setUp() throws IOException {
     dataRoot = SyntheticDataset.write(directory.resolve("GPCRdb"));
     outputRoot = directory.resolve("results");
+    // What the commands print is kept out of the build log; the errors can be checked
+    originalOut = System.out;
+    originalErr = System.err;
+    errors = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8));
+    System.setErr(new PrintStream(errors, true, StandardCharsets.UTF_8));
+  }
+
+  @AfterEach
+  void tearDown() {
+    System.setOut(originalOut);
+    System.setErr(originalErr);
   }
 
   @Nested
@@ -194,9 +210,12 @@ class CliTest {
               "--output-dir", directory.resolve("out").toString(),
               alignment.toString());
 
-      // Assert
+      // Assert: one line for the user, without stack trace
       assertNotEquals(0, status);
       assertFalse(Files.exists(directory.resolve("out/x.fasta")));
+      String reported = errors.toString(StandardCharsets.UTF_8);
+      assertTrue(reported.startsWith("Error: Invalid alignment in "), reported);
+      assertFalse(reported.contains("\tat "), reported);
     }
 
     @Test
