@@ -6,7 +6,7 @@
 
     <groupId>org.uma.jmetal</groupId>
     <artifactId>transept-core</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.9</version>
     <name>Transept core</name>
     <description>Multiobjective, structure-guided alignment of transmembrane proteins: the engine of Transept.</description>
     <url>https://github.com/jMetal/Transept-core</url>

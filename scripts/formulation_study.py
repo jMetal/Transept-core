@@ -3,7 +3,7 @@
 
 Usage:
     formulation_study.py <output-root> <dataset> --data-root <GPCRdb> --output <study.csv>
-                         [--jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar]
+                         [--jar target/transept-core-0.9-jar-with-dependencies.jar]
 
 For every run under <output-root>/ejecuciones/<dataset>/, the script evaluates its alignments
 against the GPCRdb reference with the `score` command (once; the reports are kept next to the output
@@ -130,7 +130,7 @@ def main() -> None:
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--jar", default="target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar")
+        "--jar", default="target/transept-core-0.9-jar-with-dependencies.jar")
     arguments = parser.parse_args()
 
     runs = sorted(
