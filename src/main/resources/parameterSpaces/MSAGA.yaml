@@ -8,8 +8,8 @@ createInitialSolutions:
     seededDistinct:
 #
 offspringPopulationSize:
-  type: integer
-  range: [1, 1000]
+  type: categorical
+  values: [1, 5, 10, 20, 50, 100, 200, 400]
 #
 variation:
   type: categorical

@@ -25,6 +25,7 @@ import org.transept.problem.StructuralMsaProblem;
 import org.transept.structure.ProteinStructures;
 import org.uma.evolver.algorithm.BaseLevelAlgorithm;
 import org.uma.evolver.parameter.ParameterSpace;
+import org.uma.evolver.parameter.type.CategoricalIntegerParameter;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.algorithm.RandomSearchAlgorithm;
 import org.uma.jmetal.component.algorithm.multiobjective.AGEMOEABuilder;
@@ -49,6 +50,7 @@ import org.uma.jmetal.parallel.asynchronous.algorithm.impl.AsynchronousMultiThre
 import org.uma.jmetal.parallel.asynchronous.algorithm.impl.AsynchronousMultiThreadedNSGAII;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import org.uma.jmetal.util.errorchecking.JMetalException;
 import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
 
 /**
@@ -75,6 +77,8 @@ public final class AlgorithmFactory {
 
   /** Neighbourhood size of MOEA/D (capped by the population size). */
   public static final int MOEAD_NEIGHBORHOOD_SIZE = 20;
+
+  private static final String OFFSPRING_SIZE = "offspringPopulationSize";
 
   private static final Logger LOGGER = Logger.getLogger(AlgorithmFactory.class.getName());
 
@@ -233,13 +237,11 @@ public final class AlgorithmFactory {
    * layers: the default configuration, the operator settings of the {@link
    * AlgorithmConfiguration} and, last, its configuration string.
    */
-  @SuppressWarnings("unchecked")
   private SearchRun configured(
       AlgorithmType type, Function<ParameterSpace, BaseLevelAlgorithm<MsaSolution>> algorithm) {
     Map<String, String> values =
         new LinkedHashMap<>(MsaConfigurations.defaults(type.parameterSpace()));
-    values.put(
-        "offspringPopulationSize", Integer.toString(configuration.offspringPopulationSize()));
+    values.put(OFFSPRING_SIZE, Integer.toString(configuration.offspringPopulationSize()));
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
     values.put("crossover", crossoverName(configuration.crossoverType()));
     values.put("cutCandidates", Integer.toString(configuration.cutCandidates()));
@@ -249,10 +251,34 @@ public final class AlgorithmFactory {
     values.putAll(MsaConfigurations.parse(configuration.configuration()));
     ParameterSpace space = MsaConfigurations.parameterSpace(type.parameterSpace());
     MsaConfigurations.requireKnownNames(values, space);
-    var built =
-        (EvolutionaryAlgorithm<MsaSolution>)
-            algorithm.apply(space).parse(MsaConfigurations.arguments(values)).build();
+    requireOffspringSizeOfTheSpace(values.get(OFFSPRING_SIZE), space);
+    var built = build(algorithm.apply(space), MsaConfigurations.arguments(values));
     return SearchRun.withConfiguration(SearchRun.of(built), MsaConfigurations.format(values));
+  }
+
+  /**
+   * The offspring size is the population size unless the configuration sets it, so a population
+   * size that the space does not list needs an explicit offspring size.
+   */
+  private static void requireOffspringSizeOfTheSpace(String size, ParameterSpace space) {
+    var allowed = ((CategoricalIntegerParameter) space.get(OFFSPRING_SIZE)).validValues();
+    if (!allowed.contains(Integer.valueOf(size))) {
+      throw new IllegalArgumentException(
+          OFFSPRING_SIZE + " must be one of " + allowed + ", not " + size
+              + ". It is the population size unless the configuration sets it: use one of these"
+              + " population sizes or add --" + OFFSPRING_SIZE + " to the configuration.");
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static EvolutionaryAlgorithm<MsaSolution> build(
+      BaseLevelAlgorithm<MsaSolution> algorithm, String[] arguments) {
+    try {
+      return (EvolutionaryAlgorithm<MsaSolution>) algorithm.parse(arguments).build();
+    } catch (JMetalException exception) {
+      // A value outside the parameter space is an error of the user, not of the tool
+      throw new IllegalArgumentException(exception.getMessage(), exception);
+    }
   }
 
   private MsaRunContext context() {
