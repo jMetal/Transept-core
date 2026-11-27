@@ -393,6 +393,19 @@ class AlgorithmFactoryTest {
     }
 
     @Test
+    @DisplayName("given an archive population below 10, when built, then it fails")
+    void givenArchivePopulationBelowLimit_whenBuilt_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory =
+          configured(
+              "--algorithmResult externalArchive --populationSizeWithArchive 9"
+                  + " --archiveType crowdingDistanceArchive");
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.NSGA_II));
+    }
+
+    @Test
     @DisplayName("given an archive population above 200, when built, then it fails")
     void givenArchivePopulationAboveLimit_whenBuilt_thenIllegalArgumentExceptionIsThrown() {
       // Arrange
