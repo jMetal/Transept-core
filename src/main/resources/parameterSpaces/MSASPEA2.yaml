@@ -10,7 +10,7 @@ algorithmResult:
       conditionalParameters:
         populationSizeWithArchive:
           type: integer
-          range: [2, 200]
+          range: [10, 200]
         archiveType:
           type: categorical
           values:
