@@ -33,7 +33,7 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
  * operator. Run it with
  *
  * <pre>
- * java -cp target/transept-core-0.9-jar-with-dependencies.jar \
+ * java -cp target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar \
  *     org.transept.example.FormulationTour
  * </pre>
  *
