@@ -406,6 +406,57 @@ class AlgorithmFactoryTest {
     }
 
     @Test
+    @DisplayName("given any population size, when built, then the offspring size is 100")
+    void givenAnyPopulationSize_whenBuilt_thenTheOffspringSizeIsOneHundred() {
+      // Act
+      SearchRun run = withPopulation(8, "").create(AlgorithmType.NSGA_II);
+
+      // Assert
+      assertTrue(run.configuration().contains("--offspringPopulationSize 100 "));
+    }
+
+    @Test
+    @DisplayName("given an offspring size that is not listed, when built, then it fails")
+    void givenUnlistedOffspringSize_whenBuilt_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory = configured("--offspringPopulationSize 8");
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.NSGA_II));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+      "NSGA_II, '', 100",
+      "NSGA_II, --offspringPopulationSize 10, 10",
+      "AGE_MOEA, '', 8"
+    })
+    @DisplayName("given an algorithm, when asking its offspring size, then the one it uses")
+    void givenAlgorithm_whenAskingItsOffspringSize_thenTheOneItUses(
+        AlgorithmType type, String text, int expected) {
+      // Arrange
+      var configuration =
+          new AlgorithmConfiguration(
+              EVALUATIONS, 8, 8, 0.8, 0.2, 1, MutationType.TM_SAFE_GAP_SHIFT, null, text);
+
+      // Act & Assert
+      assertEquals(expected, AlgorithmFactory.offspringPopulationSize(type, configuration));
+    }
+
+    @Test
+    @DisplayName("given a population not multiple of 4, when running NSGA-III, then it works")
+    void givenPopulationNotMultipleOfFour_whenRunningNsgaThree_thenItWorks() {
+      // Arrange
+      SearchRun run = withPopulation(10, "").create(AlgorithmType.NSGA_III);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertFalse(run.front().isEmpty());
+    }
+
+    @Test
     @DisplayName("given the default options, when built, then the default configuration is used")
     void givenDefaultOptions_whenBuilt_thenTheDefaultConfigurationIsUsed() {
       // Act
@@ -414,13 +465,14 @@ class AlgorithmFactoryTest {
       // Assert
       assertEquals(
           "--algorithmResult population --createInitialSolutions seededDistinct"
+              + " --offspringPopulationSize 100"
               + " --variation crossoverAndMutationVariation --crossover tmSafeSinglePoint"
               + " --crossoverProbability 0.8 --cutCandidates 1"
               + " --mutation tmSafeGapShift"
               + " --mutationProbability 0.2 --maxShift 0 --blockShift 1 --realignWindow 50"
               + " --selection tournament"
               + " --selectionTournamentSize 2",
-          run.configuration().replaceFirst(" --offspringPopulationSize \\d+", ""));
+          run.configuration());
     }
 
     @Test
