@@ -39,9 +39,8 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 ### Changed
 
 - `offspringPopulationSize` takes the values 1, 5, 10, 20, 50, 100, 200 and 400 (it was any integer
-  up to 1000), and `populationSizeWithArchive` goes up to 200 (it was 1000). With NSGA-II, SPEA2 and
-  the genetic algorithm, a population size that is not one of those values needs an explicit
-  `offspringPopulationSize`.
+  up to 1000) and is 100 by default (it was the population size); `populationSizeWithArchive` goes up
+  to 200 (it was 1000). NSGA-III accepts a population size that is not a multiple of 4.
 - The structural objective is the mean of the per-residue lDDT scores; the original aggregation
   favoured short, compact alignments.
 - Seed alignments are given explicitly with `--seeds` and recorded, instead of reading every file of

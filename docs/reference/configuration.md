@@ -40,7 +40,7 @@ the space are errors.
 | `archiveType` | `crowdingDistanceArchive`, `unboundedArchive`, `spatialSpreadDeviationArchive`, `knnDistanceArchive`, `angleArchive` | (none) | With `externalArchive`: the archives of Evolver; unbounded, or bounded by crowding distance, spatial spread deviation, distance to the `knnDistanceArchiveK` nearest neighbours, or angles |
 | `knnDistanceArchiveK` | integer, 1–10 | (none) | With `knnDistanceArchive`: number of neighbours |
 | `createInitialSolutions` | `seededDistinct` | `seededDistinct` | The seed alignments followed by distinct crossover children ([T2, Step 7](../tutorials/T2-problem-formulation.md#step-7-the-initial-population)) |
-| `offspringPopulationSize` | 1, 5, 10, 20, 50, 100, 200, 400 | the population size | Children per generation. With a population size that is not in the list, set it here |
+| `offspringPopulationSize` | 1, 5, 10, 20, 50, 100, 200, 400 | 100 | Children per generation, whatever the population size |
 | `variation` | `crossoverAndMutationVariation` | | Crossover, then mutation |
 | `crossover` | `tmSafeSinglePoint`, `tmSafeUniform` | `tmSafeSinglePoint` | The crossovers of `--crossover` ([cli](cli.md)) |
 | `crossoverProbability` | 0.0–1.0 | 0.8 | Probability of crossing two parents |

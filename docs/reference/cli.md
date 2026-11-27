@@ -53,7 +53,7 @@ java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
 | `--algorithm` | `NSGA_II` | Search algorithm (see below) |
 | `--max-evaluations` | 10000 | Stop after this many evaluations |
 | `--max-time` | (none) | Stop after this many seconds instead; exclusive with `--max-evaluations`. Runs that stop by time are not reproducible exactly |
-| `--population-size` | 100 | Population size; also the offspring size (unless the configuration sets it) and, for PAES, the archive size. NSGA-II, SPEA2 and the genetic algorithm only take the offspring sizes of their [parameter space](configuration.md): with another population size, set `offspringPopulationSize` |
+| `--population-size` | 100 | Population size. NSGA-II, SPEA2 and the genetic algorithm create 100 offspring per generation unless their [configuration](configuration.md) sets `offspringPopulationSize`; in the other algorithms it also gives the offspring or archive size where they have one |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
 | `--crossover` | `TM_SAFE_SINGLE_POINT` | Crossover operator (see below) |
 | `--crossover-probability` | 0.8 | Probability of applying the crossover |
@@ -86,7 +86,7 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 | `NSGA_II` | NSGA-II | Published configuration; configurable ([configuration](configuration.md)) |
 | `ASYNC_NSGA_II` | Asynchronous NSGA-II | Every evaluated solution enters the population at once, so all `--threads` stay busy; with more than one thread, runs do not repeat exactly |
 | `SPEA2` | SPEA2-style (RDEMOEA with strength ranking and k-nearest-neighbour density) | The population plays the role of SPEA2's archive; configurable |
-| `NSGA_III` | NSGA-III | The population size must be a multiple of 4 |
+| `NSGA_III` | NSGA-III | The population is rounded up to a multiple of 4 |
 | `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
 | `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
 | `MOEA_D` | MOEA/D | Normalised PBI aggregation, neighbourhood of 20, seeds spread over the subproblems; steady state. With three objectives the population size must be one with weight vectors: 91, 100, 136, 300, 500, 600, 800, 1000 or 1200 |
