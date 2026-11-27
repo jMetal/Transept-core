@@ -514,17 +514,9 @@ class AlgorithmFactoryTest {
     @EnumSource(AlgorithmType.class)
     @DisplayName("given an algorithm that accepts three objectives, when run, then it completes")
     void givenAlgorithmAcceptingThreeObjectives_whenRun_thenItCompletes(AlgorithmType type) {
-      // Arrange: MOEA/D needs a population size with weight vectors (W3D_100.dat)
+      // Arrange: MOEA/D and NSGA-III need a population size with weight vectors (W3D_100.dat)
       assumeTrue(type.maxObjectives() == 3, type + " accepts fewer objectives");
-      StructuralMsaProblem three =
-          new StructuralMsaProblem(
-              "test",
-              proteins,
-              List.of(
-                  TopologyAwareSumOfPairs.withDefaultParameters(),
-                  new StructuralLddt(structures, 15f),
-                  new AlignedPairCoverage(proteins)));
-      SearchRun run = factory(three, 100, 1.0).create(type);
+      SearchRun run = factory(threeObjectives(), 100, 1.0).create(type);
 
       // Act
       run.run();
@@ -534,22 +526,44 @@ class AlgorithmFactoryTest {
       run.front().forEach(solution -> assertEquals(3, solution.objectives().length));
     }
 
-    @Test
-    @DisplayName("given MOEA/D, three objectives and no weights for the size, then it fails")
-    void givenMoeadThreeObjectivesAndNoWeights_whenBuilding_thenItFails() {
+    @ParameterizedTest
+    @EnumSource(
+        value = AlgorithmType.class,
+        names = {"MOEA_D", "NSGA_III"})
+    @DisplayName("given three objectives and no weights for the size, when built, then it fails")
+    void givenThreeObjectivesAndNoWeights_whenBuilding_thenItFails(AlgorithmType type) {
       // Arrange
-      StructuralMsaProblem three =
-          new StructuralMsaProblem(
-              "test",
-              proteins,
-              List.of(
-                  TopologyAwareSumOfPairs.withDefaultParameters(),
-                  new StructuralLddt(structures, 15f),
-                  new AlignedPairCoverage(proteins)));
-      AlgorithmFactory factory = factory(three, 50, 1.0);
+      AlgorithmFactory factory = factory(threeObjectives(), 50, 1.0);
 
-      // Act & Assert
-      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.MOEA_D));
+      // Act
+      var exception =
+          assertThrows(IllegalArgumentException.class, () -> factory.create(type));
+
+      // Assert
+      assertTrue(exception.getMessage().contains("W3D_50.dat is missing"));
+    }
+
+    @Test
+    @DisplayName("given NSGA-III and 91 weight vectors, when run, then the population stays small")
+    void givenNsgaThreeAndNinetyOneWeights_whenRun_thenThePopulationStaysSmall() {
+      // Arrange
+      SearchRun run = factory(threeObjectives(), 91, 1.0).create(AlgorithmType.NSGA_III);
+
+      // Act
+      run.run();
+
+      // Assert: 91 reference points, rounded up to a multiple of 4
+      assertTrue(run.front().size() <= 92, "front of " + run.front().size());
+    }
+
+    private StructuralMsaProblem threeObjectives() {
+      return new StructuralMsaProblem(
+          "test",
+          proteins,
+          List.of(
+              TopologyAwareSumOfPairs.withDefaultParameters(),
+              new StructuralLddt(structures, 15f),
+              new AlignedPairCoverage(proteins)));
     }
   }
 
