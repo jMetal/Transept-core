@@ -36,7 +36,7 @@ the space are errors.
 | Parameter | Values | Default | Meaning |
 | --- | --- | --- | --- |
 | `algorithmResult` | `population`, `externalArchive` | `population` | What the run returns: the final population, or an archive of the non-dominated solutions found during the search |
-| `populationSizeWithArchive` | integer, 2–200 | (none) | With `externalArchive`: the population of the search; the archive has `--population-size` solutions |
+| `populationSizeWithArchive` | integer, 10–200 | (none) | With `externalArchive`: the population of the search; the archive has `--population-size` solutions |
 | `archiveType` | `crowdingDistanceArchive`, `unboundedArchive`, `spatialSpreadDeviationArchive`, `knnDistanceArchive`, `angleArchive` | (none) | With `externalArchive`: the archives of Evolver; unbounded, or bounded by crowding distance, spatial spread deviation, distance to the `knnDistanceArchiveK` nearest neighbours, or angles |
 | `knnDistanceArchiveK` | integer, 1–10 | (none) | With `knnDistanceArchive`: number of neighbours |
 | `createInitialSolutions` | `seededDistinct` | `seededDistinct` | The seed alignments followed by distinct crossover children ([T2, Step 7](../tutorials/T2-problem-formulation.md#step-7-the-initial-population)) |
