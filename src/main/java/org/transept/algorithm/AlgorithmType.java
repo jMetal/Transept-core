@@ -15,7 +15,7 @@ public enum AlgorithmType {
   ASYNC_NSGA_II(false, true, false, null),
   /** SPEA2-style algorithm (strength ranking, k-nearest-neighbour density); configurable. */
   SPEA2(false, true, false, MsaSpea2.PARAMETER_SPACE),
-  /** NSGA-III; the population size must be a multiple of 4. */
+  /** NSGA-III; jMetal rounds its population up to a multiple of 4. */
   NSGA_III(false, true, false, null),
   /** AGE-MOEA. */
   AGE_MOEA(false, true, false, null),

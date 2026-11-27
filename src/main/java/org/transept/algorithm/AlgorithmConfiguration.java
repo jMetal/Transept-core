@@ -10,7 +10,8 @@ import org.transept.operator.TmSafeSinglePointCrossover;
  * @param maxEvaluations stopping criterion, number of evaluations (ignored if {@code maxTime}
  *     is set)
  * @param populationSize population size
- * @param offspringPopulationSize offspring created per generation
+ * @param offspringPopulationSize offspring created per generation; the algorithms built from a
+ *     parameter space take it from their configuration instead
  * @param crossoverProbability probability of the TM-safe crossover
  * @param mutationProbability probability of the gap-shift mutation
  * @param threads number of evaluation threads; 1 evaluates sequentially

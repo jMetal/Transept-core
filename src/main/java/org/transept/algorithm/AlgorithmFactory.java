@@ -25,7 +25,6 @@ import org.transept.problem.StructuralMsaProblem;
 import org.transept.structure.ProteinStructures;
 import org.uma.evolver.algorithm.BaseLevelAlgorithm;
 import org.uma.evolver.parameter.ParameterSpace;
-import org.uma.evolver.parameter.type.CategoricalIntegerParameter;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.component.algorithm.RandomSearchAlgorithm;
 import org.uma.jmetal.component.algorithm.multiobjective.AGEMOEABuilder;
@@ -233,6 +232,26 @@ public final class AlgorithmFactory {
   }
 
   /**
+   * Offspring created per generation by an algorithm: the value of its configuration for those
+   * built from a parameter space, and that of the {@link AlgorithmConfiguration} for the others.
+   *
+   * @param type the algorithm
+   * @param configuration its configuration
+   * @return the offspring size
+   */
+  public static int offspringPopulationSize(
+      AlgorithmType type, AlgorithmConfiguration configuration) {
+    int size = configuration.offspringPopulationSize();
+    if (type.isConfigurable()) {
+      Map<String, String> values =
+          new LinkedHashMap<>(MsaConfigurations.defaults(type.parameterSpace()));
+      values.putAll(MsaConfigurations.parse(configuration.configuration()));
+      size = Integer.parseInt(values.get(OFFSPRING_SIZE));
+    }
+    return size;
+  }
+
+  /**
    * An algorithm built with Evolver from its parameter space. The configuration is resolved in
    * layers: the default configuration, the operator settings of the {@link
    * AlgorithmConfiguration} and, last, its configuration string.
@@ -241,7 +260,6 @@ public final class AlgorithmFactory {
       AlgorithmType type, Function<ParameterSpace, BaseLevelAlgorithm<MsaSolution>> algorithm) {
     Map<String, String> values =
         new LinkedHashMap<>(MsaConfigurations.defaults(type.parameterSpace()));
-    values.put(OFFSPRING_SIZE, Integer.toString(configuration.offspringPopulationSize()));
     values.put("crossoverProbability", Double.toString(configuration.crossoverProbability()));
     values.put("crossover", crossoverName(configuration.crossoverType()));
     values.put("cutCandidates", Integer.toString(configuration.cutCandidates()));
@@ -251,23 +269,8 @@ public final class AlgorithmFactory {
     values.putAll(MsaConfigurations.parse(configuration.configuration()));
     ParameterSpace space = MsaConfigurations.parameterSpace(type.parameterSpace());
     MsaConfigurations.requireKnownNames(values, space);
-    requireOffspringSizeOfTheSpace(values.get(OFFSPRING_SIZE), space);
     var built = build(algorithm.apply(space), MsaConfigurations.arguments(values));
     return SearchRun.withConfiguration(SearchRun.of(built), MsaConfigurations.format(values));
-  }
-
-  /**
-   * The offspring size is the population size unless the configuration sets it, so a population
-   * size that the space does not list needs an explicit offspring size.
-   */
-  private static void requireOffspringSizeOfTheSpace(String size, ParameterSpace space) {
-    var allowed = ((CategoricalIntegerParameter) space.get(OFFSPRING_SIZE)).validValues();
-    if (!allowed.contains(Integer.valueOf(size))) {
-      throw new IllegalArgumentException(
-          OFFSPRING_SIZE + " must be one of " + allowed + ", not " + size
-              + ". It is the population size unless the configuration sets it: use one of these"
-              + " population sizes or add --" + OFFSPRING_SIZE + " to the configuration.");
-    }
   }
 
   @SuppressWarnings("unchecked")
@@ -323,9 +326,8 @@ public final class AlgorithmFactory {
 
   private EvolutionaryAlgorithm<MsaSolution> nsgaThree() {
     int size = configuration.populationSize();
-    if (size % 4 != 0 || size < 4) {
-      throw new IllegalArgumentException(
-          "NSGA-III needs a population size that is a multiple of 4, got " + size);
+    if (size < 4) {
+      throw new IllegalArgumentException("NSGA-III needs a population of at least 4, got " + size);
     }
     return new NSGAIIIBuilder<>(problem, size - 1, crossover(), mutation())
         .setCreateInitialPopulation(population())

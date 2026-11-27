@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.transept.algorithm.AlgorithmConfiguration;
+import org.transept.algorithm.AlgorithmFactory;
 import org.transept.algorithm.AlgorithmType;
 import org.transept.objective.ObjectiveSet;
 import org.transept.structure.MappingPolicy;
@@ -275,7 +276,9 @@ public record RunConfiguration(
         "maxTimeSeconds",
         algorithm.maxTime() == null ? null : algorithm.maxTime().toMillis() / 1000.0);
     map.put("populationSize", algorithm.populationSize());
-    map.put("offspringPopulationSize", algorithm.offspringPopulationSize());
+    map.put(
+        "offspringPopulationSize",
+        AlgorithmFactory.offspringPopulationSize(algorithmType, algorithm));
     map.put("crossoverProbability", algorithm.crossoverProbability());
     map.put("crossoverType", algorithm.crossoverType());
     map.put("cutCandidates", algorithm.cutCandidates());

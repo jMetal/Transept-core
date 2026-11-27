@@ -152,8 +152,8 @@ public final class RunCommand implements Callable<Integer> {
       names = "--algorithm",
       defaultValue = "NSGA_II",
       description =
-          "Search algorithm: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}. NSGA_III needs a"
-              + " population size multiple of 4; PAES uses the first seed and ignores the"
+          "Search algorithm: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}. NSGA_III rounds"
+              + " the population up to a multiple of 4; PAES uses the first seed and ignores the"
               + " crossover; RANDOM_SEARCH ignores the seeds and both operators. The ASYNC_"
               + " algorithms keep all --threads busy but do not repeat exactly.")
   AlgorithmType algorithm;
