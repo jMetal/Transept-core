@@ -1,5 +1,8 @@
 package org.transept.algorithm;
 
+import java.io.FileNotFoundException;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,7 @@ import org.uma.jmetal.parallel.asynchronous.algorithm.impl.AsynchronousMultiThre
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.errorchecking.JMetalException;
+import org.uma.jmetal.util.neighborhood.impl.WeightVectorNeighborhood;
 import org.uma.jmetal.util.sequencegenerator.impl.CyclicIntegerSequence;
 
 /**
@@ -69,8 +73,8 @@ public final class AlgorithmFactory {
   public static final String ASYNC_GENETIC_ALGORITHM_NAME = "AsyncGeneticAlgorithm";
 
   /**
-   * Classpath directory of the weight vectors of MOEA/D for more than two objectives (files
-   * {@code W<objectives>D_<population size>.dat}, taken from Evolver's resources).
+   * Classpath directory of the weight vectors of MOEA/D and NSGA-III for more than two objectives
+   * (files {@code W<objectives>D_<population size>.dat}, taken from Evolver's resources).
    */
   public static final String MOEAD_WEIGHT_VECTORS = "/weightVectors";
 
@@ -324,16 +328,49 @@ public final class AlgorithmFactory {
     }
   }
 
+  /**
+   * NSGA-III with one reference point per member of the population: evenly spaced for two
+   * objectives and the weight vectors of MOEA/D for more. jMetal rounds the population up to a
+   * multiple of 4.
+   */
   private EvolutionaryAlgorithm<MsaSolution> nsgaThree() {
     int size = configuration.populationSize();
-    if (size < 4) {
-      throw new IllegalArgumentException("NSGA-III needs a population of at least 4, got " + size);
+    if (size < 2) {
+      throw new IllegalArgumentException("NSGA-III needs a population of at least 2, got " + size);
     }
-    return new NSGAIIIBuilder<>(problem, size - 1, crossover(), mutation())
+    NSGAIIIBuilder<MsaSolution> builder =
+        objectives() == 2
+            ? new NSGAIIIBuilder<>(problem, size - 1, crossover(), mutation())
+            : new NSGAIIIBuilder<>(
+                problem, weightVectors(AlgorithmType.NSGA_III), crossover(), mutation());
+    return builder
         .setCreateInitialPopulation(population())
         .setTermination(termination())
         .setEvaluation(evaluation())
         .build();
+  }
+
+  /** The weight vectors of the population size, for more than two objectives. */
+  private List<double[]> weightVectors(AlgorithmType type) {
+    int size = configuration.populationSize();
+    requireWeightVectors(type);
+    try {
+      var vectors = new WeightVectorNeighborhood<>(size, objectives(), 1, MOEAD_WEIGHT_VECTORS);
+      return Arrays.asList(vectors.getWeightVector());
+    } catch (FileNotFoundException exception) {
+      throw new UncheckedIOException(exception);
+    }
+  }
+
+  private void requireWeightVectors(AlgorithmType type) {
+    String file =
+        MOEAD_WEIGHT_VECTORS + "/W" + objectives() + "D_" + configuration.populationSize() + ".dat";
+    if (AlgorithmFactory.class.getResource(file) == null) {
+      throw new IllegalArgumentException(
+          type + " with " + objectives() + " objectives needs a population size with weight"
+              + " vectors (" + file + " is missing); with 3 objectives: 91, 100, 136, 300, 500,"
+              + " 600, 800, 1000 or 1200");
+    }
   }
 
   private EvolutionaryAlgorithm<MsaSolution> ageMoea(
@@ -362,13 +399,7 @@ public final class AlgorithmFactory {
   private EvolutionaryAlgorithm<MsaSolution> moead() {
     int size = configuration.populationSize();
     if (objectives() > 2) {
-      String file = MOEAD_WEIGHT_VECTORS + "/W" + objectives() + "D_" + size + ".dat";
-      if (AlgorithmFactory.class.getResource(file) == null) {
-        throw new IllegalArgumentException(
-            "MOEA_D with " + objectives() + " objectives needs a population size with weight"
-                + " vectors (" + file + " is missing); with 3 objectives: 91, 100, 136, 300, 500,"
-                + " 600, 800, 1000 or 1200");
-      }
+      requireWeightVectors(AlgorithmType.MOEA_D);
     }
     return new MOEADBuilder<>(
             problem,
