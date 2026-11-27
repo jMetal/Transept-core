@@ -72,7 +72,7 @@ picocli) is downloaded from Maven Central.
 
 ```bash
 git clone https://github.com/jMetal/Transept-core.git && cd Transept-core
-mvn clean package -DskipTests      # target/transept-core-0.9-jar-with-dependencies.jar
+mvn clean package -DskipTests      # target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 ### As a dependency
@@ -86,6 +86,10 @@ Transept core is published in Maven Central as `org.uma.jmetal:transept-core`:
   <version>0.9</version>
 </dependency>
 ```
+
+The development version (`1.0-SNAPSHOT`), when deployed, is in the snapshot repository of Maven
+Central, `https://central.sonatype.com/repository/maven-snapshots/`, which has to be declared in
+`<repositories>`.
 
 The jar with every dependency is built locally (`mvn package`) and is not published in Maven
 Central.

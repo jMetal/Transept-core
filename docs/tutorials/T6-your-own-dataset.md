@@ -139,7 +139,7 @@ their crossover children (unless the population is not larger than the number of
 Run a short search first:
 
 ```bash
-java -jar target/transept-core-0.9-jar-with-dependencies.jar run \
+java -jar target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar run \
   --data-root MyRoot --dataset mydata --seeds mafft,clustalo \
   --output-root results --run-id check --seed 1 \
   --max-evaluations 200 --population-size 20

@@ -34,7 +34,7 @@ cd Transept-core
 mvn clean package -DskipTests
 ```
 
-The result is `target/transept-core-0.9-jar-with-dependencies.jar`, a single file with every
+The result is `target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar`, a single file with every
 dependency. `mvn clean verify` also runs the tests (a few minutes).
 
 Maven downloads every dependency from Maven Central the first time, including
@@ -61,7 +61,7 @@ topology-aware sum of pairs (**SOPwTP**) and a structural score (**lDDT**). Both
 ## Step 4: run
 
 ```bash
-java -jar target/transept-core-0.9-jar-with-dependencies.jar run \
+java -jar target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
@@ -150,7 +150,7 @@ The [output reference](../reference/outputs.md) describes every field.
 The same options and the same seed give the same result, bit for bit:
 
 ```bash
-java -jar target/transept-core-0.9-jar-with-dependencies.jar run \
+java -jar target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id first-again --seed 1 \
@@ -171,7 +171,7 @@ line (10 000 evaluations, populations of 100) and four evaluation threads it tak
 30 seconds on `classF`:
 
 ```bash
-java -jar target/transept-core-0.9-jar-with-dependencies.jar run \
+java -jar target/transept-core-1.0-SNAPSHOT-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
   --output-root results --run-id seed_000 --seed 0 \
