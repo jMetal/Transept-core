@@ -59,7 +59,7 @@ class TmSafetyIT {
             run,
             7L,
             new AlgorithmConfiguration(
-                400, 8, 8, 0.9, 1.0, 1, MutationType.TM_SAFE_GAP_SHIFT),
+                400, 20, 20, 0.9, 1.0, 1, MutationType.TM_SAFE_GAP_SHIFT),
             type,
             MappingPolicy.VERIFIED,
             15f,
@@ -91,7 +91,7 @@ class TmSafetyIT {
             run,
             11L,
             new AlgorithmConfiguration(
-                400, 8, 8, 0.9, 1.0, 1, mutation),
+                400, 20, 20, 0.9, 1.0, 1, mutation),
             AlgorithmType.NSGA_II,
             MappingPolicy.VERIFIED,
             15f,
@@ -122,7 +122,7 @@ class TmSafetyIT {
             run,
             13L,
             new AlgorithmConfiguration(
-                400, 8, 8, 0.9, 1.0, 1, MutationType.TM_SAFE_GAP_SHIFT, null, "", 3, 4),
+                400, 20, 20, 0.9, 1.0, 1, MutationType.TM_SAFE_GAP_SHIFT, null, "", 3, 4),
             type,
             MappingPolicy.VERIFIED,
             15f,

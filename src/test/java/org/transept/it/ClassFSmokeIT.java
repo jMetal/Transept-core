@@ -40,7 +40,7 @@ class ClassFSmokeIT {
             directory.resolve(type.name()),
             1L,
             new AlgorithmConfiguration(
-                200, 12, 12, 0.8, type == AlgorithmType.PAES ? 1.0 : 0.2, 2),
+                200, 20, 20, 0.8, type == AlgorithmType.PAES ? 1.0 : 0.2, 2),
             type,
             MappingPolicy.VERIFIED,
             15f,

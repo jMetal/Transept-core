@@ -77,12 +77,12 @@ class ReproducibilityIT {
                 List.of("left", "right"),
                 runDirectory,
                 seed,
-                AlgorithmConfiguration.withDefaults(300, 8, threads),
+                AlgorithmConfiguration.withDefaults(300, 10, threads),
                 MappingPolicy.VERIFIED,
                 15f,
                 100));
     StringBuilder results = new StringBuilder(Files.readString(runDirectory.resolve("FUN.csv")));
-    for (int index = 0; index < 8; index++) {
+    for (int index = 0; index < 10; index++) {
       results.append(Files.readString(runDirectory.resolve("MSASol" + index + ".fasta")));
     }
     return results.toString();
