@@ -3,6 +3,7 @@ message: "If you use Transept core, please cite it as below."
 type: software
 title: "Transept core: multiobjective, structure-guided multiple sequence alignment of transmembrane proteins"
 version: "0.9"
+date-released: "2026-11-27"
 license: GPL-3.0-only
 repository-code: "https://github.com/jMetal/Transept-core"
 abstract: >-

@@ -6,7 +6,7 @@ All notable changes to Transept core are recorded here. The format follows
 
 ## [Unreleased]
 
-## [0.9] - YYYY-MM-DD
+## [0.9] - 2026-11-27
 
 First release.
 
