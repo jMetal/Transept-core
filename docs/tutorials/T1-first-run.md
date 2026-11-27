@@ -77,12 +77,12 @@ java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
 | `--seeds` | Start from the alignments of six sequence aligners |
 | `--output-root`, `--run-id` | Write to `results/ejecuciones/classF/first/` |
 | `--seed` | Seed of the random generator |
-| `--max-evaluations`, `--population-size` | A tiny run: 500 alignments evaluated, populations of 20 |
+| `--max-evaluations`, `--population-size` | A tiny run: about 500 alignments evaluated, a population of 20 (NSGA-II creates 100 offspring per generation, so it stops at 520) |
 
 The algorithm is NSGA-II, the default. After some log lines from jMetal, the run ends with:
 
 ```text
-Run finished: 500 evaluations, 20 solutions in results/ejecuciones/classF/first
+Run finished: 520 evaluations, 20 solutions in results/ejecuciones/classF/first
 ```
 
 It takes about 6 seconds. The run directory must not exist: to repeat a run, give it another
@@ -106,17 +106,17 @@ results/ejecuciones/classF/first/
 **`FUN.csv`** has one line per solution, with SOPwTP and lDDT. Higher is better for both:
 
 ```text
-61281.0,0.8000945492779323
-57638.0,0.8122004593862518
-57638.0,0.8122004593862518
-61281.0,0.8000945492779323
-60777.0,0.802523090910181
+60495.0,0.8001938417574468
+58085.0,0.8125907400854824
+60495.0,0.8001938417574468
+60343.0,0.8043033089926177
+58628.0,0.8103732752287465
 ...
 ```
 
 The solutions trade one objective for the other: the first has the best SOPwTP and the worst
 lDDT, the second the opposite. The file holds the final population, so some lines repeat (here
-the first and the fourth, and the second and the third): the search can produce copies of the
+the first and the third): the search can produce copies of the
 same alignment.
 
 **`MSASol<i>.fasta`** is the alignment of line `i`, in aligned FASTA. Any alignment viewer (Jalview,
@@ -140,7 +140,7 @@ not contribute to the lDDT.
 It can be followed while a long run is active (`tail -f`):
 
 ```json
-{"evaluations":100,"elapsedMs":1302,"best":{"SOPwTP":60715.0,"lDDT":0.8104647910532942}}
+{"evaluations":120,"elapsedMs":1692,"best":{"SOPwTP":60495.0,"lDDT":0.8075674397684053}}
 ```
 
 The [output reference](../reference/outputs.md) describes every field.
