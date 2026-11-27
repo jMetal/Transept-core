@@ -86,7 +86,7 @@ The initial population holds the distinct seeds and, for the rest, distinct cros
 | `NSGA_II` | NSGA-II | Published configuration; configurable ([configuration](configuration.md)) |
 | `ASYNC_NSGA_II` | Asynchronous NSGA-II | Every evaluated solution enters the population at once, so all `--threads` stay busy; with more than one thread, runs do not repeat exactly |
 | `SPEA2` | SPEA2-style (RDEMOEA with strength ranking and k-nearest-neighbour density) | The population plays the role of SPEA2's archive; configurable |
-| `NSGA_III` | NSGA-III | The population is rounded up to a multiple of 4 |
+| `NSGA_III` | NSGA-III | One reference point per member of the population, rounded up to a multiple of 4. With two objectives any size from 2; with three, one with weight vectors, as for `MOEA_D` |
 | `AGE_MOEA`, `AGE_MOEA_II` | AGE-MOEA, AGE-MOEA-II | |
 | `SMS_EMOA` | SMS-EMOA | Steady state: `--threads` does not speed it up |
 | `MOEA_D` | MOEA/D | Normalised PBI aggregation, neighbourhood of 20, seeds spread over the subproblems; steady state. With three objectives the population size must be one with weight vectors: 91, 100, 136, 300, 500, 600, 800, 1000 or 1200 |

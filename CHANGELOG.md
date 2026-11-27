@@ -40,7 +40,9 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 - `offspringPopulationSize` takes the values 1, 5, 10, 20, 50, 100, 200 and 400 (it was any integer
   up to 1000) and is 100 by default (it was the population size); `populationSizeWithArchive` goes up
-  to 200 (it was 1000). NSGA-III accepts a population size that is not a multiple of 4.
+  to 200 (it was 1000). NSGA-III accepts a population size that is not a multiple of 4; with three
+  objectives it needs one with weight vectors, as MOEA/D, instead of running a much larger
+  population.
 - The structural objective is the mean of the per-residue lDDT scores; the original aggregation
   favoured short, compact alignments.
 - Seed alignments are given explicitly with `--seeds` and recorded, instead of reading every file of

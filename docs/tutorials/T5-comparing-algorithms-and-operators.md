@@ -25,7 +25,8 @@ the comparison is fair, how to measure them, and how to tell a real difference f
 All algorithms start from the same seed alignments, use the same operators and stop after the same
 number of evaluations, so that only the option under study changes. Some need care:
 
-- `NSGA_III` rounds the population size up to a multiple of 4.
+- `NSGA_III` rounds the population size up to a multiple of 4. With three objectives, it and
+  `MOEA_D` need a population size with weight vectors ([command line](../reference/cli.md)).
 - `SMS_EMOA` and `MOEA_D` are steady state: they evaluate one solution at a time, so `--threads`
   does not speed them up.
 - `PAES` is a (1+1) strategy: it starts from the first seed and only mutates (mutation probability
