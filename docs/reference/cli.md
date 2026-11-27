@@ -53,7 +53,7 @@ java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
 | `--algorithm` | `NSGA_II` | Search algorithm (see below) |
 | `--max-evaluations` | 10000 | Stop after this many evaluations |
 | `--max-time` | (none) | Stop after this many seconds instead; exclusive with `--max-evaluations`. Runs that stop by time are not reproducible exactly |
-| `--population-size` | 100 | Population size; also the offspring size (unless the configuration sets it) and, for PAES, the archive size |
+| `--population-size` | 100 | Population size; also the offspring size (unless the configuration sets it) and, for PAES, the archive size. NSGA-II, SPEA2 and the genetic algorithm only take the offspring sizes of their [parameter space](configuration.md): with another population size, set `offspringPopulationSize` |
 | `--threads` | 1 | Parallel evaluation threads; results do not depend on it |
 | `--crossover` | `TM_SAFE_SINGLE_POINT` | Crossover operator (see below) |
 | `--crossover-probability` | 0.8 | Probability of applying the crossover |
