@@ -377,6 +377,60 @@ class AlgorithmFactoryTest {
           new SeededRandom(5));
     }
 
+    private AlgorithmFactory withPopulation(int populationSize, String text) {
+      return new AlgorithmFactory(
+          problem,
+          seeds,
+          new AlgorithmConfiguration(
+              EVALUATIONS, populationSize, populationSize, 0.8, 0.2, 1,
+              MutationType.TM_SAFE_GAP_SHIFT, null, text),
+          structures,
+          new SeededRandom(5));
+    }
+
+    @Test
+    @DisplayName("given a population size that is not listed, when built, then it fails")
+    void givenUnlistedPopulationSize_whenBuilt_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory = withPopulation(8, "");
+
+      // Act
+      var exception =
+          assertThrows(
+              IllegalArgumentException.class, () -> factory.create(AlgorithmType.NSGA_II));
+
+      // Assert
+      assertTrue(exception.getMessage().contains("one of [1, 5, 10, 20, 50, 100, 200, 400]"));
+      assertTrue(exception.getMessage().contains("not 8"));
+    }
+
+    @Test
+    @DisplayName("given an unlisted population and a listed offspring, when run, then it works")
+    void givenUnlistedPopulationAndListedOffspring_whenRun_thenItWorks() {
+      // Arrange
+      SearchRun run =
+          withPopulation(8, "--offspringPopulationSize 10").create(AlgorithmType.NSGA_II);
+
+      // Act
+      run.run();
+
+      // Assert
+      assertFalse(run.front().isEmpty());
+    }
+
+    @Test
+    @DisplayName("given an archive population above 200, when built, then it fails")
+    void givenArchivePopulationAboveLimit_whenBuilt_thenIllegalArgumentExceptionIsThrown() {
+      // Arrange
+      AlgorithmFactory factory =
+          configured(
+              "--algorithmResult externalArchive --populationSizeWithArchive 201"
+                  + " --archiveType crowdingDistanceArchive");
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () -> factory.create(AlgorithmType.NSGA_II));
+    }
+
     @Test
     @DisplayName("given the default options, when built, then the default configuration is used")
     void givenDefaultOptions_whenBuilt_thenTheDefaultConfigurationIsUsed() {
