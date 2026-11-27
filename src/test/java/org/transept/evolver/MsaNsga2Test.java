@@ -136,6 +136,32 @@ class MsaNsga2Test {
       assertTrue(algorithm.result().size() <= POPULATION_SIZE);
     }
 
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+          "crowdingDistanceArchive",
+          "unboundedArchive",
+          "spatialSpreadDeviationArchive",
+          "knnDistanceArchive",
+          "angleArchive"
+        })
+    @DisplayName("given each archive of Evolver, when run, then the result is not empty")
+    void givenEachArchiveOfEvolver_whenRun_thenTheResultIsNotEmpty(String archive) {
+      // Arrange
+      Map<String, String> changes = new LinkedHashMap<>();
+      changes.put("algorithmResult", "externalArchive");
+      changes.put("populationSizeWithArchive", "10");
+      changes.put("archiveType", archive);
+      changes.put("knnDistanceArchiveK", "3");
+      var algorithm = build(changes, 1, null);
+
+      // Act
+      algorithm.run();
+
+      // Assert
+      assertFalse(algorithm.result().isEmpty());
+    }
+
     @Test
     @DisplayName("given a time limit, when run, then it stops by time instead of evaluations")
     void givenTimeLimit_whenRun_thenItStopsByTime() {
