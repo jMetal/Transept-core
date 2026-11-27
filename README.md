@@ -6,8 +6,8 @@ Transept core is the engine of [Transept](https://github.com/jMetal/Transept), a
 aligning transmembrane proteins such as G protein-coupled receptors (GPCRs). It is a Java command
 line that can be used on its own or driven by the Transept graphical interface.
 
-> **Status: prototype (0.1-SNAPSHOT).** Options, output formats and defaults may still change. Please
-> report problems and suggestions in the [issues](https://github.com/jMetal/Transept-core/issues).
+> **Version 0.9.** Options, output formats and defaults may still change before 1.0. Please report
+> problems and suggestions in the [issues](https://github.com/jMetal/Transept-core/issues).
 
 ## What it does
 
@@ -72,29 +72,18 @@ picocli) is downloaded from Maven Central.
 
 ```bash
 git clone https://github.com/jMetal/Transept-core.git && cd Transept-core
-mvn clean package -DskipTests      # target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar
+mvn clean package -DskipTests      # target/transept-core-0.9-jar-with-dependencies.jar
 ```
 
 ### As a dependency
 
-Transept core is published in Maven Central as `org.uma.jmetal:transept-core`. Until the first
-release, the development version (`0.1-SNAPSHOT`) is in the snapshot repository of Maven Central,
-which has to be declared:
+Transept core is published in Maven Central as `org.uma.jmetal:transept-core`:
 
 ```xml
-<repositories>
-  <repository>
-    <id>central-snapshots</id>
-    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-    <releases><enabled>false</enabled></releases>
-    <snapshots><enabled>true</enabled></snapshots>
-  </repository>
-</repositories>
-
 <dependency>
   <groupId>org.uma.jmetal</groupId>
   <artifactId>transept-core</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.9</version>
 </dependency>
 ```
 

@@ -3,7 +3,7 @@
 The JAR built by `mvn clean package` runs the command line:
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar <command> [options]
+java -jar target/transept-core-0.9-jar-with-dependencies.jar <command> [options]
 ```
 
 | Command | Purpose |
@@ -26,7 +26,7 @@ stack trace. `run` also writes its errors as JSON in `error.json` ([outputs](out
 ## `run`
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
+java -jar target/transept-core-0.9-jar-with-dependencies.jar run \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --dataset classF \
   --seeds clustalw,kalign,mafft,muscle5,tcoffee,tmaligner \
@@ -129,7 +129,7 @@ the same `--output-root` read them instead of computing them (a few seconds for 
 minutes for the largest datasets).
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar seeds \
+java -jar target/transept-core-0.9-jar-with-dependencies.jar seeds \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb --datasets classF --output-root results
 ```
 
@@ -152,7 +152,7 @@ Prints, as JSON, every algorithm of `run --algorithm` with the numbers of object
 whether it is steady state, asynchronous and uses the crossover.
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar algorithms
+java -jar target/transept-core-0.9-jar-with-dependencies.jar algorithms
 ```
 
 ## `baseline`
@@ -162,7 +162,7 @@ files given with `--alignments`, such as the internal seeds that a run saved in 
 folder (their paths are in its `metadata.json`).
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar baseline \
+java -jar target/transept-core-0.9-jar-with-dependencies.jar baseline \
   --data-root ../Dataset_Structural_GPCRs/GPCRdb \
   --datasets classF,classT2_19 \
   --output baselines.csv
@@ -184,7 +184,7 @@ says why ([outputs](outputs.md#evaluation-output)). The status is 0 if at least 
 compared.
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar score \
+java -jar target/transept-core-0.9-jar-with-dependencies.jar score \
   --reference ../Dataset_Structural_GPCRs/GPCRdb/reference_alignments/classF.fasta \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --msa-root results/ejecuciones/classF \
@@ -209,7 +209,7 @@ not change. The repaired alignments are written with the same file names, and th
 many gap runs it moved in each one.
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar repair \
+java -jar target/transept-core-0.9-jar-with-dependencies.jar repair \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --output-dir repaired \
   ../Dataset_Structural_GPCRs/GPCRdb/precomputed/classF/mafft_classF.fasta

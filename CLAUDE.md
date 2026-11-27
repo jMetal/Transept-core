@@ -6,7 +6,7 @@ evolutionary algorithms, guided by their topology and AlphaFold2 structures. The
 interface (Streamlit, separate repository) drives it only through its commands and output files,
 so those are a contract between the two projects.
 
-Both projects are developed collaboratively and are still prototypes (0.1): options, output
+Both projects are developed collaboratively and have not reached 1.0: options, output
 formats and defaults may change, but every change must keep the two repositories in step.
 
 ## Current state
@@ -26,15 +26,14 @@ formats and defaults may change, but every change must keep the two repositories
   reference alignments.
 - **Quality**: `mvn clean verify` runs unit and integration tests, Checkstyle and JaCoCo (80 %);
   GitHub Actions runs it on Linux.
-- **Releases**: none yet. The tag `legacy-v1.0` keeps the state of TM-M2StructAlign, from which this
-  project derives. See `CHANGELOG.md` (`[Unreleased]`).
+- **Releases**: 0.9 is the first one. The tag `legacy-v1.0` keeps the state of TM-M2StructAlign, from
+  which this project derives. See `CHANGELOG.md`.
 
 ## Open lines of work
 
 Contributions are welcome in any of these; open an issue first to agree on the approach.
 
-- A first release: versioned jar, archived with a DOI, and an installation that works on a clean
-  macOS or Linux machine.
+- An installation tested on clean macOS and Linux machines.
 - Transmembrane families beyond GPCRs (e.g. the transmembrane reference set of BAliBASE), with
   topology and AlphaFold models from UniProt.
 - Seeds from structural aligners (FoldMason, US-align, MUSTANG) and their effect on the results.

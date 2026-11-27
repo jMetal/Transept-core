@@ -6,14 +6,17 @@ All notable changes to Transept core are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.9] - YYYY-MM-DD
+
+First release.
+
 Transept core succeeds TM-M2StructAlign. The state of that tool before the changes below is kept
 in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 ### Added
 
-- Publication in Maven Central as `org.uma.jmetal:transept-core`: `mvn deploy` sends the
-  development version (`0.1-SNAPSHOT`) to the snapshot repository, and `mvn -P release deploy` a
-  release to the Central Portal. The jar with dependencies is built but not deployed.
+- Publication in Maven Central as `org.uma.jmetal:transept-core`. The jar with dependencies is
+  built locally and not deployed.
 - Command line with the commands `run`, `seeds`, `algorithms`, `baseline`, `score` and `repair`.
 - `repair`: moves the gaps that split a transmembrane helix out of any alignment, without search,
   as `run` does with the seeds (tutorial T8).
@@ -22,6 +25,8 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 - Algorithms: NSGA-II (default), SPEA2 and a genetic algorithm configurable from Evolver parameter
   spaces; their asynchronous parallel variants; NSGA-III, AGE-MOEA, AGE-MOEA-II, SMS-EMOA, MOEA/D,
   PAES, and two random searches as sanity checks.
+- The offspring size of the configurable algorithms is 100 by default, whatever the population size.
+  NSGA-III and MOEA/D need weight vectors for their population size with three objectives.
 - Formulations: SOPwTP and lDDT (default), lDDT alone for the genetic algorithms, and SOPwTP, lDDT
   and aligned-pair coverage (experimental).
 - Operators that never split a transmembrane helix: single-point and uniform crossovers; gap shift,
@@ -38,11 +43,6 @@ in the tag `legacy-v1.0`, which reproduces its earlier results.
 
 ### Changed
 
-- `offspringPopulationSize` takes the values 1, 5, 10, 20, 50, 100, 200 and 400 (it was any integer
-  up to 1000) and is 100 by default (it was the population size); `populationSizeWithArchive` goes up
-  to 200 (it was 1000). NSGA-III accepts a population size that is not a multiple of 4; with three
-  objectives it needs one with weight vectors, as MOEA/D, instead of running a much larger
-  population.
 - The structural objective is the mean of the per-residue lDDT scores; the original aggregation
   favoured short, compact alignments.
 - Seed alignments are given explicitly with `--seeds` and recorded, instead of reading every file of

@@ -50,7 +50,7 @@ The helix is now whole: `T` moved two columns to the right, next to the rest of 
 ## Step 3: repairing alignments with the `repair` command
 
 ```bash
-java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar repair \
+java -jar target/transept-core-0.9-jar-with-dependencies.jar repair \
   --topology ../Dataset_Structural_GPCRs/GPCRdb/sequences/tmregions/classF_predicted_topologies.3line \
   --output-dir repaired \
   ../Dataset_Structural_GPCRs/GPCRdb/precomputed/classF/*_classF.fasta

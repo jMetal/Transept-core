@@ -23,7 +23,7 @@ description: Build the Transept core jar and run a short alignment of classF (a 
 
    ```bash
    OUT=$(mktemp -d)
-   java -jar target/transept-core-0.1-SNAPSHOT-jar-with-dependencies.jar run \
+   java -jar target/transept-core-0.9-jar-with-dependencies.jar run \
      --data-root ../Dataset_Structural_GPCRs/GPCRdb --dataset classF \
      --seeds clustalw,kalign,mafft,muscle5,tcoffee --repair-seeds \
      --output-root "$OUT" --run-id "quick_$(date +%Y%m%d_%H%M%S)" --seed 1 \
