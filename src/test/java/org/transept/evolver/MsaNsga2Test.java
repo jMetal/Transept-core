@@ -29,7 +29,7 @@ import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 @DisplayName("Unit tests for class MsaNsga2")
 class MsaNsga2Test {
 
-  private static final int POPULATION_SIZE = 8;
+  private static final int POPULATION_SIZE = 20;
   private static final int EVALUATIONS = 48;
 
   private ProteinSet proteins;

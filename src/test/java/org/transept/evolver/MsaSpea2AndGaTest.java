@@ -30,7 +30,7 @@ import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 @DisplayName("Unit tests for classes MsaSpea2 and MsaGeneticAlgorithm")
 class MsaSpea2AndGaTest {
 
-  private static final int POPULATION_SIZE = 8;
+  private static final int POPULATION_SIZE = 20;
   private static final int EVALUATIONS = 48;
 
   private ProteinSet proteins;
@@ -187,7 +187,7 @@ class MsaSpea2AndGaTest {
       var algorithm =
           ga(
               problem(true),
-              Map.of("gaReplacement", "muCommaLambda", "offspringPopulationSize", "16"),
+              Map.of("gaReplacement", "muCommaLambda", "offspringPopulationSize", "50"),
               null);
 
       // Act

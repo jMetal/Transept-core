@@ -334,7 +334,7 @@ class CliTest {
                       "--run-id", "stopped",
                       "--seed", "3",
                       "--max-evaluations", "100000000",
-                      "--population-size", "8",
+                      "--population-size", "20",
                       "--progress-interval", "8"));
       user.join();
 
@@ -361,7 +361,7 @@ class CliTest {
               "--run-id", "internal",
               "--seed", "3",
               "--max-evaluations", "50",
-              "--population-size", "8");
+              "--population-size", "20");
 
       // Assert
       Path run = outputRoot.resolve("ejecuciones/synthetic/internal");
@@ -390,7 +390,7 @@ class CliTest {
                   "--run-id", "repair",
                   "--seed", "3",
                   "--max-evaluations", "50",
-                  "--population-size", "8"));
+                  "--population-size", "20"));
       if (option.startsWith("--")) {
         arguments.add(option);
       }
@@ -431,7 +431,7 @@ class CliTest {
               "--run-id", "precomputed",
               "--seed", "3",
               "--max-evaluations", "50",
-              "--population-size", "8");
+              "--population-size", "20");
 
       // Assert
       assertEquals(0, prepared);
@@ -462,7 +462,7 @@ class CliTest {
               "--run-id", "timed",
               "--seed", "3",
               "--max-time", "0.5",
-              "--population-size", "6");
+              "--population-size", "10");
 
       // Assert
       Path run = outputRoot.resolve("ejecuciones/synthetic/timed");
@@ -586,7 +586,7 @@ class CliTest {
         "--run-id", runId,
         "--seed", "7",
         "--max-evaluations", "60",
-        "--population-size", "6",
+        "--population-size", "10",
         "--progress-interval", "20"
       };
     }
@@ -727,7 +727,7 @@ class CliTest {
               "--run-id", "paes",
               "--seed", "3",
               "--max-evaluations", "50",
-              "--population-size", "8",
+              "--population-size", "20",
               "--algorithm", "PAES");
 
       // Assert
@@ -753,7 +753,7 @@ class CliTest {
               "--run-id", "operators",
               "--seed", "3",
               "--max-evaluations", "50",
-              "--population-size", "8",
+              "--population-size", "20",
               "--mutation", "RANDOM_CHOICE");
 
       // Assert

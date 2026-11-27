@@ -35,8 +35,8 @@ import org.transept.testing.SeededRandom;
 @DisplayName("Unit tests for classes AlgorithmFactory, SearchRun and AlgorithmType")
 class AlgorithmFactoryTest {
 
-  private static final int POPULATION_SIZE = 8;
-  private static final int EVALUATIONS = 40;
+  private static final int POPULATION_SIZE = 20;
+  private static final int EVALUATIONS = 80;
 
   private ProteinSet proteins;
   private StructuralMsaProblem problem;

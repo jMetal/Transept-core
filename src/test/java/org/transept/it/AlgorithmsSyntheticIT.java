@@ -32,7 +32,7 @@ import org.transept.testing.SyntheticDataset;
 @DisplayName("Integration tests: every algorithm on the synthetic dataset")
 class AlgorithmsSyntheticIT {
 
-  private static final int POPULATION = 8;
+  private static final int POPULATION = 20;
   private static final int EVALUATIONS = 120;
 
   @TempDir Path directory;
